@@ -1,0 +1,84 @@
+{
+  "entities": {
+    "Usuario": {
+      "title": "Usuario",
+      "description": "Cadastro de usuários administrativos e de controle",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "nome": { "type": "string" },
+        "email": { "type": "string" },
+        "empresaId": { "type": "string" },
+        "papel": { "type": "string", "enum": ["admin", "controle", "operador"] },
+        "status": { "type": "string", "enum": ["ativo", "inativo"] },
+        "mfaHabilitado": { "type": "boolean" }
+      },
+      "required": ["nome", "email", "empresaId", "papel"]
+    },
+    "Empresa": {
+      "title": "Empresa",
+      "description": "Empresas/Unidades cadastradas no sistema",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string" },
+        "cidade": { "type": "string" },
+        "estado": { "type": "string" },
+        "plano": { "type": "string" },
+        "modulos": { "type": "array" },
+        "ativo": { "type": "boolean" }
+      },
+      "required": ["nome", "cidade", "estado", "ativo"]
+    },
+    "Colaborador": {
+      "title": "Colaborador",
+      "description": "Colaboradores e operadores que usam matrícula e senha",
+      "type": "object",
+      "properties": {
+        "matricula": { "type": "string" },
+        "nome": { "type": "string" },
+        "email": { "type": "string" },
+        "senha": { "type": "string" },
+        "funcao": { "type": "string" },
+        "empresaId": { "type": "string" }
+      },
+      "required": ["matricula", "nome", "senha", "funcao", "empresaId"]
+    },
+    "Despejo": {
+      "title": "Despejo",
+      "description": "Registros de despejo de líquidos",
+      "type": "object",
+      "properties": {
+        "data": { "type": "string" },
+        "colaborador": { "type": "string" },
+        "embalagem": { "type": "string" },
+        "quantidade": { "type": "integer" },
+        "inicio": { "type": "string" },
+        "fim": { "type": "string" },
+        "tempo": { "type": "string" },
+        "statusMeta": { "type": "string" },
+        "empresaId": { "type": "string" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["data", "colaborador", "embalagem", "quantidade", "empresaId"]
+    }
+  },
+  "firestore": {
+    "/usuarios/{userId}": {
+      "schema": "Usuario",
+      "description": "Coleção de perfis de usuários"
+    },
+    "/empresas/{empresaId}": {
+      "schema": "Empresa",
+      "description": "Coleção de empresas"
+    },
+    "/colaboradores/{colabId}": {
+      "schema": "Colaborador",
+      "description": "Coleção de colaboradores da operação"
+    },
+    "/despejo/{docId}": {
+      "schema": "Despejo",
+      "description": "Coleção de registros de despejo"
+    }
+  }
+}

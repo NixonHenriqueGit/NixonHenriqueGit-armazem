@@ -1,0 +1,492 @@
+import React, { useState, useEffect } from 'react';
+import { db, isCustomFirebaseConnected } from '../firebase';
+import { collection, addDoc, onSnapshot, query, where, deleteDoc, doc } from 'firebase/firestore';
+import { Usuario, Empresa, RepackRow } from '../types';
+import { TrendingUp, CheckCircle, Clock, Award, BarChart2 } from 'lucide-react';
+
+interface RepackPanelProps {
+  user: Usuario;
+  empresa: Empresa | null;
+}
+
+const REPACK_EMBALAGENS = [
+  { nome: 'LATA 250', meta: '00:04:30' },
+  { nome: 'LATA 269', meta: '00:04:30' },
+  { nome: 'LATA 350', meta: '00:05:30' },
+  { nome: 'LATA 473', meta: '00:05:30' },
+  { nome: 'LONG NECK', meta: '00:06:00' },
+  { nome: 'PET 1L', meta: '00:05:30' },
+  { nome: 'PET 2L', meta: '00:05:00' },
+  { nome: 'PET 500ml', meta: '00:05:00' },
+  { nome: 'PET 200ml', meta: '00:04:30' },
+  { nome: 'PET 2,5L', meta: '00:04:30' },
+  { nome: 'PET 3,3L', meta: '00:04:00' },
+  { nome: '600 OW', meta: '00:05:00' },
+  { nome: '300 OW', meta: '00:04:00' },
+];
+
+export default function RepackPanel({ user, empresa }: RepackPanelProps) {
+  const [embalagem, setEmbalagem] = useState(REPACK_EMBALAGENS[0].nome);
+  const [quantidade, setQuantidade] = useState(1);
+  const [inicio, setInicio] = useState('');
+  const [fim, setFim] = useState('');
+  const [duracao, setDuracao] = useState('00:00:00');
+  const [statusMeta, setStatusMeta] = useState('—');
+  const [activeTab, setActiveTab] = useState<'form' | 'stats' | 'hist'>('form');
+  const [repackRows, setRepackRows] = useState<RepackRow[]>([]);
+  const [registering, setRegistering] = useState(false);
+  const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
+
+  const toggleDateGroup = (dateKey: string) => {
+    setExpandedDates(prev => ({ ...prev, [dateKey]: !prev[dateKey] }));
+  };
+
+  const activeMeta = REPACK_EMBALAGENS.find((e) => e.nome === embalagem)?.meta || '00:00:00';
+
+  // Helper formatting operations
+  const pad2 = (num: number) => String(num).padStart(2, '0');
+  const toSec = (hms: string) => {
+    const [h = 0, m = 0, s = 0] = String(hms).split(':').map(Number);
+    return h * 3600 + m * 60 + s;
+  };
+  const toHMS = (sec: number) => {
+    sec = Math.max(0, Math.floor(sec));
+    return [Math.floor(sec / 3600), Math.floor((sec % 3600) / 60), sec % 60]
+      .map(pad2)
+      .join(':');
+  };
+  const nowHHMMSS = () => {
+    const n = new Date();
+    return [n.getHours(), n.getMinutes(), n.getSeconds()].map(pad2).join(':');
+  };
+
+  // Sync with Firestore (scoped to company)
+  useEffect(() => {
+    if (!db || !empresa?.id) {
+      // Local sync fallback
+      const saved = localStorage.getItem(`repack_rows_${empresa?.id || 'demo'}`);
+      if (saved) setRepackRows(JSON.parse(saved));
+      return;
+    }
+
+    const companyId = empresa?.id || 'demo';
+    const q = query(collection(db, 'repack'));
+    const unsub = onSnapshot(q, (snap) => {
+      const rows = snap.docs.map(doc => ({ _docId: doc.id, ...doc.data() } as RepackRow));
+      const filtered = isCustomFirebaseConnected() ? rows : rows.filter(r => r.empresaId === companyId);
+      filtered.sort((a, b) => (b.dataISO || '').localeCompare(a.dataISO || '') || (b.inicio || '').localeCompare(a.inicio || ''));
+      setRepackRows(filtered);
+      localStorage.setItem(`repack_rows_${companyId}`, JSON.stringify(filtered));
+    });
+
+    return () => unsub();
+  }, [empresa?.id]);
+
+  useEffect(() => {
+    calcDuration();
+  }, [inicio, fim, embalagem, quantidade]);
+
+  const calcDuration = () => {
+    if (!inicio || !fim) {
+      setDuracao('00:00:00');
+      setStatusMeta('—');
+      return;
+    }
+    const tot = toSec(fim) - toSec(inicio);
+    setDuracao(toHMS(tot));
+
+    const metaSec = toSec(activeMeta) * quantidade;
+    if (tot <= metaSec) {
+      setStatusMeta('🟢 META BATIDA');
+    } else {
+      setStatusMeta('🔴 ACIMA DA META');
+    }
+  };
+
+  const handleRegister = async () => {
+    if (!inicio || !fim) return;
+    setRegistering(true);
+
+    const today = new Date();
+    const dataStr = today.toLocaleDateString('pt-BR');
+    const dataISO = today.toISOString().split('T')[0];
+
+    const newRow: Omit<RepackRow, '_docId'> & { empresaId: string } = {
+      empresaId: empresa?.id || 'demo',
+      data: dataStr,
+      dataISO,
+      embalagem,
+      quantidade,
+      inicio,
+      fim,
+      duracao,
+      meta: activeMeta,
+      resultado: statusMeta,
+      operador: user.nome,
+    };
+
+    try {
+      if (db) {
+        await addDoc(collection(db, 'repack'), newRow);
+      } else {
+        // standalone fallback
+        const current = [...repackRows, { _docId: String(Date.now()), ...newRow }];
+        setRepackRows(current);
+        localStorage.setItem(`repack_rows_${empresa?.id || 'demo'}`, JSON.stringify(current));
+      }
+
+      // Reset fields
+      setQuantidade(1);
+      setInicio('');
+      setFim('');
+      setDuracao('00:00:00');
+      setStatusMeta('—');
+      setActiveTab('hist');
+    } catch (e) {
+      alert('Erro ao registrar repack: ' + e);
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleDelete = async (docId?: string) => {
+    if (!docId || !confirm('Excluir este registro?')) return;
+    try {
+      if (db) {
+        await deleteDoc(doc(db, 'repack', docId));
+      } else {
+        const remaining = repackRows.filter(r => r._docId !== docId);
+        setRepackRows(remaining);
+        localStorage.setItem(`repack_rows_${empresa?.id || 'demo'}`, JSON.stringify(remaining));
+      }
+    } catch (e) {
+      alert('Erro ao deletar: ' + e);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      
+      {/* Top Header bar with Metadata */}
+      <div className="flex items-center justify-between p-4 bg-[#11151c] border-b border-[#222d3a] rounded-t-xl -mx-6 md:-mx-12 -mt-6">
+        <span className="font-sans font-black text-sm tracking-widest text-[#f5a623] uppercase">♻️ REPACK TIMER — PRODUTIVIDADE</span>
+        <div className="text-xs text-[#6a7d92] tracking-wider font-semibold">
+          META UNIT.: <strong className="text-[#f5a623] font-mono">{activeMeta}</strong>
+        </div>
+      </div>
+
+      <div className="ptabs border-b border-[#222d3a] flex gap-2">
+        <button 
+          onClick={() => setActiveTab('form')}
+          className={`ptab py-2 px-6 font-sans font-bold text-xs uppercase cursor-pointer relative ${activeTab === 'form' ? 'text-[#f5a623] border-b-2 border-b-[#f5a623]' : 'text-[#6a7d92] hover:text-[#e8eef5]'}`}
+        >
+          ⚙ Registrar
+        </button>
+        <button 
+          onClick={() => setActiveTab('stats')}
+          className={`ptab py-2 px-6 font-sans font-bold text-xs uppercase cursor-pointer relative ${activeTab === 'stats' ? 'text-[#f5a623] border-b-2 border-b-[#f5a623]' : 'text-[#6a7d92] hover:text-[#e8eef5]'}`}
+        >
+          📊 Produtividade do Dia
+        </button>
+        <button 
+          onClick={() => setActiveTab('hist')}
+          className={`ptab py-2 px-6 font-sans font-bold text-xs uppercase cursor-pointer relative ${activeTab === 'hist' ? 'text-[#f5a623] border-b-2 border-b-[#f5a623]' : 'text-[#6a7d92] hover:text-[#e8eef5]'}`}
+        >
+          📋 Histórico <span className="ml-1.5 px-2 py-0.5 rounded-full bg-[#151b23] border border-[#222d3a] text-[10px] text-snow">{repackRows.length}</span>
+        </button>
+      </div>
+
+      {activeTab === 'stats' && (
+        <div className="g-card p-6 flex flex-col gap-6 bg-gradient-to-br from-[#11151c] to-[#151b23] border border-[#222d3a]">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h3 className="font-sans font-black text-lg text-[#f5a623] uppercase tracking-wide flex items-center gap-2">
+                <BarChart2 className="w-5 h-5" /> Minha Produtividade de Hoje
+              </h3>
+              <p className="text-xs text-[#6a7d92] mt-1">
+                Visão em tempo real das suas atividades registradas no turno de {new Date().toLocaleDateString('pt-BR')}.
+              </p>
+            </div>
+            <div className="text-[10px] text-[#6a7d92] font-mono font-bold bg-[#151b23] border border-[#222d3a] px-3 py-1.5 rounded-lg">
+              OPERADOR: {user.nome}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-[#151b23] border border-[#222d3a] rounded-xl p-4 flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-[#f5a623]/10 text-[#f5a623]">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#6a7d92] block tracking-wider">Lançamentos</span>
+                <span className="text-xl font-bold text-snow font-mono">
+                  {repackRows.filter(r => r.data === new Date().toLocaleDateString('pt-BR') && r.operador === user.nome).length}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-[#151b23] border border-[#222d3a] rounded-xl p-4 flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-indigo-500/10 text-indigo-400">
+                <Award className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#6a7d92] block tracking-wider">Caixas Reembaladas</span>
+                <span className="text-xl font-bold text-snow font-mono">
+                  {repackRows.filter(r => r.data === new Date().toLocaleDateString('pt-BR') && r.operador === user.nome).reduce((sum, r) => sum + (r.quantidade || 0), 0)} cx
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-[#151b23] border border-[#222d3a] rounded-xl p-4 flex items-center gap-4">
+              <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-400">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-bold text-[#6a7d92] block tracking-wider">Metas Batidas</span>
+                <span className="text-xl font-bold text-snow font-mono">
+                  {repackRows.filter(r => r.data === new Date().toLocaleDateString('pt-BR') && r.operador === user.nome && r.resultado?.includes('BATIDA')).length}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-bold text-[#6a7d92] uppercase tracking-wider">Histórico Detalhado de Hoje</h4>
+            {repackRows.filter(r => r.data === new Date().toLocaleDateString('pt-BR') && r.operador === user.nome).length === 0 ? (
+              <div className="text-center py-6 border border-dashed border-[#222d3a] rounded-xl text-xs text-[#6a7d92]">
+                Nenhuma atividade registrada por você hoje ainda. Use a aba "Registrar" para começar!
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-[#a0aec0]">
+                  <thead>
+                    <tr className="border-b border-[#222d3a] text-[#6a7d92] uppercase text-[10px] font-bold tracking-wider">
+                      <th className="py-2.5 px-3">Embalagem</th>
+                      <th className="py-2.5 px-3">Quantidade</th>
+                      <th className="py-2.5 px-3">Início / Fim</th>
+                      <th className="py-2.5 px-3">Duração</th>
+                      <th className="py-2.5 px-3">Resultado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#222d3a]">
+                    {repackRows
+                      .filter(r => r.data === new Date().toLocaleDateString('pt-BR') && r.operador === user.nome)
+                      .map((r, idx) => (
+                        <tr key={r._docId || idx} className="hover:bg-[#151b23]/30 transition-colors">
+                          <td className="py-3 px-3 font-bold text-snow">{r.embalagem}</td>
+                          <td className="py-3 px-3 font-mono">{r.quantidade} cx</td>
+                          <td className="py-3 px-3 font-mono text-[#6a7d92]">{r.inicio} - {r.fim}</td>
+                          <td className="py-3 px-3 font-mono">{r.duracao}</td>
+                          <td className="py-3 px-3">
+                            <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] ${
+                              r.resultado?.includes('BATIDA') 
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                            }`}>
+                              {r.resultado}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'form' ? (
+        <div className="g-card p-6 flex flex-col gap-5">
+          <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#f5a623]">Configurar Lançamento</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Embalagem</label>
+              <select 
+                value={embalagem}
+                onChange={e => setEmbalagem(e.target.value)}
+                className="g-input bg-[#151b23] border-[#1c2530]"
+              >
+                {REPACK_EMBALAGENS.map((e) => (
+                  <option key={e.nome} value={e.nome}>{e.nome} (meta: {e.meta})</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Quantidade Reembalada (Caixas)</label>
+              <input 
+                type="number"
+                min={1}
+                value={quantidade}
+                onChange={e => setQuantidade(Math.max(1, parseInt(e.target.value) || 0))}
+                className="g-input"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Hora Inicial</label>
+              <div className="flex gap-2">
+                <input 
+                  type="time"
+                  step={1}
+                  value={inicio}
+                  onChange={e => setInicio(e.target.value)}
+                  className="g-input flex-1 font-mono"
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setInicio(nowHHMMSS())}
+                  className="px-3 border border-[#222d3a] hover:border-[#6a7d92] bg-[#151b23] rounded-lg text-xs font-bold text-[#f5a623] cursor-pointer"
+                >
+                  ⏱ Agora
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Hora Final</label>
+              <div className="flex gap-2">
+                <input 
+                  type="time"
+                  step={1}
+                  value={fim}
+                  onChange={e => setFim(e.target.value)}
+                  className="g-input flex-1 font-mono"
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setFim(nowHHMMSS())}
+                  className="px-3 border border-[#222d3a] hover:border-[#6a7d92] bg-[#151b23] rounded-lg text-xs font-bold text-[#f5a623] cursor-pointer"
+                >
+                  ⏱ Agora
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 p-4 bg-[#151b23]/50 border border-[#222d3a] rounded-xl">
+            <div className="flex flex-col justify-center">
+              <span className="text-[9px] uppercase font-bold text-[#6a7d92] tracking-wider">Tempo Total Gasto</span>
+              <span className="font-mono text-3xl font-black text-snow mt-1">{duracao}</span>
+            </div>
+            <div className="flex flex-col justify-center text-right">
+              <span className="text-[9px] uppercase font-bold text-[#6a7d92] tracking-wider block text-right">Status de Produtividade</span>
+              <span className={`font-sans font-black text-lg tracking-wider mt-1 block ${statusMeta.includes('BATIDA') ? 'text-[#22c55e]' : 'text-[#ef4444]'}`}>
+                {statusMeta}
+              </span>
+            </div>
+          </div>
+
+          <button 
+            type="button"
+            disabled={registering || !inicio || !fim}
+            onClick={handleRegister}
+            className="w-full py-4 text-sm font-sans font-bold uppercase tracking-widest text-[#07090d] bg-gradient-to-br from-[#f5a623] to-[#d4780a] hover:shadow-[0_4px_16px_rgba(245,166,35,0.25)] rounded-xl disabled:opacity-50 cursor-pointer"
+          >
+            {registering ? 'Registrando dados...' : '✅ REGISTRAR PRODUTIVIDADE'}
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {(() => {
+            const grouped = repackRows.reduce((acc, r) => {
+              const key = r.dataISO || (r.data ? r.data.split('/').reverse().join('-') : 'sem-data');
+              if (!acc[key]) acc[key] = [];
+              acc[key].push(r);
+              return acc;
+            }, {} as Record<string, RepackRow[]>);
+
+            if (Object.keys(grouped).length === 0) {
+              return <div className="g-card p-12 text-center text-[#6a7d92]">Nenhum repack computado ainda.</div>;
+            }
+
+            return (Object.entries(grouped) as [string, RepackRow[]][]).map(([dateKey, rows]) => {
+              const isOpen = !!expandedDates[dateKey];
+              const batidaCount = rows.filter(r => r.resultado.includes('BATIDA')).length;
+              const totalBoxes = rows.reduce((s, r) => s + (r.quantidade || 0), 0);
+
+              let formattedDate = dateKey;
+              try {
+                const [y, m, d] = dateKey.split('-');
+                const dt = new Date(Number(y), Number(m) - 1, Number(d));
+                const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+                formattedDate = `${d}/${m}/${y} — ${daysOfWeek[dt.getDay()]}`;
+              } catch (e) {}
+
+              return (
+                <div key={dateKey} className="g-card overflow-hidden">
+                  <div 
+                    onClick={() => toggleDateGroup(dateKey)}
+                    className="p-4 bg-[#151b23] flex items-center justify-between cursor-pointer select-none gap-4 flex-wrap"
+                  >
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="font-sans font-black text-sm text-[#f5a623] tracking-wide">📅 {formattedDate}</span>
+                      <span className="text-[10px] bg-[#11151c] border border-[#222d3a] px-2 py-0.5 rounded-full font-bold text-snow">
+                        {rows.length} operações
+                      </span>
+                      {batidaCount === rows.length ? (
+                        <span className="text-[9px] bg-[#22c55e]/15 border border-[#22c55e]/25 text-[#22c55e] px-2 py-0.5 rounded-full font-bold">
+                          ✓ Tudo Ok ({batidaCount}/{rows.length})
+                        </span>
+                      ) : (
+                        <span className="text-[9px] bg-[#ef4444]/15 border border-[#ef4444]/25 text-[#fca5a5] px-2 py-0.5 rounded-full font-bold">
+                          ⚠ {rows.length - batidaCount} acima da meta
+                        </span>
+                      )}
+                      <span className="text-[10px] text-[#6a7d92] font-semibold">
+                        📦 {totalBoxes} caixas reembaladas
+                      </span>
+                    </div>
+                    <span className="text-[#6a7d92] text-xs transition-transform" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' }}>▼</span>
+                  </div>
+
+                  {isOpen && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs min-w-[640px]">
+                        <thead>
+                          <tr className="bg-[#07090d] border-b border-[#222d3a]">
+                            <th className="p-3 text-[#6a7d92] uppercase font-bold tracking-wider">Embalagem</th>
+                            <th className="p-3 text-[#6a7d92] uppercase font-bold tracking-wider text-center">Caixas</th>
+                            <th className="p-3 text-[#6a7d92] uppercase font-bold tracking-wider">Início</th>
+                            <th className="p-3 text-[#6a7d92] uppercase font-bold tracking-wider">Fim</th>
+                            <th className="p-3 text-[#6a7d92] uppercase font-bold tracking-wider">Duração</th>
+                            <th className="p-3 text-[#6a7d92] uppercase font-bold tracking-wider">Resultado</th>
+                            <th className="p-3 text-[#6a7d92] uppercase font-bold tracking-wider text-right">Ação</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#222d3a]">
+                          {rows.map((r, i) => (
+                            <tr key={r._docId || i} className="hover:bg-[#151b23]/30">
+                              <td className="p-3 font-semibold text-[#f5a623]">{r.embalagem}</td>
+                              <td className="p-3 text-center font-bold">{r.quantidade}</td>
+                              <td className="p-3 font-mono">{r.inicio}</td>
+                              <td className="p-3 font-mono">{r.fim}</td>
+                              <td className="p-3 font-mono text-snow font-bold">{r.duracao}</td>
+                              <td className={`p-3 font-sans font-black ${r.resultado.includes('BATIDA') ? 'text-[#22c55e]' : 'text-[#ef4444]'}`}>{r.resultado}</td>
+                              <td className="p-3 text-right">
+                                <button 
+                                  onClick={() => handleDelete(r._docId)}
+                                  className="py-1 px-2.5 bg-[#ef4444]/10 border border-[#ef4444]/20 hover:bg-[#ef4444] text-[#fca5a5] hover:text-white rounded-md text-[10px] font-bold cursor-pointer"
+                                >
+                                  ✕
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              );
+            });
+          })()}
+        </div>
+      )}
+
+    </div>
+  );
+}
+export {};
