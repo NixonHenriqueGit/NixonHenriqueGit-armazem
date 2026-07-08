@@ -28,7 +28,8 @@ import {
   SearchCode,
   Shield,
   HelpCircle,
-  Clock
+  Clock,
+  ClipboardList
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -53,11 +54,15 @@ export default function Sidebar({
   onToggleTheme
 }: SidebarProps) {
   const collapsed = false;
+  const isNixon = user.email.toLowerCase().trim() === 'nixon.a.a100.nh@gmail.com';
+  const isControleOuSupervisor = user.isControle || user.papel === 'controle';
+  const isSupervisorOrAdmin = user.isControle || user.papel === 'admin' || user.papel === 'controle' || isNixon;
+
   const [timeStr, setTimeStr] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
-    'ANALYTICS & B.I.': false,
+    'DASHBOARD': isControleOuSupervisor ? true : false,
     'SETORES DE OPERAÇÃO': false,
     'ADMINISTRAÇÃO & GESTÃO': false
   });
@@ -77,9 +82,6 @@ export default function Sidebar({
     setMobileOpen(false);
   };
 
-  const isNixon = user.email.toLowerCase().trim() === 'nixon.a.a100.nh@gmail.com';
-  const isSupervisorOrAdmin = user.isControle || user.papel === 'admin' || user.papel === 'controle' || isNixon;
-
   // Let's model all potential navigation items with category tags
   const navItems = [
     // General
@@ -96,49 +98,49 @@ export default function Sidebar({
       id: 'repack-dashboard',
       label: 'Dashboard Repack',
       icon: <BarChart2 className="w-4 h-4 text-purple-400" />,
-      category: 'ANALYTICS & B.I.',
+      category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
     {
       id: 'despejo-dashboard',
       label: 'Dashboard Despejo',
       icon: <BarChart2 className="w-4 h-4 text-rose-500" />,
-      category: 'ANALYTICS & B.I.',
+      category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
     {
       id: 'logistica-dashboard',
       label: 'Dashboard Logística',
       icon: <Truck className="w-4 h-4 text-sky-400" />,
-      category: 'ANALYTICS & B.I.',
+      category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
     {
       id: 'quebras-dashboard',
       label: 'Dashboard Quebras',
       icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
-      category: 'ANALYTICS & B.I.',
+      category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
     {
       id: 'fefo-dashboard',
       label: 'Dashboard FEFO (Validades)',
       icon: <Calendar className="w-4 h-4 text-emerald-500" />,
-      category: 'ANALYTICS & B.I.',
+      category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
     {
       id: 'blitz-dashboard',
       label: 'Dashboard Blitz (Refugo)',
       icon: <Search className="w-4 h-4 text-indigo-400" />,
-      category: 'ANALYTICS & B.I.',
+      category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
     {
       id: 'picking-dashboard',
       label: 'BI de Picking',
       icon: <BarChart2 className="w-4 h-4 text-amber-500" />,
-      category: 'ANALYTICS & B.I.',
+      category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
 
@@ -148,59 +150,66 @@ export default function Sidebar({
       label: 'Operação Repack',
       icon: <RefreshCw className="w-4 h-4 text-purple-400 animate-spin-hover" />,
       category: 'SETORES DE OPERAÇÃO',
-      visible: isSupervisorOrAdmin || user.papel === 'repack' || user.papel === 'admin'
+      visible: !isControleOuSupervisor && (isSupervisorOrAdmin || user.papel === 'repack' || user.papel === 'admin')
     },
     {
       id: 'despejo',
       label: 'Operação Despejo',
       icon: <Trash2 className="w-4 h-4 text-rose-500" />,
       category: 'SETORES DE OPERAÇÃO',
-      visible: isSupervisorOrAdmin || user.papel === 'despejo' || user.papel === 'admin'
+      visible: !isControleOuSupervisor && (isSupervisorOrAdmin || user.papel === 'despejo' || user.papel === 'admin')
     },
     {
       id: 'armazem',
       label: 'Operação de Pátio',
       icon: <Truck className="w-4 h-4 text-sky-400" />,
       category: 'SETORES DE OPERAÇÃO',
-      visible: isSupervisorOrAdmin || user.papel === 'armazem' || user.papel === 'admin'
+      visible: !isControleOuSupervisor && (isSupervisorOrAdmin || user.papel === 'armazem' || user.papel === 'admin')
     },
     {
       id: 'quebras',
       label: 'Operação Quebras',
       icon: <AlertTriangle className="w-4 h-4 text-red-500" />,
       category: 'SETORES DE OPERAÇÃO',
-      visible: isSupervisorOrAdmin || user.papel === 'quebras' || user.papel === 'admin'
+      visible: !isControleOuSupervisor && (isSupervisorOrAdmin || user.papel === 'quebras' || user.papel === 'admin')
     },
     {
       id: 'validades',
       label: 'Operação Validades',
       icon: <Calendar className="w-4 h-4 text-emerald-500" />,
       category: 'SETORES DE OPERAÇÃO',
-      visible: isSupervisorOrAdmin || user.papel === 'validades' || user.papel === 'admin'
+      visible: !isControleOuSupervisor && (isSupervisorOrAdmin || user.papel === 'validades' || user.papel === 'admin')
     },
     {
       id: 'refugo',
       label: 'Blitz Refugo',
       icon: <Search className="w-4 h-4 text-indigo-400" />,
       category: 'SETORES DE OPERAÇÃO',
-      visible: isSupervisorOrAdmin || user.papel === 'refugo' || user.papel === 'admin'
+      visible: !isControleOuSupervisor && (isSupervisorOrAdmin || user.papel === 'refugo' || user.papel === 'admin')
     },
     {
       id: 'empilhador',
       label: 'Operação Picking',
       icon: <Package className="w-4 h-4 text-amber-500" />,
       category: 'SETORES DE OPERAÇÃO',
-      visible: isSupervisorOrAdmin || user.papel === 'empilhador' || user.papel === 'admin'
+      visible: !isControleOuSupervisor && (isSupervisorOrAdmin || user.papel === 'empilhador' || user.papel === 'admin')
     },
     {
       id: 'conferente',
       label: 'Conferência Geral',
       icon: <ClipboardCheck className="w-4 h-4 text-teal-400" />,
       category: 'SETORES DE OPERAÇÃO',
-      visible: isSupervisorOrAdmin || user.papel === 'conferente' || user.papel === 'admin'
+      visible: !isControleOuSupervisor && (isSupervisorOrAdmin || user.papel === 'conferente' || user.papel === 'admin')
     },
 
     // Administrative / Core
+    {
+      id: 'registros',
+      label: 'Registros de Setores',
+      icon: <ClipboardList className="w-4 h-4 text-emerald-500" />,
+      category: 'ADMINISTRAÇÃO & GESTÃO',
+      visible: isSupervisorOrAdmin
+    },
     {
       id: 'controle',
       label: 'Painel Controle',

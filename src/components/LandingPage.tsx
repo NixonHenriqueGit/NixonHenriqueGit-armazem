@@ -166,9 +166,9 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
       {/* ── HERO SECTION ── */}
       <header className="min-h-screen flex flex-col items-center justify-center pt-28 pb-16 px-6 text-center max-w-5xl mx-auto">
 
-        <div className="inline-flex items-center gap-2 font-mono text-[9px] uppercase tracking-[3px] text-[#1e56f0] border border-[#1e56f0]/35 bg-[#1e56f0]/5 px-4 py-1.5 rounded-full mb-6">
-          <span className="w-1.5 h-1.5 bg-[#1e56f0] rounded-full animate-ping"></span>
-          GESTÃO DE RETORNO DE ROTA — GUARABIRA — 100% TEMPO REAL
+        <div className="inline-flex items-center gap-2.5 font-sans text-[10px] font-black uppercase tracking-[4px] text-slate-700 bg-slate-100 border border-slate-200 px-5 py-2 rounded-full mb-6 select-none shadow-xs">
+          <span className="w-2 h-2 bg-[#1e56f0] rounded-full animate-pulse-slow"></span>
+          <span>Mesa de Controle Operacional • Guarabira</span>
         </div>
 
         <h1 className="font-sans font-black text-4xl sm:text-5xl md:text-6xl leading-[1.1] tracking-tight mb-6 text-[#0f172a]">

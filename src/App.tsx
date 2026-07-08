@@ -23,6 +23,7 @@ import QuebrasDashboard from './components/QuebrasDashboard';
 import FefoDashboard from './components/FefoDashboard';
 import BlitzDashboard from './components/BlitzDashboard';
 import PickingDashboard from './components/PickingDashboard';
+import RegistrosPanel from './components/RegistrosPanel';
 
 import { auth, db, isCustomFirebaseConnected } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -226,6 +227,8 @@ export default function App() {
         return <EmpilhadorPanel user={user} empresa={empresa} />;
       case 'conferente':
         return <ConferentePanel user={user} empresa={empresa} />;
+      case 'registros':
+        return <RegistrosPanel user={user} empresa={empresa} onNavigate={setActivePanel} />;
       case 'controle':
         return <ControlePanel user={user} empresa={empresa} />;
       case 'firebase':
@@ -270,49 +273,49 @@ export default function App() {
         };
       case 'repack-dashboard':
         return {
-          breadcrumbs: ['Analytics & B.I.', 'Dashboard Repack'],
+          breadcrumbs: ['Dashboard', 'Dashboard Repack'],
           title: 'Dashboard Repack',
           subtitle: 'Análise de performance, produtividade de operadores e eficiência de reembalagem.',
           color: 'from-purple-500/10 to-transparent'
         };
       case 'despejo-dashboard':
         return {
-          breadcrumbs: ['Analytics & B.I.', 'Dashboard Despejo'],
+          breadcrumbs: ['Dashboard', 'Dashboard Despejo'],
           title: 'Dashboard Despejo',
           subtitle: 'Monitoramento corporativo de descarte de líquidos e eficiência operacional.',
           color: 'from-rose-500/10 to-transparent'
         };
       case 'logistica-dashboard':
         return {
-          breadcrumbs: ['Analytics & B.I.', 'Dashboard Logística'],
+          breadcrumbs: ['Dashboard', 'Dashboard Logística'],
           title: 'Dashboard Logística',
           subtitle: 'Análise de tempos de carregamento, janelas logísticas e fluxo de caminhões.',
           color: 'from-sky-500/10 to-transparent'
         };
       case 'quebras-dashboard':
         return {
-          breadcrumbs: ['Analytics & B.I.', 'Dashboard Quebras'],
+          breadcrumbs: ['Dashboard', 'Dashboard Quebras'],
           title: 'Dashboard Quebras',
           subtitle: 'Análise detalhada de avarias, perdas por setor e motivos de quebra.',
           color: 'from-sky-500/10 to-transparent'
         };
       case 'fefo-dashboard':
         return {
-          breadcrumbs: ['Analytics & B.I.', 'Dashboard FEFO'],
+          breadcrumbs: ['Dashboard', 'Dashboard FEFO'],
           title: 'Dashboard FEFO (Validades)',
           subtitle: 'Indicadores de produtos próximos ao vencimento, lotes em risco e perdas evitadas.',
           color: 'from-emerald-500/10 to-transparent'
         };
       case 'blitz-dashboard':
         return {
-          breadcrumbs: ['Analytics & B.I.', 'Dashboard Blitz'],
+          breadcrumbs: ['Dashboard', 'Dashboard Blitz'],
           title: 'Dashboard Blitz (Refugo)',
           subtitle: 'Monitoramento de blitz preventivas e refugo de embalagens recuperáveis.',
           color: 'from-indigo-500/10 to-transparent'
         };
       case 'picking-dashboard':
         return {
-          breadcrumbs: ['Analytics & B.I.', 'Dashboard Picking'],
+          breadcrumbs: ['Dashboard', 'Dashboard Picking'],
           title: 'BI de Picking e Abastecimento',
           subtitle: 'Gargalos operacionais, eficiência de turnos, telemetria de empilhadeira e produtividade.',
           color: 'from-[#1e56f0]/10 to-transparent'
@@ -372,6 +375,13 @@ export default function App() {
           title: 'Conferência Geral',
           subtitle: 'Validação de volumes expedidos, recebimentos e auditoria de pallets.',
           color: 'from-teal-500/10 to-transparent'
+        };
+      case 'registros':
+        return {
+          breadcrumbs: ['Administração & Gestão', 'Registros de Setores'],
+          title: 'Registros de Setores',
+          subtitle: 'Visão unificada para acessar os lançamentos e auditorias de todas as frentes de trabalho.',
+          color: 'from-emerald-500/10 to-transparent'
         };
       case 'controle':
         return {
