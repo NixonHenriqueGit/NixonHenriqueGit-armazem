@@ -1,7 +1,6 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import appletConfig from '../firebase-applet-config.json';
 
 interface FirebaseConfigExtended {
   apiKey: string;
@@ -15,14 +14,14 @@ interface FirebaseConfigExtended {
 }
 
 const DEFAULT_CONFIG: FirebaseConfigExtended = {
-  apiKey: appletConfig.apiKey || "AIzaSyA_ykhJGRk1DbPuDNYooM1VvB2DeVzp2VE",
-  authDomain: appletConfig.authDomain || "armazemfacil-b2292.firebaseapp.com",
-  projectId: appletConfig.projectId || "armazemfacil-b2292",
-  storageBucket: appletConfig.storageBucket || "armazemfacil-b2292.appspot.com",
-  messagingSenderId: appletConfig.messagingSenderId || "688234941301",
-  appId: appletConfig.appId || "1:688234941301:web:153e2ad3f634379fe3213c",
-  measurementId: appletConfig.measurementId || "G-6HFDEKWVDB",
-  firestoreDatabaseId: appletConfig.firestoreDatabaseId || undefined
+  apiKey: "AIzaSyA_ykhJGRk1DbPuDNYooM1VvB2DeVzp2VE",
+  authDomain: "armazemfacil-b2292.firebaseapp.com",
+  projectId: "armazemfacil-b2292",
+  storageBucket: "armazemfacil-b2292.appspot.com",
+  messagingSenderId: "688234941301",
+  appId: "1:688234941301:web:153e2ad3f634379fe3213c",
+  measurementId: "G-6HFDEKWVDB",
+  firestoreDatabaseId: undefined
 };
 
 // Check if there is a custom configuration saved in localStorage
