@@ -171,7 +171,7 @@ export default function BlitzDashboard({ user, empresa, onBack }: BlitzDashboard
   };
 
   return (
-    <div className="flex flex-col gap-6 bg-[#f8fafc] text-[#0f172a] p-6 rounded-2xl shadow-sm border border-gray-200/80 w-full selection:bg-[#3b82f6] selection:text-white">
+    <div id="blitz-dashboard-wrapper" className="flex flex-col gap-3 bg-[#f8fafc] text-[#0f172a] p-4 rounded-xl shadow-sm border border-gray-200/80 w-full selection:bg-[#3b82f6] selection:text-white">
       
       {/* ── HEADER PRINCIPAL ── */}
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 border-b border-gray-200 pb-5">

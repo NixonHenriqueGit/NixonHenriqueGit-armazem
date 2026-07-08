@@ -550,7 +550,7 @@ export default function FefoDashboard({ user, empresa, onBack }: FefoDashboardPr
   ];
 
   return (
-    <div className="flex flex-col gap-6 bg-[#f8fafc] text-[#0f172a] p-6 rounded-2xl shadow-sm border border-gray-200/80 w-full">
+    <div id="fefo-dashboard-wrapper" className="flex flex-col gap-3 bg-[#f8fafc] text-[#0f172a] p-4 rounded-xl shadow-sm border border-gray-200/80 w-full">
       
       {/* SECTION HEADER */}
       <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 border-b border-gray-200 pb-5">

@@ -269,7 +269,7 @@ export default function Sidebar({
       <button
         key={item.id}
         onClick={() => handleNavClick(item.id)}
-        className={`w-full flex items-center px-4 py-2.5 rounded-lg border-none text-left cursor-pointer transition-all relative overflow-hidden group ${
+        className={`w-full flex items-center px-2.5 py-1.5 rounded-md border-none text-left cursor-pointer transition-all relative overflow-hidden group ${
           isActive 
             ? 'bg-[#1e56f0]/10 text-[#1e56f0] border border-[#1e56f0]/15 font-bold' 
             : 'text-slate-500 dark:text-[#6a7d92] hover:text-[#1e56f0] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#151b23]'
@@ -277,9 +277,12 @@ export default function Sidebar({
         title={item.label}
       >
         {isActive && (
-          <span className="absolute left-0 top-2 bottom-2 w-[3px] bg-[#1e56f0] rounded-r" />
+          <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#1e56f0] rounded-r" />
         )}
-        <span className="font-sans font-medium text-[10.5px] uppercase tracking-widest flex-1 truncate transition-colors duration-200">
+        <span className="mr-2 flex-shrink-0 opacity-85 group-hover:opacity-100 transition-opacity [&_svg]:w-3.5 [&_svg]:h-3.5 flex items-center justify-center">
+          {item.icon}
+        </span>
+        <span className="font-sans font-medium text-[9.5px] uppercase tracking-widest flex-1 truncate transition-colors duration-200">
           {item.label}
         </span>
       </button>
@@ -321,15 +324,15 @@ export default function Sidebar({
 
       {/* Sidebar Layout */}
       <aside className={`fixed md:sticky top-0 h-screen bg-[#0b0e14] border-r border-[#1c2530] flex flex-col z-50 transition-all duration-300 ${
-        collapsed ? 'w-[68px]' : 'w-[250px]'
-      } ${mobileOpen ? 'left-0 shadow-2xl' : '-left-[250px] md:left-0'}`}>
+        collapsed ? 'w-[68px]' : 'w-[200px]'
+      } ${mobileOpen ? 'left-0 shadow-2xl' : '-left-[200px] md:left-0'}`}>
         
         {/* Mobile close toggle (positioned absolutely at top right) */}
         {mobileOpen && (
-          <div className="absolute top-4 right-4 z-50 md:hidden">
+          <div className="absolute top-3 right-3 z-50 md:hidden">
             <button 
               onClick={() => setMobileOpen(false)}
-              className={`w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer transition-colors border ${
+              className={`w-7 h-7 rounded-lg flex items-center justify-center cursor-pointer transition-colors border ${
                 theme === 'dark'
                   ? 'bg-[#151b23] border-[#222d3a] text-[#6a7d92] hover:text-[#ef4444]'
                   : 'bg-white border-slate-200 text-slate-500 hover:text-red-500 hover:bg-red-50 shadow-sm'
@@ -343,16 +346,16 @@ export default function Sidebar({
 
         {/* Dynamic SaaS Tenant User Profile Card */}
         {!collapsed ? (
-          <div className={`p-4 mx-3 mt-4 rounded-xl border transition-all duration-300 relative overflow-hidden group ${
+          <div className={`p-2.5 mx-2 mt-2 rounded-lg border transition-all duration-300 relative overflow-hidden group ${
             theme === 'dark' 
               ? 'bg-[#11151c]/60 border-[#1c2530] hover:border-[#1e56f0]/25' 
               : 'bg-gradient-to-br from-blue-50/20 to-white border-slate-100 shadow-[0_4px_20px_rgba(30,86,240,0.02)] hover:border-slate-200'
           }`}>
             {theme === 'dark' && (
-              <div className="absolute top-0 right-0 w-20 h-20 bg-[#1e56f0]/5 rounded-full blur-xl -mr-6 -mt-6" />
+              <div className="absolute top-0 right-0 w-16 h-16 bg-[#1e56f0]/5 rounded-full blur-xl -mr-6 -mt-6" />
             )}
-            <div className="flex items-center gap-3 relative z-10">
-              <div className={`w-10 h-10 rounded-full border flex items-center justify-center font-bold text-xs shadow-xs flex-shrink-0 transition-all ${
+            <div className="flex items-center gap-2 relative z-10">
+              <div className={`w-8 h-8 rounded-full border flex items-center justify-center font-bold text-[11px] shadow-xs flex-shrink-0 transition-all ${
                 theme === 'dark'
                   ? 'bg-gradient-to-tr from-[#1e56f0]/20 to-[#1e56f0]/5 border-[#1e56f0]/30 text-blue-400'
                   : 'bg-blue-50 border-blue-200 text-[#1e56f0]'
@@ -360,27 +363,27 @@ export default function Sidebar({
                 {getInitials(user.nome)}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] uppercase font-black text-[#1e56f0] tracking-widest truncate mb-0.5">
+                <div className="text-[8px] uppercase font-black text-[#1e56f0] tracking-widest truncate">
                   Colaborador
                 </div>
-                <div className={`text-xs truncate font-bold leading-none ${
+                <div className={`text-[11px] truncate font-bold leading-tight ${
                   theme === 'dark' ? 'text-white' : 'text-slate-800'
                 }`}>
                   {user.nome || 'Operador'}
                 </div>
-                <div className={`text-[9px] font-semibold uppercase tracking-wider mt-1.5 flex items-center gap-1 ${
+                <div className={`text-[8px] font-semibold uppercase tracking-wider mt-0.5 flex items-center gap-1 ${
                   theme === 'dark' ? 'text-[#6a7d92]' : 'text-slate-500'
                 }`}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#1e56f0] animate-pulse" />
-                  {user.papel === 'admin' ? 'Administração' : (user.papel === 'controle' || user.isControle) ? 'Controle/Supervisor' : 'Operações'}
+                  <span className="w-1 h-1 rounded-full bg-[#1e56f0] animate-pulse" />
+                  {user.papel === 'admin' ? 'Administração' : (user.papel === 'controle' || user.isControle) ? 'Supervisor' : 'Operações'}
                 </div>
               </div>
             </div>
             
-            <div className={`flex items-center justify-between gap-1.5 mt-3 pt-2.5 border-t ${
+            <div className={`flex items-center justify-between gap-1.5 mt-2 pt-2 border-t ${
               theme === 'dark' ? 'border-[#1c2530]' : 'border-slate-100'
             }`}>
-              <span className={`text-[8px] font-black uppercase tracking-widest px-2.5 py-1 border rounded-md ${
+              <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 border rounded ${
                 theme === 'dark'
                   ? 'bg-emerald-500/20 border-emerald-500/20 text-emerald-400'
                   : 'bg-emerald-500/10 border-emerald-500/15 text-emerald-600'
@@ -389,22 +392,22 @@ export default function Sidebar({
               </span>
               <button 
                 onClick={onLogout}
-                className={`text-[10px] font-bold rounded-md px-1.5 py-1 flex items-center gap-1 cursor-pointer transition-colors ml-auto border-none ${
+                className={`text-[9px] font-bold rounded px-1.5 py-0.5 flex items-center gap-1 cursor-pointer transition-colors ml-auto border-none ${
                   theme === 'dark'
                     ? 'text-[#6a7d92] hover:text-rose-400 hover:bg-[#ef4444]/10'
                     : 'text-slate-500 hover:text-red-500 hover:bg-red-500/5'
                 }`}
                 title="Sair da Conta"
               >
-                <LogOut className="w-3 h-3" />
+                <LogOut className="w-2.5 h-2.5" />
                 <span>SAIR</span>
               </button>
             </div>
           </div>
         ) : (
-          <div className="my-4 flex justify-center">
+          <div className="my-2 flex justify-center">
             <div 
-              className={`w-10 h-10 rounded-full border flex items-center justify-center font-black text-xs cursor-pointer transition-colors ${
+              className={`w-8 h-8 rounded-full border flex items-center justify-center font-black text-xs cursor-pointer transition-colors ${
                 theme === 'dark'
                   ? 'bg-[#11151c] border-[#1c2530] text-blue-400 hover:border-[#1e56f0]/40'
                   : 'bg-slate-50 border-slate-200 text-[#1e56f0] hover:border-[#1e56f0]/40'
@@ -419,9 +422,9 @@ export default function Sidebar({
 
         {/* Real-time search filter */}
         {!collapsed && (
-          <div className="px-3 pt-3">
+          <div className="px-2.5 pt-2">
             <div className="relative">
-              <Search className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 ${
+              <Search className={`absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 ${
                 theme === 'dark' ? 'text-[#6a7d92]' : 'text-slate-400'
               }`} />
               <input 
@@ -429,7 +432,7 @@ export default function Sidebar({
                 placeholder="Ir para setor..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full border rounded-lg pl-8 pr-6 py-1.5 font-sans text-xs outline-none transition-all ${
+                className={`w-full border rounded pl-7 pr-5 py-1 font-sans text-[11px] outline-none transition-all ${
                   theme === 'dark'
                     ? 'bg-[#11151c]/50 border-[#1c2530] text-white placeholder-[#6a7d92] focus:border-[#1e56f0]/40 focus:bg-[#11151c]'
                     : 'bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-[#1e56f0]/40 focus:bg-white'
@@ -438,7 +441,7 @@ export default function Sidebar({
               {searchQuery && (
                 <button 
                   onClick={() => setSearchQuery('')}
-                  className={`absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] border-none bg-transparent cursor-pointer ${
+                  className={`absolute right-2 top-1/2 -translate-y-1/2 text-[9px] border-none bg-transparent cursor-pointer ${
                     theme === 'dark' ? 'text-[#6a7d92] hover:text-white' : 'text-slate-400 hover:text-slate-700'
                   }`}
                 >
@@ -450,7 +453,7 @@ export default function Sidebar({
         )}
 
         {/* Navigation list */}
-        <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-2 scrollbar-thin">
+        <nav className="flex-1 overflow-y-auto px-1.5 py-2 space-y-1.5 scrollbar-thin">
           {activeCategories.map(category => {
             const items = filteredNavItems.filter(item => item.category === category);
             if (items.length === 0) return null;
@@ -459,34 +462,34 @@ export default function Sidebar({
             const isExpanded = isGeral || expandedCategories[category] !== false;
 
             return (
-              <div key={category} className="space-y-1">
+              <div key={category} className="space-y-0.5">
                 {/* Category Header (collapsible) */}
                 {!isGeral && (
                   <button
                     type="button"
                     onClick={() => setExpandedCategories(prev => ({ ...prev, [category]: !isExpanded }))}
-                    className="w-full flex items-center justify-between text-[9px] uppercase tracking-widest font-black text-slate-500 dark:text-[#6a7d92] hover:text-[#1e56f0] dark:hover:text-white px-3 py-1 bg-transparent border-none cursor-pointer transition-colors"
+                    className="w-full flex items-center justify-between text-[8px] uppercase tracking-widest font-black text-slate-500 dark:text-[#6a7d92] hover:text-[#1e56f0] dark:hover:text-white px-2 py-0.5 bg-transparent border-none cursor-pointer transition-colors"
                   >
                     <span>{category}</span>
                     <span>
                       {isExpanded ? (
-                        <ChevronDown className="w-3 h-3 stroke-[2.5]" />
+                        <ChevronDown className="w-2.5 h-2.5 stroke-[2.5]" />
                       ) : (
-                        <ChevronRight className="w-3 h-3 stroke-[2.5]" />
+                        <ChevronRight className="w-2.5 h-2.5 stroke-[2.5]" />
                       )}
                     </span>
                   </button>
                 )}
                 
                 {isGeral && (
-                  <div className="text-[8px] uppercase tracking-widest font-black text-slate-400 dark:text-[#6a7d92]/70 px-3 py-1 flex items-center justify-between">
+                  <div className="text-[8px] uppercase tracking-widest font-black text-slate-400 dark:text-[#6a7d92]/70 px-2 py-0.5 flex items-center justify-between">
                     <span>{category}</span>
-                    <span className="w-1.5 h-1.5 rounded-full bg-slate-200 dark:bg-[#1c2530]" />
+                    <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-[#1c2530]" />
                   </div>
                 )}
 
                 {isExpanded && (
-                  <div className="space-y-0.5">
+                  <div className="space-y-[1px]">
                     {items.map(renderNavItem)}
                   </div>
                 )}
@@ -495,9 +498,9 @@ export default function Sidebar({
           })}
 
           {filteredNavItems.length === 0 && (
-            <div className="p-4 text-center">
-              <HelpCircle className="w-8 h-8 text-[#6a7d92]/40 mx-auto mb-2" />
-              <span className="text-[10px] text-[#6a7d92] uppercase font-bold tracking-wider block">
+            <div className="p-3 text-center">
+              <HelpCircle className="w-6 h-6 text-[#6a7d92]/40 mx-auto mb-1.5" />
+              <span className="text-[9px] text-[#6a7d92] uppercase font-bold tracking-wider block">
                 Nenhum setor encontrado
               </span>
             </div>
@@ -505,15 +508,15 @@ export default function Sidebar({
         </nav>
 
         {/* Sidebar Footer block: Network indicators / Clock time */}
-        <div className={`p-3 border-t flex flex-col gap-2 items-center text-center ${
+        <div className={`p-2 border-t flex flex-col gap-1.5 items-center text-center ${
           theme === 'dark'
             ? 'border-[#1c2530] bg-[#07090d]/40'
             : 'border-slate-100 bg-white'
         }`}>
-          <div className={`font-mono text-xs tracking-wider select-none font-black flex items-center gap-1.5 justify-center ${
+          <div className={`font-mono text-[11px] tracking-wider select-none font-black flex items-center gap-1 justify-center ${
             theme === 'dark' ? 'text-blue-400' : 'text-[#1e56f0]'
           }`}>
-            <Clock className={`w-3.5 h-3.5 animate-pulse-slow ${
+            <Clock className={`w-3 h-3 animate-pulse-slow ${
               theme === 'dark' ? 'text-blue-400' : 'text-[#1e56f0]'
             }`} />
             {!collapsed && <span>{timeStr}</span>}
@@ -522,30 +525,30 @@ export default function Sidebar({
           {/* Theme switch button */}
           <button 
             onClick={onToggleTheme}
-            className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-[10px] font-sans font-black tracking-wider transition-all cursor-pointer border ${
+            className={`flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[9px] font-sans font-black tracking-wider transition-all cursor-pointer border ${
               theme === 'dark'
                 ? 'bg-[#11151c]/60 border-[#1c2530] text-gray-300 hover:text-white hover:border-[#1e56f0]/40'
                 : 'bg-white border-slate-100 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-xs'
             } ${
-              collapsed ? 'w-10 h-10 p-0' : 'w-full'
+              collapsed ? 'w-8 h-8 p-0' : 'w-full'
             }`}
             title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
           >
             {theme === 'dark' ? (
               <>
-                <Sun className="w-3.5 h-3.5 text-amber-500 animate-pulse-slow" />
+                <Sun className="w-3 h-3 text-amber-500 animate-pulse-slow" />
                 {!collapsed && <span className="uppercase">Tema Claro</span>}
               </>
             ) : (
               <>
-                <Moon className="w-3.5 h-3.5 text-[#1e56f0]" />
+                <Moon className="w-3 h-3 text-[#1e56f0]" />
                 {!collapsed && <span className="uppercase">Tema Escuro</span>}
               </>
             )}
           </button>
 
           {!collapsed && (
-            <div className={`w-full py-1.5 px-2.5 rounded-lg font-sans font-black text-[9px] tracking-widest text-center border transition-all flex items-center justify-center gap-1.5 ${
+            <div className={`w-full py-1 px-2 rounded font-sans font-black text-[8px] tracking-widest text-center border transition-all flex items-center justify-center gap-1 ${
               isFbOnline 
                 ? theme === 'dark'
                   ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20'
@@ -554,8 +557,8 @@ export default function Sidebar({
                   ? 'bg-rose-500/20 text-rose-400 border-rose-500/20 animate-pulse'
                   : 'bg-rose-500/10 text-rose-600 border-rose-500/15 animate-pulse'
             }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${isFbOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-              <span>{isFbOnline ? 'SISTEMA ONLINE' : 'DESCONECTADO'}</span>
+              <span className={`w-1 h-1 rounded-full ${isFbOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+              <span>{isFbOnline ? 'ONLINE' : 'DESCONECTADO'}</span>
             </div>
           )}
         </div>

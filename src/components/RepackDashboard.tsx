@@ -201,6 +201,8 @@ const PIE_COLORS = [COLORS.azul, COLORS.verde, COLORS.amarelo, COLORS.roxo, COLO
 
 export default function RepackDashboard({ user, empresa, onBack }: RepackDashboardProps) {
   const [activeSubTab, setActiveSubTab] = useState<'produtividade' | 'boarda3'>('produtividade');
+  const [isCompact, setIsCompact] = useState(false);
+  const [biPage, setBiPage] = useState<'geral' | 'comparativos' | 'historico'>('geral');
   const [actualRepackRows, setActualRepackRows] = useState<RepackRow[]>([]);
   const [actualActionPlans, setActualActionPlans] = useState<RepackActionPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1028,70 +1030,70 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
   };
 
   return (
-    <div className="w-full bg-[#f8fafc] min-h-screen text-[#0f172a] p-6 rounded-2xl shadow-sm border border-gray-200/80 relative">
+    <div id="repack-dashboard-wrapper" className={`w-full bg-[#f8fafc] text-[#0f172a] rounded-xl shadow-sm border border-gray-200/80 relative transition-all duration-300 ${isCompact ? 'p-3' : 'p-4'}`}>
 
-      {/* ── BARRA SUPERIOR (70px) ── */}
-      <header className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4 border-b border-gray-200 pb-5 mb-5">
-        <div className="flex items-center gap-3">
+      {/* ── BARRA SUPERIOR ── */}
+      <header className={`flex flex-col xl:flex-row xl:items-center xl:justify-between gap-2.5 border-b border-gray-200 ${isCompact ? 'pb-2 mb-2' : 'pb-4 mb-4'}`}>
+        <div className="flex items-center gap-2.5">
           {onBack && (
             <button 
               onClick={onBack}
-              className="p-1.5 hover:bg-gray-200/80 rounded-lg transition-colors cursor-pointer text-gray-500 border-none bg-transparent"
+              className="p-1 hover:bg-gray-200/80 rounded-lg transition-colors cursor-pointer text-gray-500 border-none bg-transparent"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
           )}
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-xl shadow-[0_0_20px_rgba(245,166,35,0.25)]">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-base shadow-[0_0_12px_rgba(245,166,35,0.2)]">
             📦
           </div>
           <div>
-            <h1 className="font-sans font-black text-2xl tracking-tight text-[#032b5e] uppercase">
+            <h1 className={`font-sans font-black tracking-tight text-[#032b5e] uppercase ${isCompact ? 'text-base' : 'text-xl'}`}>
               PRODUTIVIDADE DO REPACK
             </h1>
-            <p className="text-[10px] text-gray-500 tracking-wider font-bold uppercase mt-0.5">
+            <p className="text-[9px] text-gray-400 tracking-wider font-bold uppercase mt-0.5">
               INDICADORES ESTRATÉGICOS, METAS DE DESEMPENHO E CRONOMETRAGEM DE REEMBALAGEM
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200/60">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center bg-gray-100 p-0.5 rounded-lg border border-gray-200/60">
             <button 
               onClick={() => setActiveSubTab('produtividade')}
-              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'produtividade' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              className={`px-3 py-1 rounded font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'produtividade' ? 'bg-[#032b5e] text-white shadow-xs' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
               Produtividade & BI
             </button>
             <button 
               onClick={() => setActiveSubTab('boarda3')}
-              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              className={`px-3 py-1 rounded font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-xs' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
               Quadro de Ações
             </button>
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-gray-500 bg-white px-3 py-1.5 rounded-xl border border-gray-200 shadow-sm font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>{currentTime || 'Sincronizando...'}</span>
+          <div className="flex items-center gap-1.5 text-[10px] text-gray-500 bg-white px-2.5 py-1 rounded-lg border border-gray-200 shadow-xs font-semibold">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[9px] font-mono">{currentTime || 'Sincronizando...'}</span>
           </div>
         </div>
       </header>
 
       {activeSubTab === 'produtividade' && (
-        <div className="space-y-6">
+        <div className="space-y-3">
           
-          {/* ── LINHA DE FILTROS (70px) ── */}
-          <section className="bg-white border border-gray-200 p-4 rounded-xl flex flex-wrap items-center justify-between gap-4 shadow-sm">
-            <div className="flex flex-wrap items-center gap-4">
+          {/* ── LINHA DE FILTROS COMPACTA ── */}
+          <section className="bg-white border border-gray-200 rounded-xl flex flex-wrap items-center justify-between p-2 gap-2 shadow-xs">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Colaborador */}
-              <div className="flex flex-col gap-1 w-[180px]">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Colaborador</label>
+              <div className="flex flex-col gap-0.5 w-[120px]">
+                <label className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Colaborador</label>
                 <select
                   value={filterColaborador}
                   onChange={(e) => setFilterColaborador(e.target.value)}
-                  className="bg-white border border-gray-200 text-slate-800 text-xs rounded-lg p-2 focus:border-[#032b5e] outline-none"
+                  className="bg-white border border-gray-200 text-slate-800 rounded-lg outline-none px-2 py-1 text-[10px] h-[26px]"
                 >
-                  <option value="todos">Todos Colaboradores</option>
+                  <option value="todos">Todos</option>
                   {distinctOperadores.map(op => (
                     <option key={op} value={op}>{op}</option>
                   ))}
@@ -1099,14 +1101,14 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
               </div>
 
               {/* Embalagem */}
-              <div className="flex flex-col gap-1 w-[180px]">
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Embalagem</label>
+              <div className="flex flex-col gap-0.5 w-[120px]">
+                <label className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Embalagem</label>
                 <select
                   value={filterEmbalagem}
                   onChange={(e) => setFilterEmbalagem(e.target.value)}
-                  className="bg-white border border-gray-200 text-slate-800 text-xs rounded-lg p-2 focus:border-[#032b5e] outline-none"
+                  className="bg-white border border-gray-200 text-slate-800 rounded-lg outline-none px-2 py-1 text-[10px] h-[26px]"
                 >
-                  <option value="todos">Todas Embalagens</option>
+                  <option value="todos">Todas</option>
                   {Object.keys(EMBALAGENS_CONFIG).map(k => (
                     <option key={k} value={k}>{k}</option>
                   ))}
@@ -1114,12 +1116,12 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
               </div>
 
               {/* Período */}
-              <div className="flex flex-col gap-1 w-[180px]">
-                <label className="text-[11px] font-bold text-[var(--dim)] uppercase">Período</label>
+              <div className="flex flex-col gap-0.5 w-[100px]">
+                <label className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Período</label>
                 <select
                   value={filterPeriodo}
                   onChange={(e) => setFilterPeriodo(e.target.value as any)}
-                  className="bg-white border border-gray-200 text-slate-800 text-xs rounded-lg p-2 focus:border-[#032b5e] outline-none"
+                  className="bg-white border border-gray-200 text-slate-800 rounded-lg outline-none px-2 py-1 text-[10px] h-[26px]"
                 >
                   <option value="hoje">Hoje</option>
                   <option value="semana">Semana</option>
@@ -1130,507 +1132,423 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
 
               {/* Custom Date Inputs */}
               {filterPeriodo === 'personalizado' && (
-                <div className="flex items-center gap-2">
-                  <div className="flex flex-col gap-1 w-[130px]">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Data Inicial</label>
+                <div className="flex items-center gap-1.5">
+                  <div className="flex flex-col gap-0.5 w-[90px]">
+                    <label className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Data Inicial</label>
                     <input
                       type="date"
                       value={filterDataInicio}
                       onChange={(e) => setFilterDataInicio(e.target.value)}
-                      className="bg-white border border-gray-200 text-slate-800 text-xs rounded-lg p-2"
+                      className="bg-white border border-gray-200 text-slate-800 rounded-lg px-1.5 py-0.5 text-[10px] h-[26px]"
                     />
                   </div>
-                  <div className="flex flex-col gap-1 w-[130px]">
-                    <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Data Final</label>
+                  <div className="flex flex-col gap-0.5 w-[90px]">
+                    <label className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Data Final</label>
                     <input
                       type="date"
                       value={filterDataFim}
                       onChange={(e) => setFilterDataFim(e.target.value)}
-                      className="bg-white border border-gray-200 text-slate-800 text-xs rounded-lg p-2"
+                      className="bg-white border border-gray-200 text-slate-800 rounded-lg px-1.5 py-0.5 text-[10px] h-[26px]"
                     />
                   </div>
                 </div>
               )}
 
-              {/* Horário inputs */}
-              <div className="flex items-center gap-2">
-                <div className="flex flex-col gap-1 w-[80px]">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Início</label>
+              {/* Horários */}
+              <div className="flex items-center gap-1.5">
+                <div className="flex flex-col gap-0.5 w-[50px]">
+                  <label className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Início</label>
                   <input
                     type="text"
                     placeholder="00:00"
                     value={filterHoraInicio}
                     onChange={(e) => setFilterHoraInicio(e.target.value)}
-                    className="bg-white border border-gray-200 text-slate-800 text-xs rounded-lg p-2 font-mono text-center outline-none focus:border-[#032b5e]"
+                    className="bg-white border border-gray-200 text-slate-800 rounded-lg text-center outline-none px-1 py-0.5 text-[10px] h-[26px]"
                   />
                 </div>
-                <div className="flex flex-col gap-1 w-[80px]">
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Fim</label>
+                <div className="flex flex-col gap-0.5 w-[50px]">
+                  <label className="text-[8px] font-bold text-gray-400 uppercase tracking-wider">Fim</label>
                   <input
                     type="text"
                     placeholder="23:59"
                     value={filterHoraFim}
                     onChange={(e) => setFilterHoraFim(e.target.value)}
-                    className="bg-white border border-gray-200 text-slate-800 text-xs rounded-lg p-2 font-mono text-center outline-none focus:border-[#032b5e]"
+                    className="bg-white border border-gray-200 text-slate-800 rounded-lg text-center outline-none px-1 py-0.5 text-[10px] h-[26px]"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
               <button
                 onClick={handleApplyFilters}
-                className="w-[170px] h-[40px] bg-[#032b5e] hover:bg-[#021f44] text-white font-sans font-bold rounded-lg text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer transition-all border-none"
+                className="bg-[#032b5e] hover:bg-[#021f44] text-white font-sans font-bold rounded-lg uppercase tracking-wider flex items-center justify-center gap-1 cursor-pointer transition-all border-none px-2.5 h-[26px] text-[9px]"
               >
-                <SlidersHorizontal className="w-4 h-4" />
-                Aplicar Filtros
+                <SlidersHorizontal className="w-3 h-3" />
+                Aplicar
               </button>
               <button
                 onClick={handleClearFilters}
-                className="w-[120px] h-[40px] border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-sans font-bold rounded-lg text-xs uppercase tracking-wider cursor-pointer transition-all"
+                className="border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-sans font-bold rounded-lg uppercase tracking-wider cursor-pointer transition-all px-2 h-[26px] text-[9px]"
               >
-                Limpar Filtros
+                Limpar
               </button>
             </div>
           </section>
 
-          {/* ── LINHA 1: KPIs (4 Cards) ── */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* KPI 1: Caixas */}
-            <div className="bg-white p-5 rounded-xl border border-gray-200 flex flex-col justify-between shadow-sm hover:border-[#f5a623]/50 transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">📦 Caixas</span>
-                  <span className="text-3xl font-extrabold text-[#032b5e] mt-1">{totalCaixas}</span>
-                  <span className="text-[10px] text-gray-400 mt-0.5 font-bold uppercase">Total no período</span>
+          {/* ── COCKPIT INDICADORES GERAL ── */}
+          <div className="space-y-3">
+              {/* LINE 1: KPIs (4 Cards) */}
+              <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {/* KPI 1: Caixas */}
+                <div className="bg-white rounded-xl border border-gray-200 flex flex-col justify-between shadow-xs hover:border-[#f5a623]/50 transition-all duration-300 p-2.5 h-[115px] overflow-hidden">
+                  <div className="flex justify-between items-start">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">📦 Caixas</span>
+                      <span className="font-extrabold text-[#032b5e] mt-0.5 text-2xl leading-none">{totalCaixas}</span>
+                      <span className="text-[9px] text-gray-400 font-bold uppercase mt-1">Total no período</span>
+                    </div>
+                    <div className="rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 w-7 h-7 flex-shrink-0">
+                      <Box className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="w-full h-[32px] mt-1">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartProdutividadeDia} margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
+                        <Area type="monotone" dataKey="Caixas" stroke="#f5a623" fill="rgba(245,166,35,0.06)" strokeWidth={1} dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
-                  <Box className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="h-10 w-full mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartProdutividadeDia}>
-                    <Area type="monotone" dataKey="Caixas" stroke="#f5a623" fill="rgba(245,166,35,0.08)" strokeWidth={1.5} dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
 
-            {/* KPI 2: Tempo Médio */}
-            <div className="bg-white p-5 rounded-xl border border-gray-200 flex flex-col justify-between shadow-sm hover:border-emerald-500/50 transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">⏱ Tempo Médio</span>
-                  <span className="text-3xl font-extrabold text-[#032b5e] mt-1 font-mono">{tempoMedioPorCaixaStr}</span>
-                  <span className="text-[10px] text-gray-400 mt-0.5 font-bold uppercase">Por caixa</span>
+                {/* KPI 2: Tempo Médio */}
+                <div className="bg-white rounded-xl border border-gray-200 flex flex-col justify-between shadow-xs hover:border-emerald-500/50 transition-all duration-300 p-2.5 h-[115px] overflow-hidden">
+                  <div className="flex justify-between items-start">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">⏱ Tempo Médio</span>
+                      <span className="font-extrabold text-[#032b5e] mt-0.5 text-2xl leading-none font-mono">{tempoMedioPorCaixaStr}</span>
+                      <span className="text-[9px] text-gray-400 font-bold uppercase mt-1">Por caixa</span>
+                    </div>
+                    <div className="rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 w-7 h-7 flex-shrink-0">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="w-full h-[32px] mt-1">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartTempoMedioDia} margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
+                        <Area type="monotone" dataKey="Minutos" stroke="#22c55e" fill="rgba(34,197,94,0.06)" strokeWidth={1} dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                  <Clock className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="h-10 w-full mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartTempoMedioDia}>
-                    <Area type="monotone" dataKey="Minutos" stroke="#22c55e" fill="rgba(34,197,94,0.08)" strokeWidth={1.5} dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
 
-            {/* KPI 3: Produtividade */}
-            <div className="bg-white p-5 rounded-xl border border-gray-200 flex flex-col justify-between shadow-sm hover:border-amber-500/50 transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">⚡ Produtividade</span>
-                  <span className="text-3xl font-extrabold text-[#f5a623] mt-1 font-mono">{produtividadeCxHora} cx/h</span>
-                  <span className="text-[10px] text-gray-400 mt-0.5 font-bold uppercase">Caixas por hora</span>
+                {/* KPI 3: Produtividade */}
+                <div className="bg-white rounded-xl border border-gray-200 flex flex-col justify-between shadow-xs hover:border-amber-500/50 transition-all duration-300 p-2.5 h-[115px] overflow-hidden">
+                  <div className="flex justify-between items-start">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">⚡ Produtividade</span>
+                      <span className="font-extrabold text-[#f5a623] mt-0.5 text-2xl leading-none font-mono">{produtividadeCxHora} cx/h</span>
+                      <span className="text-[9px] text-gray-400 font-bold uppercase mt-1 font-sans">Caixas por hora</span>
+                    </div>
+                    <div className="rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 w-7 h-7 flex-shrink-0">
+                      <Zap className="w-4 h-4" />
+                    </div>
+                  </div>
+                  <div className="w-full h-[32px] mt-1">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartProdutividadeDia} margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
+                        <Area type="monotone" dataKey="Caixas" stroke="#f5a623" fill="rgba(245,166,35,0.06)" strokeWidth={1} dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
-                  <Zap className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="h-10 w-full mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartProdutividadeDia}>
-                    <Area type="monotone" dataKey="Caixas" stroke="#f5a623" fill="rgba(245,166,35,0.08)" strokeWidth={1.5} dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
 
-            {/* KPI 4: Eficiência */}
-            <div className="bg-white p-5 rounded-xl border border-gray-200 flex flex-col justify-between shadow-sm hover:border-purple-500/50 transition-all duration-300">
-              <div className="flex justify-between items-start">
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">🎯 Eficiência</span>
-                  <span className="text-3xl font-extrabold text-[#032b5e] mt-1">{eficienciaMedia}%</span>
-                  <span className={`text-[10px] mt-0.5 font-bold uppercase ${eficienciaMedia >= 100 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                    {eficienciaMedia >= 100 ? 'Acima da meta' : 'Abaixo da meta'}
-                  </span>
-                </div>
-                <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500">
-                  <Target className="w-5 h-5" />
-                </div>
-              </div>
-              <div className="h-10 w-full mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartProdutividadeDia}>
-                    <Area type="monotone" dataKey="Caixas" stroke="#8b5cf6" fill="rgba(139,92,246,0.08)" strokeWidth={1.5} dot={false} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </section>
-
-          {/* ── LINHA 2: GRID 2x2 (Produtividade por dia | Tempo médio) ── */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Produtividade por dia */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm">
-              <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider mb-3">Produtividade por Dia</h3>
-              <div className="h-[260px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartProdutividadeDia}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                    <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} />
-                    <YAxis stroke="#94a3b8" tickLine={false} />
-                    <Tooltip cursor={{ fill: 'rgba(245,166,35,0.03)' }} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', color: '#1e293b' }} />
-                    <Bar dataKey="Caixas" fill="#f5a623" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Tempo médio gasto por dia */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm">
-              <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider mb-3">Tempo médio gasto por dia</h3>
-              <div className="h-[260px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartTempoMedioDia}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                    <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} />
-                    <YAxis stroke="#94a3b8" tickLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', color: '#1e293b' }} />
-                    <Line type="monotone" dataKey="Minutos" stroke="#22c55e" strokeWidth={3} dot={{ r: 5, stroke: '#22c55e', strokeWidth: 2, fill: '#ffffff' }} activeDot={{ r: 7 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </section>
-
-          {/* ── LINHA 3: GAUGE | FORMULA | RANKING EMBALAGENS ── */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Circular Gauge */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl lg:col-span-4 flex flex-col justify-between items-center relative shadow-sm min-h-[300px]">
-              <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider w-full">Eficiência</h3>
-              <div className="relative w-full h-[180px] flex items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={[
-                        { value: Math.min(eficienciaMedia, 150) },
-                        { value: Math.max(0, 150 - eficienciaMedia) }
-                      ]}
-                      startAngle={180}
-                      endAngle={0}
-                      innerRadius={65}
-                      outerRadius={85}
-                      paddingAngle={0}
-                      dataKey="value"
-                    >
-                      <Cell fill={eficienciaMedia >= 100 ? COLORS.verde : eficienciaMedia >= 80 ? COLORS.amarelo : COLORS.vermelho} />
-                      <Cell fill="#f1f5f9" />
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="absolute inset-0 flex flex-col items-center justify-center pt-8">
-                  <span className="text-4xl font-extrabold text-[#032b5e]">{eficienciaMedia}%</span>
-                  <span className="text-[10px] text-gray-400 font-bold uppercase mt-1">Eficiência Geral</span>
-                </div>
-              </div>
-              <div className="flex justify-between w-full text-[10px] text-gray-400 font-bold uppercase px-2 mt-2 border-t border-gray-100 pt-2">
-                <span>0%</span>
-                <span className="text-emerald-500">Excelente</span>
-                <span>150%</span>
-              </div>
-            </div>
-
-            {/* Formula Card */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl lg:col-span-3 flex flex-col justify-between shadow-sm min-h-[300px]">
-              <div>
-                <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider mb-2">Fórmula</h3>
-                <div className="p-3 bg-slate-50 border border-gray-100 rounded-xl text-center">
-                  <span className="font-mono text-xs block text-amber-600 font-extrabold">Eficiência =</span>
-                  <span className="font-mono text-[10px] block text-gray-400 mt-1 leading-normal uppercase font-bold">
-                    (Tempo Esperado / Tempo Gasto) × 100
-                  </span>
-                </div>
-              </div>
-              <div className="mt-2 border-t border-gray-100 pt-3 space-y-1.5 text-xs text-gray-500">
-                <div className="flex justify-between">
-                  <span>Ex: Meta:</span>
-                  <span className="font-mono font-bold">4:30</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Gasto:</span>
-                  <span className="font-mono font-bold">4:00</span>
-                </div>
-                <div className="flex justify-between font-bold text-emerald-500">
-                  <span>Resultado:</span>
-                  <span className="font-mono">112%</span>
-                </div>
-                <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-center rounded-lg font-bold text-[11px] mt-1 uppercase">
-                  Acima de 100% = Excelente!
-                </div>
-              </div>
-            </div>
-
-            {/* Ranking Embalagens */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl lg:col-span-5 flex flex-col justify-between shadow-sm min-h-[300px]">
-              <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider">Ranking das Embalagens <span className="text-[10px] text-gray-400 font-normal normal-case">(por caixas)</span></h3>
-              <div className="h-[210px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart layout="vertical" data={chartRankingEmbalagens} margin={{ left: -10, right: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
-                    <XAxis type="number" stroke="#94a3b8" tickLine={false} />
-                    <YAxis dataKey="name" type="category" stroke="#94a3b8" tickLine={false} width={80} fontSize={10} />
-                    <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', color: '#1e293b' }} />
-                    <Bar dataKey="value" fill="#f5a623" radius={[0, 4, 4, 0]} barSize={12} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </section>
-
-          {/* ── LINHA 4: COMPARATIVO META x REAL | HEATMAP ── */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Comparativo Meta x Real */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm">
-              <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider mb-2">Comparativo Meta x Real <span className="text-[10px] text-gray-400 font-normal normal-case">(caixas)</span></h3>
-              <div className="h-[220px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartComparativoMetaReal}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                    <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} />
-                    <YAxis stroke="#94a3b8" tickLine={false} />
-                    <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', color: '#1e293b' }} />
-                    <Bar dataKey="Meta" fill="#f5a623" radius={[3, 3, 0, 0]} />
-                    <Bar dataKey="Real" fill="#22c55e" radius={[3, 3, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Heatmap de Produtividade */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm flex flex-col justify-between">
-              <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider">Heatmap de Produtividade <span className="text-[10px] text-gray-400 font-normal normal-case">(caixas por hora)</span></h3>
-              
-              <div className="grid grid-cols-6 gap-2 mt-4 text-center">
-                <div />
-                {['SEG', 'TER', 'QUA', 'QUI', 'SEX'].map(d => (
-                  <span key={d} className="text-[10px] font-black text-gray-400 uppercase tracking-wider">{d}</span>
-                ))}
-
-                {Object.entries(heatmapData).map(([hour, daysMap]) => (
-                  <React.Fragment key={hour}>
-                    <span className="text-xs font-bold text-gray-500 self-center">{hour}</span>
-                    {Object.entries(daysMap).map(([day, level]) => (
-                      <div key={day} className="flex justify-center py-2">
-                        <span className={`w-4 h-4 rounded-full inline-block transition-all duration-300 hover:scale-125 cursor-pointer shadow-sm ${
-                          level === 'green' ? 'bg-emerald-500 shadow-emerald-500/20' :
-                          level === 'yellow' ? 'bg-[#f5a623] shadow-[#f5a623]/20' :
-                          'bg-rose-500 shadow-rose-500/20'
-                        }`} />
-                      </div>
-                    ))}
-                  </React.Fragment>
-                ))}
-              </div>
-
-              <div className="flex justify-end gap-3 text-[9px] text-gray-400 font-black uppercase mt-3 pt-2 border-t border-gray-100">
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full inline-block" /> Alta
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 bg-[#f5a623] rounded-full inline-block" /> Média
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 bg-rose-500 rounded-full inline-block" /> Baixa
-                </span>
-              </div>
-            </div>
-          </section>
-
-          {/* ── LINHA 5: PIZZA | LINHA EVOLUÇÃO ── */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-            {/* Pizza (Distribuição do Trabalho) */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl lg:col-span-4 flex flex-col justify-between shadow-sm min-h-[300px]">
-              <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider">Distribuição do Trabalho</h3>
-              <div className="flex items-center justify-between gap-4 h-[210px]">
-                <div className="w-[150px] h-[150px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={chartDistribuicaoTrabalho}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={45}
-                        outerRadius={60}
-                        paddingAngle={3}
-                        dataKey="value"
-                      >
-                        {chartDistribuicaoTrabalho.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                        ))}
-                      </Pie>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex-1 space-y-2 text-xs">
-                  {chartDistribuicaoTrabalho.slice(0, 5).map((item, idx) => (
-                    <div key={item.name} className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-gray-500 font-bold truncate">
-                        <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }} />
-                        {item.name}
+                {/* KPI 4: Eficiência */}
+                <div className="bg-white rounded-xl border border-gray-200 flex flex-col justify-between shadow-xs hover:border-purple-500/50 transition-all duration-300 p-2.5 h-[115px] overflow-hidden">
+                  <div className="flex justify-between items-start">
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">🎯 Eficiência</span>
+                      <span className="font-extrabold text-[#032b5e] mt-0.5 text-2xl leading-none">{eficienciaMedia}%</span>
+                      <span className={`text-[9px] font-bold uppercase mt-1 ${eficienciaMedia >= 100 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                        {eficienciaMedia >= 100 ? 'Meta OK' : 'Abaixo da meta'}
                       </span>
-                      <span className="font-black text-[#032b5e]">{item.value}%</span>
                     </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Linha Evolução Semanal */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl lg:col-span-8 flex flex-col justify-between shadow-sm min-h-[300px]">
-              <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider">Evolução Semanal da Eficiência</h3>
-              <div className="h-[210px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartEvolucaoSemanal}>
-                    <defs>
-                      <linearGradient id="colorEf" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f5a623" stopOpacity={0.2}/>
-                        <stop offset="95%" stopColor="#f5a623" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                    <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} />
-                    <YAxis stroke="#94a3b8" tickLine={false} domain={[80, 130]} />
-                    <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '8px', color: '#1e293b' }} />
-                    <Area type="monotone" dataKey="Eficiencia" stroke="#f5a623" strokeWidth={3} fillOpacity={1} fill="url(#colorEf)" dot={{ r: 4, stroke: '#f5a623', fill: '#ffffff' }} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </section>
-
-          {/* ── LINHA 6: BENTO GRID DE MÉDIAS INTELIGENTES ── */}
-          <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            
-            {/* Médias Inteligentes */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl xl:col-span-2 flex flex-col justify-between h-[260px] overflow-hidden shadow-sm">
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-1">Médias Inteligentes</h3>
-              <div className="overflow-y-auto flex-1 mt-2 pr-1 space-y-1.5 text-xs">
-                {Object.keys(EMBALAGENS_CONFIG).slice(0, 4).map(key => {
-                  const matched = repackRows.filter(x => x.embalagem === key);
-                  const totalMatchedSec = matched.reduce((s, r) => s + timeToSec(r.duracao), 0);
-                  const totalMatchedQty = matched.reduce((s, r) => s + (Number(r.quantidade) || 1), 0);
-                  const avgSec = totalMatchedQty > 0 ? Math.round(totalMatchedSec / totalMatchedQty) : 0;
-                  const targetSec = EMBALAGENS_CONFIG[key].metaSec;
-                  return (
-                    <div key={key} className="flex justify-between items-center py-1 border-b border-gray-100">
-                      <div>
-                        <span className="block font-bold text-slate-800">{key}</span>
-                        <span className="text-[10px] text-gray-400">Meta: {formatSecToHMS(targetSec)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-slate-600">{avgSec > 0 ? formatSecToHMS(avgSec) : '—'}</span>
-                        <span className={`w-2.5 h-2.5 rounded-full inline-block ${avgSec === 0 ? 'bg-gray-300' : avgSec <= targetSec ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-                      </div>
+                    <div className="rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-500 w-7 h-7 flex-shrink-0">
+                      <Target className="w-4 h-4" />
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Média Diária */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl xl:col-span-1 flex flex-col justify-between h-[260px] shadow-sm">
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-1">Média diária</h3>
-              <div className="space-y-1 text-xs mt-2">
-                {chartProdutividadeDia.map(item => (
-                  <div key={item.name} className="flex justify-between border-b border-gray-100 py-1">
-                    <span className="text-gray-500">{item.name}</span>
-                    <span className="font-bold text-[#032b5e]">{item.Caixas} cx</span>
                   </div>
-                ))}
-              </div>
-              <div className="bg-emerald-500/15 p-2 rounded-lg text-center mt-2 border border-emerald-500/30 text-emerald-600 font-extrabold text-xs">
-                Média: {Math.round(chartProdutividadeDia.reduce((s,i)=>s+i.Caixas, 0) / 5)} cx/dia
-              </div>
-            </div>
-
-            {/* Média por Hora */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl xl:col-span-1 flex flex-col justify-between h-[260px] shadow-sm">
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-1">Média por Hora</h3>
-              <div className="space-y-1.5 text-xs mt-2">
-                {[
-                  { hour: '08h', cx: '3 cx' },
-                  { hour: '09h', cx: '5 cx' },
-                  { hour: '10h', cx: '6 cx' },
-                  { hour: '11h', cx: '4 cx' },
-                  { hour: '12h', cx: '2 cx' }
-                ].map(item => (
-                  <div key={item.hour} className="flex justify-between border-b border-gray-100 py-1">
-                    <span className="text-gray-500">{item.hour}</span>
-                    <span className="font-bold text-[#032b5e]">{item.cx}</span>
+                  <div className="w-full h-[32px] mt-1">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartEvolucaoSemanal} margin={{ top: 0, bottom: 0, left: 0, right: 0 }}>
+                        <Area type="monotone" dataKey="Eficiencia" stroke="#8b5cf6" fill="rgba(139,92,246,0.06)" strokeWidth={1} dot={false} />
+                      </AreaChart>
+                    </ResponsiveContainer>
                   </div>
-                ))}
-              </div>
-              <div className="text-[10px] text-center text-gray-400 mt-2 font-bold uppercase">Pico: 10h (6 cx)</div>
+                </div>
+              </section>
+
+              {/* LINE 2: Produtividade por Dia & Tempo Médio */}
+              <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-6 p-2.5 h-[175px] flex flex-col justify-between">
+                  <h3 className="font-sans font-black text-[10px] uppercase text-[#032b5e] tracking-wider mb-1">Produtividade por Dia</h3>
+                  <div className="w-full h-[135px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={chartProdutividadeDia} margin={{ top: 5, bottom: 0, left: -25, right: 0 }}>
+                        <CartesianGrid strokeDasharray="2 2" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} fontSize={8} />
+                        <YAxis stroke="#94a3b8" tickLine={false} fontSize={8} />
+                        <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '6px', fontSize: '10px' }} />
+                        <Bar dataKey="Caixas" fill="#f5a623" radius={[2, 2, 0, 0]} barSize={20} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-6 p-2.5 h-[175px] flex flex-col justify-between">
+                  <h3 className="font-sans font-black text-[10px] uppercase text-[#032b5e] tracking-wider mb-1">Tempo Médio Gasto por Dia</h3>
+                  <div className="w-full h-[135px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartTempoMedioDia} margin={{ top: 5, bottom: 0, left: -25, right: 0 }}>
+                        <CartesianGrid strokeDasharray="2 2" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} fontSize={8} />
+                        <YAxis stroke="#94a3b8" tickLine={false} fontSize={8} />
+                        <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '6px', fontSize: '10px' }} />
+                        <Line type="monotone" dataKey="Minutos" stroke="#22c55e" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+              </section>
+
+              {/* LINE 3: Eficiência Circular Gauge, Ranking Embalagens, Distribuição de Trabalho */}
+              <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+                {/* Eficiência Gauge */}
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-4 p-2.5 h-[175px] flex flex-col justify-between items-center relative">
+                  <h3 className="font-sans font-black text-[10px] uppercase text-[#032b5e] tracking-wider w-full mb-1">Eficiência Geral</h3>
+                  <div className="relative w-full h-[100px] flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={[
+                            { value: Math.min(eficienciaMedia, 150) },
+                            { value: Math.max(0, 150 - eficienciaMedia) }
+                          ]}
+                          startAngle={180}
+                          endAngle={0}
+                          innerRadius={36}
+                          outerRadius={48}
+                          paddingAngle={0}
+                          dataKey="value"
+                        >
+                          <Cell fill={eficienciaMedia >= 100 ? COLORS.verde : eficienciaMedia >= 80 ? COLORS.amarelo : COLORS.vermelho} />
+                          <Cell fill="#f1f5f9" />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center pt-4">
+                      <span className="font-extrabold text-[#032b5e] text-lg leading-none">{eficienciaMedia}%</span>
+                      <span className="text-[7px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Eficiência Geral</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between w-full text-[8px] text-gray-400 font-bold uppercase px-1 border-t border-gray-100 pt-1">
+                    <span>0%</span>
+                    <span className="text-emerald-500 font-extrabold">Meta</span>
+                    <span>150%</span>
+                  </div>
+                </div>
+
+                {/* Ranking Embalagens */}
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-4 p-2.5 h-[175px] flex flex-col justify-between">
+                  <h3 className="font-sans font-black text-[10px] uppercase text-[#032b5e] tracking-wider mb-1">Ranking Embalagens</h3>
+                  <div className="w-full h-[130px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart layout="vertical" data={chartRankingEmbalagens} margin={{ left: -30, right: 5, top: 0, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="2 2" stroke="#f1f5f9" horizontal={false} />
+                        <XAxis type="number" stroke="#94a3b8" tickLine={false} fontSize={8} />
+                        <YAxis dataKey="name" type="category" stroke="#94a3b8" tickLine={false} width={80} fontSize={8} />
+                        <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '6px', fontSize: '9px' }} />
+                        <Bar dataKey="value" fill="#f5a623" radius={[0, 2, 2, 0]} barSize={8} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Distribuição do Trabalho */}
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-4 p-2.5 h-[175px] flex flex-col justify-between">
+                  <h3 className="font-sans font-black text-[10px] uppercase text-[#032b5e] tracking-wider mb-1">Distribuição do Trabalho</h3>
+                  <div className="flex items-center justify-between gap-2 h-[130px] w-full">
+                    <div className="w-[85px] h-[85px] shrink-0">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={chartDistribuicaoTrabalho}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={24}
+                            outerRadius={36}
+                            paddingAngle={2}
+                            dataKey="value"
+                          >
+                            {chartDistribuicaoTrabalho.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                            ))}
+                          </Pie>
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex-1 min-w-0 overflow-y-auto max-h-[120px] space-y-1 text-[8px] uppercase font-black tracking-wider text-gray-500">
+                      {chartDistribuicaoTrabalho.slice(0, 4).map((item, idx) => (
+                        <div key={item.name} className="flex items-center justify-between gap-1 py-0.5 border-b border-gray-50">
+                          <span className="flex items-center gap-1 truncate">
+                            <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }} />
+                            <span className="truncate">{item.name}</span>
+                          </span>
+                          <span className="font-extrabold text-[#032b5e] shrink-0">{item.value}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
             </div>
 
-            {/* Tempo Trabalhado */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl xl:col-span-1 flex flex-col justify-between h-[260px] shadow-sm">
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-1">Tempo de Repack</h3>
-              <div className="space-y-3.5 mt-3 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500 font-bold uppercase text-[10px]">Hoje</span>
-                  <span className="text-emerald-500 font-extrabold font-mono text-sm">06h42m</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500 font-bold uppercase text-[10px]">Semana</span>
-                  <span className="text-amber-500 font-extrabold font-mono text-sm">31h20m</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500 font-bold uppercase text-[10px]">Mês</span>
-                  <span className="text-purple-500 font-extrabold font-mono text-sm">126h45m</span>
-                </div>
-              </div>
-              <div className="text-[10px] text-center text-gray-400 border-t border-gray-100 pt-2 font-bold uppercase">Variação: +4.2% s/ meta</div>
-            </div>
+            {/* ── COCKPIT MATRIZES & BI ── */}
+            <div className="space-y-3">
+              {/* LINE 1: Heatmap & Evolução */}
+              <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-6 p-2.5 h-[180px] flex flex-col justify-between">
+                  <h3 className="font-sans font-black text-[10px] uppercase text-[#032b5e] tracking-wider mb-1">Heatmap de Produtividade <span className="text-[9px] text-gray-400 font-normal normal-case">(caixas por hora)</span></h3>
+                  <div className="grid grid-cols-6 gap-1 text-center py-1">
+                    <div />
+                    {['SEG', 'TER', 'QUA', 'QUI', 'SEX'].map(d => (
+                      <span key={d} className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{d}</span>
+                    ))}
 
-            {/* Melhor/Pior Desempenho */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl xl:col-span-1 flex flex-col justify-between h-[260px] shadow-sm">
-              <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-1">Desempenho</h3>
-              <div className="space-y-3 text-xs mt-3">
-                <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-                  <span className="block text-[9px] text-emerald-500 font-black uppercase">Melhor Dia (17/02)</span>
-                  <span className="font-extrabold text-slate-700 mt-0.5 block">36 caixas (113%)</span>
+                    {Object.entries(heatmapData).map(([hour, daysMap]) => (
+                      <React.Fragment key={hour}>
+                        <span className="text-[9px] font-bold text-gray-500 self-center">{hour}</span>
+                        {Object.entries(daysMap).map(([day, level]) => (
+                          <div key={day} className="flex justify-center items-center h-4">
+                            <span className={`rounded-full inline-block transition-all duration-300 hover:scale-125 cursor-pointer shadow-xs w-2 h-2 ${
+                              level === 'green' ? 'bg-emerald-500 shadow-emerald-500/10' :
+                              level === 'yellow' ? 'bg-[#f5a623] shadow-[#f5a623]/10' :
+                              'bg-rose-500 shadow-rose-500/10'
+                            }`} />
+                          </div>
+                        ))}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                  <div className="flex justify-end gap-2 text-[8px] text-gray-400 font-black uppercase pt-1 border-t border-gray-50 mt-1">
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block" /> Alta</span>
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-[#f5a623] rounded-full inline-block" /> Média</span>
+                    <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 bg-rose-500 rounded-full inline-block" /> Baixa</span>
+                  </div>
                 </div>
-                <div className="p-2 bg-rose-500/10 border border-rose-500/20 rounded-lg">
-                  <span className="block text-[9px] text-rose-500 font-black uppercase">Pior Dia (08/02)</span>
-                  <span className="font-extrabold text-slate-700 mt-0.5 block">15 caixas (82%)</span>
+
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-6 p-2.5 h-[180px] flex flex-col justify-between">
+                  <h3 className="font-sans font-black text-[10px] uppercase text-[#032b5e] tracking-wider mb-1">Evolução Semanal da Eficiência</h3>
+                  <div className="w-full h-[140px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartEvolucaoSemanal} margin={{ top: 5, bottom: 0, left: -25, right: 0 }}>
+                        <defs>
+                          <linearGradient id="colorEf" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f5a623" stopOpacity={0.15}/>
+                            <stop offset="95%" stopColor="#f5a623" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="2 2" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} fontSize={8} />
+                        <YAxis stroke="#94a3b8" tickLine={false} domain={[80, 130]} fontSize={8} />
+                        <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '6px', fontSize: '9px' }} />
+                        <Area type="monotone" dataKey="Eficiencia" stroke="#f5a623" strokeWidth={2} fillOpacity={1} fill="url(#colorEf)" dot={{ r: 3, stroke: '#f5a623', fill: '#ffffff' }} />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
                 </div>
-              </div>
+              </section>
+
+              {/* LINE 2: Comparativo Meta x Real, Fórmula, Bento de Médias */}
+              <section className="grid grid-cols-1 lg:grid-cols-12 gap-3">
+                {/* Comparativo Meta x Real */}
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-4 p-2.5 h-[180px] flex flex-col justify-between">
+                  <h3 className="font-sans font-black text-[10px] uppercase text-[#032b5e] tracking-wider mb-1">Meta x Real <span className="text-[9px] text-gray-400 font-normal normal-case">(caixas)</span></h3>
+                  <div className="w-full h-[135px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={chartComparativoMetaReal} margin={{ top: 5, bottom: 0, left: -25, right: 0 }}>
+                        <CartesianGrid strokeDasharray="2 2" stroke="#f1f5f9" vertical={false} />
+                        <XAxis dataKey="name" stroke="#94a3b8" tickLine={false} fontSize={8} />
+                        <YAxis stroke="#94a3b8" tickLine={false} fontSize={8} />
+                        <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '6px', fontSize: '9px' }} />
+                        <Bar dataKey="Meta" fill="#f5a623" radius={[2, 2, 0, 0]} />
+                        <Bar dataKey="Real" fill="#22c55e" radius={[2, 2, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Fórmula Card */}
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-3 p-2.5 h-[180px] flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-sans font-black text-[10px] uppercase text-[#032b5e] tracking-wider mb-1">Fórmula de Produtividade</h3>
+                    <div className="p-1.5 bg-slate-50 border border-gray-100 rounded-lg text-center">
+                      <span className="font-mono text-[10px] block text-amber-600 font-extrabold">Eficiência =</span>
+                      <span className="font-mono text-[8px] block text-gray-400 mt-0.5 leading-tight uppercase font-bold">
+                        (Tempo Esperado / Tempo Gasto) × 100
+                      </span>
+                    </div>
+                  </div>
+                  <div className="border-t border-gray-100 space-y-0.5 text-[10px] text-gray-500 pt-1.5 mt-1.5">
+                    <div className="flex justify-between">
+                      <span>Ex: Meta:</span>
+                      <span className="font-mono font-bold">4:30</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Gasto:</span>
+                      <span className="font-mono font-bold">4:00</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-emerald-500">
+                      <span>Resultado:</span>
+                      <span className="font-mono">112% (Meta OK)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bento Médias Inteligentes */}
+                <div className="bg-white border border-gray-200 rounded-xl lg:col-span-5 p-2.5 h-[180px] flex flex-col justify-between overflow-hidden">
+                  <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-wider border-b border-gray-100 pb-1 mb-1">Médias de Desempenho</h3>
+                  <div className="overflow-y-auto flex-1 pr-0.5 space-y-1 text-[11px]">
+                    {Object.keys(EMBALAGENS_CONFIG).slice(0, 3).map(key => {
+                      const matched = repackRows.filter(x => x.embalagem === key);
+                      const totalMatchedSec = matched.reduce((s, r) => s + timeToSec(r.duracao), 0);
+                      const totalMatchedQty = matched.reduce((s, r) => s + (Number(r.quantidade) || 1), 0);
+                      const avgSec = totalMatchedQty > 0 ? Math.round(totalMatchedSec / totalMatchedQty) : 0;
+                      const targetSec = EMBALAGENS_CONFIG[key].metaSec;
+                      return (
+                        <div key={key} className="flex justify-between items-center py-0.5 border-b border-gray-50">
+                          <div>
+                            <span className="block font-bold text-slate-800 text-[10px]">{key}</span>
+                            <span className="text-[8px] text-gray-400">Meta: {formatSecToHMS(targetSec)}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono font-bold text-slate-600 text-[10px]">{avgSec > 0 ? formatSecToHMS(avgSec) : '—'}</span>
+                            <span className={`w-2 h-2 rounded-full inline-block ${avgSec === 0 ? 'bg-gray-200' : avgSec <= targetSec ? 'bg-emerald-500' : 'bg-rose-500'}`} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </section>
             </div>
-          </section>
 
           {/* ── LINHA 7: TABELA (1300px) & PAINEL LATERAL (450px) ── */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+          <section className={`grid grid-cols-1 lg:grid-cols-12 ${isCompact ? 'gap-3' : 'gap-4'}`}>
             
             {/* Tabela de Lançamentos */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl lg:col-span-8 flex flex-col justify-between shadow-sm min-h-[360px] overflow-x-auto">
+            <div className={`bg-white border border-gray-200 rounded-xl lg:col-span-8 flex flex-col justify-between shadow-sm overflow-x-auto transition-all ${isCompact ? 'p-3 min-h-[300px]' : 'p-5 min-h-[360px]'}`}>
               <div>
-                <div className="flex flex-wrap items-center justify-between gap-4 mb-4 border-b border-gray-100 pb-3">
+                <div className={`flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 ${isCompact ? 'mb-2.5 pb-2' : 'mb-4 pb-3'}`}>
                   <div>
                     <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider">Histórico de Lançamentos</h3>
                     <p className="text-[10px] text-gray-400 font-bold uppercase mt-0.5">Total de {tableFilteredRows.length} registros filtrados</p>
@@ -1667,14 +1585,14 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
                     <tr className="bg-slate-50 border-b border-gray-200 text-gray-500 uppercase font-bold tracking-wider text-[9px]">
-                      <th className="p-2.5">Data</th>
-                      <th className="p-2.5">Colaborador</th>
-                      <th className="p-2.5">Embalagem</th>
-                      <th className="p-2.5">Quantidade</th>
-                      <th className="p-2.5">Intervalo</th>
-                      <th className="p-2.5">Tempo</th>
-                      <th className="p-2.5">Eficiência</th>
-                      <th className="p-2.5 text-right">Ação</th>
+                      <th className={isCompact ? 'p-1.5' : 'p-2.5'}>Data</th>
+                      <th className={isCompact ? 'p-1.5' : 'p-2.5'}>Colaborador</th>
+                      <th className={isCompact ? 'p-1.5' : 'p-2.5'}>Embalagem</th>
+                      <th className={isCompact ? 'p-1.5' : 'p-2.5'}>Quantidade</th>
+                      <th className={isCompact ? 'p-1.5' : 'p-2.5'}>Intervalo</th>
+                      <th className={isCompact ? 'p-1.5' : 'p-2.5'}>Tempo</th>
+                      <th className={isCompact ? 'p-1.5' : 'p-2.5'}>Eficiência</th>
+                      <th className={`${isCompact ? 'p-1.5' : 'p-2.5'} text-right`}>Ação</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -1690,20 +1608,20 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
                           onClick={() => setSelectedRowId(row._docId || null)}
                           className={`hover:bg-slate-50/50 cursor-pointer transition-colors group ${selectedRowId === row._docId ? 'bg-amber-500/10 border-l-2 border-l-amber-500' : ''}`}
                         >
-                          <td className="p-2.5 font-semibold text-gray-400">{row.data}</td>
-                          <td className="p-2.5 font-bold text-slate-800">{row.operador || '—'}</td>
-                          <td className="p-2.5 font-semibold text-gray-500">{row.embalagem}</td>
-                          <td className="p-2.5 font-bold text-amber-600">{row.quantidade} un</td>
-                          <td className="p-2.5 text-gray-400">{row.inicio} - {row.fim}</td>
-                          <td className="p-2.5 font-mono text-slate-700 font-semibold">{row.duracao}</td>
-                          <td className="p-2.5">
+                          <td className={`${isCompact ? 'p-1.5' : 'p-2.5'} font-semibold text-gray-400`}>{row.data}</td>
+                          <td className={`${isCompact ? 'p-1.5' : 'p-2.5'} font-bold text-slate-800`}>{row.operador || '—'}</td>
+                          <td className={`${isCompact ? 'p-1.5' : 'p-2.5'} font-semibold text-gray-500`}>{row.embalagem}</td>
+                          <td className={`${isCompact ? 'p-1.5' : 'p-2.5'} font-bold text-amber-600`}>{row.quantidade} un</td>
+                          <td className={`${isCompact ? 'p-1.5' : 'p-2.5'} text-gray-400`}>{row.inicio} - {row.fim}</td>
+                          <td className={`${isCompact ? 'p-1.5' : 'p-2.5'} font-mono text-slate-700 font-semibold`}>{row.duracao}</td>
+                          <td className={isCompact ? 'p-1.5' : 'p-2.5'}>
                             <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${eff >= 100 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'}`}>
                               {eff}%
                             </span>
                           </td>
-                          <td className="p-2.5 text-right">
+                          <td className={`${isCompact ? 'p-1.5' : 'p-2.5'} text-right`}>
                             <button
-                              onClick={(e) => { e.stopPropagation(); handleDeleteRow(row._docId || ''); }}
+                               onClick={(e) => { e.stopPropagation(); handleDeleteRow(row._docId || ''); }}
                               className="p-1.5 text-gray-400 hover:text-rose-500 rounded hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer border-none bg-transparent"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
@@ -1747,7 +1665,7 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
             </div>
 
             {/* Painel lateral direito (450px) -> lg:col-span-4 */}
-            <div className="bg-white border border-gray-200 p-5 rounded-xl lg:col-span-4 flex flex-col justify-between shadow-sm min-h-[360px]">
+            <div className={`bg-white border border-gray-200 rounded-xl lg:col-span-4 flex flex-col justify-between shadow-sm transition-all ${isCompact ? 'p-3 min-h-[300px]' : 'p-5 min-h-[360px]'}`}>
               <div>
                 <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider border-b border-gray-100 pb-2 mb-3">
                   Cálculos Automáticos

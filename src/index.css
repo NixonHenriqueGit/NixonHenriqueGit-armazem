@@ -47,6 +47,41 @@ body {
   font-family: 'Barlow', sans-serif;
   overflow-x: hidden;
   min-height: 100vh;
+  font-size: 13px; /* Slightly reduced base font size for higher information density */
+}
+
+/* Fluid adaptive typography for supreme corporate aesthetics */
+.text-fluid-title {
+  font-size: clamp(13px, 1.3vw, 17px) !important;
+  letter-spacing: -0.01em;
+  font-weight: 800;
+}
+.text-fluid-subtitle {
+  font-size: clamp(9.5px, 0.95vw, 11px) !important;
+}
+.text-fluid-text {
+  font-size: clamp(10px, 0.9vw, 12.5px) !important;
+}
+.text-fluid-kpi {
+  font-size: clamp(18px, 1.8vw, 24px) !important;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* Highly dense enterprise data grids */
+.dense-table th,
+.dense-table td {
+  padding: 3.5px 5px !important;
+  font-size: clamp(9px, 0.85vw, 11.5px) !important;
+}
+
+/* Reduced margins/paddings for maximum density (mimicking 67% zoom at 100% zoom) */
+.g-card-compact {
+  padding: clamp(6px, 1vw, 12px) !important;
+}
+
+.g-gap-compact {
+  gap: clamp(5px, 0.85vw, 10px) !important;
 }
 
 body::before {
@@ -111,7 +146,7 @@ body.light-theme::before {
 .g-card {
   background: var(--surf);
   border: 1px solid var(--edge);
-  border-radius: 12px;
+  border-radius: clamp(6px, 0.8vw, 10px);
   transition: all 0.25s ease-in-out;
 }
 
@@ -493,4 +528,98 @@ rect[fill="#22c55e"],
 path[fill="#22c55e"] {
   fill: var(--green) !important;
 }
+
+
+/* ──────────────────────────────────────────────────
+   ADAPTIVE INFORMATION DENSITY SYSTEM
+   Simulates a 67% zoom density at 100% zoom level,
+   improving available screen area by ~40% while
+   maintaining superb legibility and contrast.
+   ────────────────────────────────────────────────── */
+
+/* Target any dashboard wrapper */
+[id$="-dashboard-wrapper"] {
+  padding: clamp(8px, 1vw, 14px) !important;
+  gap: clamp(5px, 0.85vw, 10px) !important;
+}
+
+/* Make headers inside dashboards very sleek */
+[id$="-dashboard-wrapper"] header,
+[id$="-dashboard-wrapper"] [id$="-header"],
+[id$="-dashboard-wrapper"] .border-b.pb-5 {
+  padding-bottom: clamp(5px, 0.7vw, 8px) !important;
+  margin-bottom: clamp(5px, 0.7vw, 8px) !important;
+}
+
+/* Force KPI containers and similar cards to have high density */
+[id$="-dashboard-wrapper"] .grid-cols-4 > div,
+[id$="-dashboard-wrapper"] .grid-cols-5 > div,
+[id$="-dashboard-wrapper"] .grid-cols-6 > div,
+[id$="-dashboard-wrapper"] .g-card,
+[id$="-dashboard-wrapper"] .bg-white.rounded-xl.border.border-gray-200 {
+  padding: clamp(5px, 0.7vw, 9px) !important;
+}
+
+/* Adaptive Height Caps on KPI Cards to reclaim screen space */
+[id$="-dashboard-wrapper"] .h-\[115px\],
+[id$="-dashboard-wrapper"] .h-\[110px\] {
+  height: clamp(80px, 8vh, 98px) !important;
+}
+
+/* Adaptive Height Caps on Graphic and BI Cards to prevent vertical overflow */
+[id$="-dashboard-wrapper"] .h-\[175px\],
+[id$="-dashboard-wrapper"] .h-\[180px\],
+[id$="-dashboard-wrapper"] .h-\[220px\] {
+  height: clamp(140px, 14.5vh, 165px) !important;
+}
+
+/* Adjust Recharts & SVG layouts to perfectly fit compact cards */
+[id$="-dashboard-wrapper"] .recharts-responsive-container {
+  max-height: 98% !important;
+}
+
+/* Compact headers and fonts within cards */
+[id$="-dashboard-wrapper"] h3 {
+  font-size: clamp(9px, 0.9vw, 11px) !important;
+  margin-top: 0 !important;
+  margin-bottom: 2px !important;
+}
+
+[id$="-dashboard-wrapper"] .text-2xl,
+[id$="-dashboard-wrapper"] .text-3xl {
+  font-size: clamp(16px, 1.6vw, 22px) !important;
+  letter-spacing: -0.015em !important;
+}
+
+[id$="-dashboard-wrapper"] .text-sm {
+  font-size: clamp(10.5px, 0.95vw, 11.5px) !important;
+}
+
+[id$="-dashboard-wrapper"] .text-xs {
+  font-size: clamp(9px, 0.85vw, 10.5px) !important;
+}
+
+/* Corporate Data Grids & Tables: Ultra Compact */
+[id$="-dashboard-wrapper"] table {
+  border-collapse: collapse !important;
+}
+
+[id$="-dashboard-wrapper"] th {
+  padding: clamp(2.5px, 0.35vw, 4.5px) clamp(3px, 0.4vw, 5px) !important;
+  font-size: clamp(8.5px, 0.8vw, 10.5px) !important;
+  background-color: rgba(30, 86, 240, 0.03) !important;
+}
+
+[id$="-dashboard-wrapper"] td {
+  padding: clamp(2.5px, 0.35vw, 4.5px) clamp(3px, 0.4vw, 5px) !important;
+  font-size: clamp(8.5px, 0.8vw, 11px) !important;
+}
+
+/* Adaptive sidebar adjustments for tablet and narrow viewports */
+@media (max-width: 1024px) {
+  [id$="-dashboard-wrapper"] .grid {
+    gap: 6px !important;
+  }
+}
+
 

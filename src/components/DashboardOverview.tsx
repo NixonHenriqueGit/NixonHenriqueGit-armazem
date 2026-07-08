@@ -561,34 +561,34 @@ export default function DashboardOverview({
 
       {/* ── KPI HIGHLIGHT CARDS (Only in Controle/Supervisor mode) ── */}
       {user.isControle && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 md:gap-3.5">
           
-          <div className="g-card p-5 text-center flex flex-col justify-center items-center">
-            <Users className="w-7 h-7 text-indigo-400 mb-2" />
-            <span className="font-sans font-black text-3xl text-snow leading-none">{liveKpiStats.usuarios}</span>
-            <span className="text-[#6a7d92] text-[10px] uppercase font-bold tracking-widest mt-1.5">Colaboradores</span>
-            <span className="text-[9px] text-[#22c55e] mt-1">Sessões ativas</span>
+          <div className="g-card p-3.5 md:p-4 text-center flex flex-col justify-center items-center">
+            <Users className="w-5 h-5 text-indigo-400 mb-1.5" />
+            <span className="font-sans font-black text-fluid-kpi text-snow">{liveKpiStats.usuarios}</span>
+            <span className="text-[#6a7d92] text-[9.5px] uppercase font-bold tracking-widest mt-1">Colaboradores</span>
+            <span className="text-[8.5px] text-[#22c55e] mt-0.5">Sessões ativas</span>
           </div>
 
-          <div className="g-card p-5 text-center flex flex-col justify-center items-center">
-            <Layers className="w-7 h-7 text-[#22c55e] mb-2" />
-            <span className="font-sans font-black text-3xl text-[#22c55e] leading-none">{kpiStatsPercent()}%</span>
-            <span className="text-[#6a7d92] text-xs uppercase font-semibold mt-2">Módulos Ativos</span>
-            <span className="text-[9px] text-[#6a7d92] mt-1">{user.papel === 'admin' || user.papel === 'controle' || user.email === 'nixon.a.a100.NH@gmail.com' ? '6' : liveKpiStats.modulos} de 6 contratados</span>
+          <div className="g-card p-3.5 md:p-4 text-center flex flex-col justify-center items-center">
+            <Layers className="w-5 h-5 text-[#22c55e] mb-1.5" />
+            <span className="font-sans font-black text-fluid-kpi text-[#22c55e]">{kpiStatsPercent()}%</span>
+            <span className="text-[#6a7d92] text-[9.5px] uppercase font-bold tracking-widest mt-1">Módulos Ativos</span>
+            <span className="text-[8.5px] text-[#6a7d92] mt-0.5">{user.papel === 'admin' || user.papel === 'controle' || user.email === 'nixon.a.a100.NH@gmail.com' ? '6' : liveKpiStats.modulos} de 6</span>
           </div>
 
-          <div className="g-card p-5 text-center flex flex-col justify-center items-center">
-            <Calendar className="w-7 h-7 text-[#ef4444] mb-2" />
-            <span className="font-sans font-black text-3xl text-[#ef4444] leading-none">{liveKpiStats.alertasFefo}</span>
-            <span className="text-[#6a7d92] text-[10px] uppercase font-bold tracking-widest mt-1.5">Validades Críticas</span>
-            <span className="text-[9px] text-[#ef4444] mt-1">Vence em ≤ 30 dias</span>
+          <div className="g-card p-3.5 md:p-4 text-center flex flex-col justify-center items-center">
+            <Calendar className="w-5 h-5 text-[#ef4444] mb-1.5" />
+            <span className="font-sans font-black text-fluid-kpi text-[#ef4444]">{liveKpiStats.alertasFefo}</span>
+            <span className="text-[#6a7d92] text-[9.5px] uppercase font-bold tracking-widest mt-1">Validades Críticas</span>
+            <span className="text-[8.5px] text-[#ef4444] mt-0.5">Vence em ≤ 30 dias</span>
           </div>
 
-          <div className="g-card p-5 text-center flex flex-col justify-center items-center">
-            <ClipboardCheck className="w-7 h-7 text-[#3b82f6] mb-2" />
-            <span className="font-sans font-black text-3xl text-[#3b82f6] leading-none">{liveKpiStats.docsHoje}</span>
-            <span className="text-[#6a7d92] text-[10px] uppercase font-bold tracking-widest mt-1.5">Lançamentos</span>
-            <span className="text-[9px] text-[#6a7d92] mt-1">Registrados no turno</span>
+          <div className="g-card p-3.5 md:p-4 text-center flex flex-col justify-center items-center">
+            <ClipboardCheck className="w-5 h-5 text-[#3b82f6] mb-1.5" />
+            <span className="font-sans font-black text-fluid-kpi text-[#3b82f6]">{liveKpiStats.docsHoje}</span>
+            <span className="text-[#6a7d92] text-[9.5px] uppercase font-bold tracking-widest mt-1">Lançamentos</span>
+            <span className="text-[8.5px] text-[#6a7d92] mt-0.5">Lançamentos hoje</span>
           </div>
 
         </div>

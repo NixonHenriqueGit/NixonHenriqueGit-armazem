@@ -322,7 +322,7 @@ export default function QuebrasDashboard({ user, empresa, onBack }: QuebrasDashb
   };
 
   return (
-    <div className="flex flex-col gap-6 bg-[#f8fafc] text-[#0f172a] p-6 rounded-2xl shadow-sm border border-gray-200/80">
+    <div id="quebras-dashboard-wrapper" className="flex flex-col gap-3 bg-[#f8fafc] text-[#0f172a] p-4 rounded-xl shadow-sm border border-gray-200/80">
       
       {/* HEADER BLOCK */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-gray-200 pb-5">

@@ -44,6 +44,17 @@ export default function App() {
       return 'light';
     }
   });
+  const [currentTime, setCurrentTime] = useState('');
+
+  useEffect(() => {
+    const tick = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour12: false }));
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Sync theme to body element and localStorage
   useEffect(() => {
@@ -500,12 +511,18 @@ export default function App() {
       <div className="flex-1 flex flex-col min-h-screen max-h-screen overflow-y-auto overflow-x-hidden w-full max-w-full">
         
         {/* Workspace Top Header (Glassmorphic & Premium) */}
-        <header className="sticky top-0 z-30 bg-[#07090d]/85 backdrop-blur-md border-b border-[#1c2530] pl-16 pr-6 md:px-6 py-4 flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between">
-          <div className="flex-1 min-w-0">
+        <header className="sticky top-0 z-30 bg-[#07090d]/85 backdrop-blur-md border-b border-[#1c2530] pl-14 pr-4 md:px-5 py-1 h-11 md:h-12 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Page title */}
+            <h1 className="font-sans font-black text-xs md:text-[13px] tracking-tight text-white uppercase truncate flex-shrink-0">
+              {headerInfo.title}
+            </h1>
+            <span className="hidden xl:inline text-[8px] px-1.5 py-0.5 rounded bg-[#11151c] border border-[#1c2530] text-[#6a7d92] uppercase font-bold tracking-wider">
+              {activePanel}
+            </span>
+            <div className="hidden sm:block w-[1px] h-3 bg-[#1c2530]" />
             {/* Breadcrumbs */}
-            <div className="flex items-center gap-1.5 text-[10px] uppercase font-black tracking-widest text-[#6a7d92]">
-              <span>Colaborador: {user.nome}</span>
-              <span className="text-[#1c2530] font-bold">/</span>
+            <div className="hidden sm:flex items-center gap-1.5 text-[8.5px] uppercase font-black tracking-widest text-[#6a7d92] truncate">
               <span>{headerInfo.breadcrumbs[0]}</span>
               {headerInfo.breadcrumbs[1] && (
                 <>
@@ -514,46 +531,37 @@ export default function App() {
                 </>
               )}
             </div>
-            
-            {/* Page title and description */}
-            <div className="mt-1 flex items-baseline gap-2">
-              <h1 className="font-sans font-black text-lg tracking-tight text-white uppercase">
-                {headerInfo.title}
-              </h1>
-              <span className="hidden md:inline text-[10px] px-2 py-0.5 rounded bg-[#11151c] border border-[#1c2530] text-[#6a7d92] uppercase font-bold tracking-wider">
-                {activePanel}
-              </span>
-            </div>
           </div>
 
-          {/* Quick Stats / System Health widget */}
-          <div className="flex items-center gap-3 self-start md:self-auto flex-shrink-0">
-            <div className="hidden lg:flex flex-col items-end text-right">
-              <div className="text-[10px] text-white font-bold uppercase tracking-wider">
-                Operador: {user.nome?.split(' ')[0]}
-              </div>
-              <div className="text-[9px] text-[#6a7d92] font-mono">
-                IP: Intranet-Secure ({isCustomFirebaseConnected() ? 'Nuvem' : 'Local'})
-              </div>
+          {/* Quick Stats / System Health widget aligned horizontally */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="text-[9px] md:text-[10px] text-white font-bold uppercase tracking-wider hidden md:block">
+              Operador: <span className="text-[#1e56f0]">{user.nome?.split(' ')[0]}</span>
             </div>
-
-            <div className="w-[1px] h-8 bg-[#1c2530] hidden lg:block" />
-
+            {currentTime && (
+              <>
+                <div className="w-[1px] h-3.5 bg-[#1c2530] hidden md:block" />
+                <div className="text-[9px] text-slate-400 font-mono font-bold uppercase tracking-wider hidden md:block">
+                  {currentTime}
+                </div>
+              </>
+            )}
+            <div className="w-[1px] h-3.5 bg-[#1c2530] hidden sm:block" />
             {/* Live Indicator Widget */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#11151c] border border-[#1c2530] text-[10px] font-sans font-black tracking-wider text-[#6a7d92]">
-              <span className="w-2 h-2 rounded-full bg-[#1e56f0] animate-pulse" />
-              <span className="uppercase text-gray-300">Setores Ativos: 8</span>
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#11151c] border border-[#1c2530] text-[8.5px] font-sans font-black tracking-widest text-[#6a7d92]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#1e56f0] animate-pulse" />
+              <span className="uppercase text-gray-300">SISTEMA ATIVO</span>
             </div>
           </div>
         </header>
 
         {/* Inner Content Body */}
-        <main className="flex-1 p-4 md:p-8 lg:p-10 relative">
+        <main className="flex-1 p-2 md:p-3 lg:p-4.5 relative">
           
           {/* Subtle decorative glow */}
           <div className={`absolute top-0 left-0 w-96 h-96 bg-gradient-to-br ${headerInfo.color} rounded-full blur-3xl pointer-events-none opacity-40 z-0`} />
 
-          <div className={`relative z-10 ${activePanel.endsWith('-dashboard') ? 'max-w-[1600px]' : 'max-w-6xl'} mx-auto w-full transition-all duration-300`}>
+          <div className={`relative z-10 ${activePanel.endsWith('-dashboard') ? 'max-w-full px-1' : 'max-w-[1300px]'} mx-auto w-full transition-all duration-300`}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={activePanel}

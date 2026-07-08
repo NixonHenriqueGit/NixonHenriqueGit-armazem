@@ -400,10 +400,10 @@ export default function PickingDashboard({ user, empresa, onBack }: PickingDashb
   const COLORS = ['#f5a623', '#3b82f6', '#10b981', '#a855f7', '#ec4899', '#f43f5e', '#14b8a6'];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div id="picking-dashboard-wrapper" className="flex flex-col gap-3">
       
       {/* Top Header Row */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-[#11151c] border-b border-[#222d3a] rounded-t-xl -mx-6 md:-mx-12 -mt-6 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between p-3.5 bg-[#11151c] border-b border-[#222d3a] rounded-t-xl -mx-3 md:-mx-4.5 -mt-3.5 gap-3.5">
         <div className="flex items-center gap-3">
           {onBack && (
             <button 
