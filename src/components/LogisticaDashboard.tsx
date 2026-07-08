@@ -40,6 +40,7 @@ import {
 import { Usuario, Empresa, ArmazemRow } from '../types';
 import { db, isCustomFirebaseConnected } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
+import A3BoardComponent from './A3BoardComponent';
 
 interface ActionPlanItem {
   id: string;
@@ -62,7 +63,7 @@ interface LogisticaDashboardProps {
 
 export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaDashboardProps) {
   const [armazemRows, setArmazemRows] = useState<ArmazemRow[]>([]);
-  const [activeSubTab, setActiveSubTab] = useState<'indicadores' | 'planos'>('indicadores');
+  const [activeSubTab, setActiveSubTab] = useState<'indicadores' | 'boarda3'>('indicadores');
 
   useEffect(() => {
     const companyId = empresa?.id || 'demo';
@@ -706,10 +707,10 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
               Logística & BI
             </button>
             <button 
-              onClick={() => setActiveSubTab('planos')}
-              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'planos' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              onClick={() => setActiveSubTab('boarda3')}
+              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
-              Planos de Ação 5W2H
+              Quadro de Ações
             </button>
           </div>
 
@@ -1260,7 +1261,11 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
       )}
 
       {/* SECTION 5: PLANO DE AÇÃO (INTERACTIVE TABLE) */}
-      {activeSubTab === 'planos' && (
+      {activeSubTab === 'boarda3' && (
+        <A3BoardComponent user={user} empresa={empresa} dashboard="logistica" />
+      )}
+
+      {false && activeSubTab === 'planos' && (
         <div className="bg-white rounded-xl border border-gray-200/80 shadow-sm overflow-hidden">
         <div className="p-4.5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>

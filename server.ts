@@ -72,6 +72,74 @@ Escreva um relatório analítico contendo:
   }
 });
 
+// Endpoint for AI-driven Picking & Conferencia decision analysis (DPO Guidelines)
+app.post('/api/gemini/analise-picking', async (req, res) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  
+  if (!apiKey) {
+    return res.status(401).json({ 
+      error: 'Por favor, configure sua chave GEMINI_API_KEY nas Configurações > Secrets do projeto para liberar este recurso.' 
+    });
+  }
+
+  const {
+    empresa,
+    totalPaletes,
+    completedPaletes,
+    completionRate,
+    averageTMA,
+    pendingTasksCount,
+    inProgressTasksCount,
+    mostRequestedSKU,
+    topOperator,
+    topConferente
+  } = req.body;
+
+  try {
+    const ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build'
+        }
+      }
+    });
+
+    const prompt = `Você é um Engenheiro de Processos Sênior e Especialista em Distribuição (DPO - Distribution Process Optimisation) da Ambev.
+Analise de forma analítica e estratégica as seguintes métricas coletadas em tempo real do banco de dados da operação de picking e conferência da unidade "${empresa}":
+
+MÉTRICAS DO TURNO:
+- Total de Paletes Solicitados pelas Docas: ${totalPaletes} paletes.
+- Paletes Atendidos/Abastecidos pelas Empilhadeiras: ${completedPaletes} paletes (Taxa de conclusão: ${completionRate}%).
+- Tempo Médio de Atendimento (TMA) atual: ${averageTMA} minutos (Meta DPO é ≤ 10 min).
+- Fila Pendente Atual (Aguardando atendimento): ${pendingTasksCount} ordens.
+- Atividades Em Execução no pátio: ${inProgressTasksCount} ordens.
+- SKU/Produto com maior gargalo de solicitações: ${mostRequestedSKU || 'Nenhum registrado'}.
+- Operador com maior volume de atendimento: ${topOperator || 'Nenhum'}.
+- Conferente com maior volume de chamados: ${topConferente || 'Nenhum'}.
+
+Com base nessas informações reais da operação, formule uma diretriz tática de tomada de decisão estruturada em markdown contendo:
+
+1. **DIAGNÓSTICO DA OPERAÇÃO**: Uma avaliação ultra realista e crítica sobre o TMA atual em relação à meta de 10 min, o tamanho da fila pendente (risco de ociosidade de caminhão) e a produtividade de operadores e conferentes.
+2. **PLANO DE DESPACHO E BALANCEAMENTO (DPO)**: Diretrizes práticas e imediatas para o supervisor rebalancear a frota de empilhadeiras, readequar frentes de picking do produto crítico ("${mostRequestedSKU}"), e evitar o "atendimento no grito".
+3. **AÇÕES PREVENTIVAS DE CURTO PRAZO (3 Bullets)**: 3 ações cirúrgicas que o time de pátio deve colocar em prática na próxima reunião de 10 minutos (DDS) para reduzir a ociosidade da conferência geral nas docas.
+
+Use uma linguagem focada em metas de pátio, produtividade, e eliminação de desperdício Lean. Formate tudo em Markdown direto, elegante e legível.`;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.5-flash',
+      contents: prompt
+    });
+
+    const reportText = response.text || 'O auditor não conseguiu formular a resposta.';
+    res.json({ report: reportText });
+
+  } catch (error: any) {
+    console.error('Error contacting Gemini API for picking:', error);
+    res.status(500).json({ error: error.message || 'Erro inesperado na chamada ao robô.' });
+  }
+});
+
 // Configure Vite middleware as SPA router or serve static contents in production
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {

@@ -3,6 +3,7 @@ import { auth, db } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { motion } from 'motion/react';
+import { BrandLogo } from './BrandLogo';
 
 interface LoginAuthProps {
   onAuthSuccess: (userProfile: any) => void;
@@ -80,7 +81,7 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
           status: 'ativo',
           empresa: {
             id: 'emp_dono',
-            nome: 'Armazém Fácil Headquarter',
+            nome: 'Pau Brasil Distribuidora Headquarter',
             cidade: 'Guarabira',
             estado: 'PB',
             plano: 'completo',
@@ -150,7 +151,7 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
             id: colabDocId,
             uid: colabDocId,
             nome: colabData.nome,
-            email: colabData.email || `${colabData.matricula}@armazemfacil.com`,
+            email: colabData.email || `${colabData.matricula}@paubrasil.com`,
             papel: colabData.funcao,
             empresaId: colabData.empresaId || 'demo',
             status: 'ativo',
@@ -259,7 +260,7 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
         isControle: true,
         empresa: {
           id: 'emp_dono',
-          nome: 'Armazém Fácil Headquarter',
+          nome: 'Pau Brasil Distribuidora Headquarter',
           cidade: 'Guarabira',
           estado: 'PB',
           plano: 'completo',
@@ -326,7 +327,7 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
             id: colabDocId,
             uid: colabDocId,
             nome: colabData.nome,
-            email: colabData.email || `${colabData.matricula}@armazemfacil.com`,
+            email: colabData.email || `${colabData.matricula}@paubrasil.com`,
             papel: 'admin', // supervisor also owner!
             empresaId: colabData.empresaId || 'demo',
             status: 'ativo',
@@ -437,59 +438,54 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
   };
 
   return (
-    <div className="min-h-screen bg-[#07090d] text-[#e8eef5] flex items-center justify-center p-6 relative z-10 selection:bg-[#f5a623] selection:text-[#07090d]">
-      
-      {/* Dynamic ambient background glow */}
-      <div className="absolute top-[30%] left-[50%] -translate-x-[50%] -translate-y-[50%] w-[500px] h-[500px] bg-[#f5a623]/3 rounded-full blur-[120px] pointer-events-none z-0" />
+    <div className="min-h-screen bg-transparent text-[#1f2937] flex items-center justify-center p-6 relative z-10 select-none">
       
       <div className="w-full max-w-[440px] relative z-10">
         {/* Top Header */}
         <div className="text-center mb-8 flex flex-col items-center">
           <motion.div 
             onClick={onBackToLanding} 
-            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#f5a623] to-[#d4780a] flex items-center justify-center text-3xl shadow-[0_0_30px_rgba(245,166,35,0.25)] hover:shadow-[0_0_45px_rgba(245,166,35,0.45)] cursor-pointer transition-all mb-4"
-            animate={{ y: [0, -6, 0] }}
+            className="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-[0_10px_30px_rgba(30,86,240,0.08)] border border-slate-100 cursor-pointer mb-5"
+            whileHover={{ scale: 1.05 }}
+            animate={{ y: [0, -4, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
           >
-            📦
+            <BrandLogo size="lg" variant="icon-only" />
           </motion.div>
-          <span className="font-sans font-black text-xl tracking-[4px] text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-[#f5a623] to-amber-600 block">
-            ARMAZÉM FÁCIL
+          
+          <div className="flex items-center gap-1.5 font-sans font-black text-3xl tracking-wider uppercase select-none">
+            <span className="text-[#1f2937] font-light">PAU</span>
+            <span className="text-[#1e56f0]">BRASIL</span>
+          </div>
+          
+          <div className="text-[10px] uppercase font-bold tracking-[3px] mt-1.5 flex items-center gap-1.5 text-slate-500">
+            <span>DISTRIBUIDORA</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]" />
+            <span className="text-[#f59e0b] font-black">AMBEV</span>
+          </div>
+
+          <span className="text-xs uppercase font-extrabold tracking-[1px] text-slate-700 mt-6 block max-w-[340px] leading-tight text-center">
+            RETORNO DE ROTA — GUARABIRA
           </span>
-          <span className="text-[10px] uppercase font-bold tracking-[2px] text-[#6a7d92] mt-1 block">
-            Sistema Integrado de Armazém
+          <span className="text-[11px] text-slate-500 mt-1.5 block max-w-[320px] leading-relaxed text-center font-medium">
+            Controle de Retornos, Aferição Física e Conciliação Fiscal
           </span>
           
-          <div className="mt-3.5 inline-flex items-center gap-1.5 px-2.5 py-1 bg-green/10 border border-green/20 text-[9px] uppercase font-bold text-green tracking-widest rounded-full">
-            <span className="w-1.5 h-1.5 rounded-full bg-green animate-pulse" />
-            Sistema Homologado
+          <div 
+            className="mt-4 inline-flex items-center justify-center px-6 py-1.5 border text-[10px] uppercase font-black tracking-[1.5px] rounded-full bg-transparent shadow-xs"
+            style={{ borderColor: '#1f2937', color: '#1f2937' }}
+          >
+            SISTEMA OFICIAL
           </div>
         </div>
 
         {/* Auth Card Container */}
-        <div className="g-card overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.6)] border-[#1c2530] hover:border-[#2a3545]">
+        <div className="bg-white rounded-2xl overflow-hidden shadow-[0_15px_35px_rgba(30,86,240,0.04)] border border-slate-100/80 hover:border-slate-200 transition-all duration-300">
           
           {/* Header tabs/MFA state */}
-          {!mfaAtingido ? (
-            <div className="tabs border-b border-[#1c2530] flex bg-[#0f1318]">
-              <button 
-                onClick={() => { setActiveTab('login'); setMsg(null); }}
-                className={`tab-btn flex-1 py-4.5 font-sans font-black text-[10px] tracking-wider uppercase bg-transparent border-none text-center cursor-pointer transition-all relative ${activeTab === 'login' ? 'text-[#f5a623]' : 'text-[#6a7d92] hover:text-[#e8eef5]'}`}
-              >
-                Entrar na Operação
-                {activeTab === 'login' && <span className="absolute bottom-0 left-[15%] right-[15%] h-[2px] bg-[#f5a623] rounded-full" />}
-              </button>
-              <button 
-                onClick={() => { setActiveTab('controle'); setMsg(null); }}
-                className={`tab-btn flex-1 py-4.5 font-sans font-black text-[10px] tracking-wider uppercase bg-transparent border-none text-center cursor-pointer transition-all relative ${activeTab === 'controle' ? 'text-[#f5a623]' : 'text-[#6a7d92] hover:text-[#e8eef5]'}`}
-              >
-                Controle
-                {activeTab === 'controle' && <span className="absolute bottom-0 left-[15%] right-[15%] h-[2px] bg-[#f5a623] rounded-full" />}
-              </button>
-            </div>
-          ) : (
-            <div className="bg-[#151b23] border-b border-[#1c2530] p-4 text-center">
-              <span className="font-sans font-black text-sm text-[#f5a623] tracking-widest uppercase">🔐 SEGUNDA ETAPA DE ACESSO</span>
+          {mfaAtingido && (
+            <div className="bg-[#f1f5f9] border-b border-slate-100 p-4 text-center">
+              <span className="font-sans font-black text-sm text-[#1e56f0] tracking-widest uppercase">🔐 SEGUNDA ETAPA DE ACESSO</span>
             </div>
           )}
 
@@ -499,18 +495,18 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
             {/* MFA PASSCODE FORM */}
             {mfaAtingido ? (
               <div className="flex flex-col gap-4">
-                <p className="text-xs text-[#6a7d92] text-center leading-relaxed mb-2">
+                <p className="text-xs text-slate-500 text-center leading-relaxed mb-2">
                   Por medidas de segurança, digite o código de 6 dígitos gerado no seu dispositivo <strong>Google Authenticator</strong>.
                 </p>
                 <div className="flex flex-col gap-1.5 align-center text-center">
-                  <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Código MFA de 6 Dígitos</label>
+                  <label className="text-[10px] font-bold tracking-widest text-slate-500 uppercase">Código MFA de 6 Dígitos</label>
                   <input 
                     type="password"
                     maxLength={6}
                     placeholder="••••••"
                     value={lMfaCode}
                     onChange={e => setLMfaCode(e.target.value.replace(/\D/g, ''))}
-                    className="g-input font-mono text-center text-2xl tracking-[12px] h-14"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 font-mono text-center text-2xl tracking-[12px] h-14 focus:outline-none focus:border-[#1e56f0]"
                   />
                 </div>
                 {msg && (
@@ -521,43 +517,43 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
                 <div className="flex gap-3">
                   <button 
                     onClick={() => { setMfaAtingido(false); setLMfaCode(''); }}
-                    className="btn-ghost flex-1 py-3 border border-[#243040] text-[#6a7d92] hover:text-[#e8eef5] rounded-xl text-xs uppercase font-extrabold tracking-wider"
+                    className="flex-1 py-3 border border-slate-200 text-slate-500 hover:text-slate-800 rounded-xl text-xs uppercase font-extrabold tracking-wider bg-transparent cursor-pointer transition-colors"
                   >
                     Voltar
                   </button>
                   <button 
                     onClick={handleMfaVerify}
-                    className="btn-primary flex-[2] bg-gradient-to-r from-[#f5a623] to-[#d4780a] text-[#07090d] text-xs font-bold uppercase tracking-widest py-3 rounded-xl hover:shadow-[0_4px_16px_rgba(245,166,35,0.25)]"
+                    className="flex-[2] bg-[#1e56f0] hover:bg-[#1848c8] text-white text-xs font-bold uppercase tracking-widest py-3 rounded-xl hover:shadow-[0_4px_16px_rgba(30,86,240,0.25)] border-none cursor-pointer transition-colors"
                   >
                     Confirmar Código
                   </button>
                 </div>
               </div>
-            ) : activeTab === 'login' ? (
+            ) : (
               
               /* SIGN IN FORM PANEL */
               <form onSubmit={handleLogin} className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">E-mail ou Matrícula</label>
+                  <label className="text-[10px] font-extrabold tracking-widest text-slate-500 uppercase">E-mail ou Matrícula</label>
                   <input 
                     type="text"
                     required
                     placeholder="Seu e-mail ou matrícula"
                     value={lEmail}
                     onChange={e => setLEmail(e.target.value)}
-                    className="g-input"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e56f0] focus:ring-2 focus:ring-[#1e56f0]/10 transition-all text-sm"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Senha</label>
+                  <label className="text-[10px] font-extrabold tracking-widest text-slate-500 uppercase">Senha</label>
                   <input 
                     type="password"
                     required
                     placeholder="••••••••"
                     value={lSenha}
                     onChange={e => setLSenha(e.target.value)}
-                    className="g-input"
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e56f0] focus:ring-2 focus:ring-[#1e56f0]/10 transition-all text-sm"
                   />
                 </div>
 
@@ -570,7 +566,7 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
                 <button 
                   type="submit"
                   disabled={loading}
-                  className="btn-primary py-3.5 bg-gradient-to-br from-[#f5a623] to-[#d4780a] text-[#07090d] text-xs font-sans font-bold uppercase tracking-[2px] rounded-xl cursor-pointer disabled:opacity-50"
+                  className="w-full py-4 bg-[#1e56f0] hover:bg-[#1848c8] text-white text-xs font-sans font-bold uppercase tracking-[2px] rounded-xl cursor-pointer disabled:opacity-50 border-none transition-all shadow-[0_4px_16px_rgba(30,86,240,0.15)] hover:shadow-[0_4px_16px_rgba(30,86,240,0.25)] flex items-center justify-center"
                 >
                   {loading ? 'Aguarde...' : 'Entrar na Operação'}
                 </button>
@@ -578,72 +574,24 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
                 <button 
                   type="button"
                   onClick={handleResetSenha}
-                  className="btn-ghost py-2.5 border border-[#1c2530] text-[#6a7d92] hover:text-[#e8eef5] rounded-xl text-xs font-sans tracking-wide"
+                  className="w-full py-3.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 hover:text-slate-800 rounded-xl text-xs font-bold tracking-wide transition-colors"
                 >
                   Esqueci minha senha
-                </button>
-              </form>
-            ) : (
-              
-              /* CONTROLE PANEL SIGN IN */
-              <form onSubmit={handleControleLogin} className="flex flex-col gap-4">
-                <div className="sep text-[10px] uppercase font-bold tracking-widest text-[#f5a623]">Acesso de Controle</div>
-                
-                <p className="text-xs text-[#6a7d92] leading-relaxed mb-1">
-                  Digite as credenciais de controle para gerenciar e acessar todos os painéis e dashboards unificados.
-                </p>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">E-mail ou Matrícula de Controle</label>
-                  <input 
-                    type="text"
-                    required
-                    placeholder="Seu e-mail ou matrícula"
-                    value={contEmail}
-                    onChange={e => setContEmail(e.target.value)}
-                    className="g-input"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Senha</label>
-                  <input 
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={contSenha}
-                    onChange={e => setContSenha(e.target.value)}
-                    className="g-input"
-                  />
-                </div>
-
-                {msg && (
-                  <div className={`p-3 rounded-lg text-xs font-semibold ${msg.type === 'ok' ? 'bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e]' : 'bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444]'}`}>
-                    {msg.text}
-                  </div>
-                )}
-
-                <button 
-                  type="submit"
-                  disabled={loading}
-                  className="btn-primary py-3.5 bg-gradient-to-br from-[#f5a623] to-[#d4780a] text-[#07090d] text-xs font-sans font-bold uppercase tracking-[2px] rounded-xl cursor-pointer disabled:opacity-50 mt-2"
-                >
-                  {loading ? 'Acessando Controle...' : 'Entrar no Painel de Controle'}
                 </button>
               </form>
             )}
 
             <button 
               onClick={onBackToLanding}
-              className="w-full text-center mt-6 text-xs text-[#6a7d92] hover:text-[#e8eef5] transition-colors uppercase font-bold tracking-widest cursor-pointer"
+              className="w-full text-center mt-6 text-xs text-slate-500 hover:text-slate-800 transition-colors uppercase font-bold tracking-widest cursor-pointer flex items-center justify-center gap-1.5"
             >
               ← Voltar ao site
             </button>
           </div>
         </div>
 
-        <div className="text-center mt-6 text-[10px] text-[#6a7d92] tracking-widest uppercase font-semibold">
-          Armazém Fácil &copy; Implantação Corporativa
+        <div className="text-center mt-6 text-[10px] text-slate-400 tracking-widest uppercase font-semibold">
+          Pau Brasil Distribuidora &copy; Implantação Corporativa
         </div>
       </div>
 

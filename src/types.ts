@@ -179,3 +179,48 @@ export interface RepackActionPlan {
   _criadoEm?: string;
 }
 
+export interface RepackA3Board {
+  _docId?: string;
+  empresaId: string;
+  dashboard?: string; // e.g. 'repack', 'despejo', 'logistica', 'quebras', 'fefo', 'blitz'
+  titulo: string;
+  dataCriacaoISO: string;
+  
+  // Step 1: Detalhes do Problema
+  problemaDesc: string;
+  problemaImpacto: string;
+  problemaCausa: string;
+  problemaEvidencias: string;
+  
+  // Step 2: Plano de Ação
+  actions: {
+    acao: string;
+    responsavel: string;
+    prazo: string;
+    status: 'Pendente' | 'Em Andamento' | 'Bloqueado' | 'Concluído';
+    pct: number;
+  }[];
+  recursos: string;
+  comentarios: string;
+  
+  // Step 4: Conclusão
+  concluidas: string;
+  aprendizados: string;
+  padronizacao: string;
+  
+  // Step 5: Resultados
+  resultadosDesc: string;
+  indicadores: {
+    indicador: string;
+    antes: string;
+    depois: string;
+    variacao: string;
+  }[];
+  impactoNegocio: string;
+  
+  proximosPassos: string;
+  dataRevisao: string;
+  _criadoEm?: string;
+}
+
+

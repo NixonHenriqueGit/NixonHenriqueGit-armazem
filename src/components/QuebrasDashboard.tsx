@@ -37,6 +37,7 @@ import {
 import { Usuario, Empresa, QuebraRow } from '../types';
 import { db, isCustomFirebaseConnected } from '../firebase';
 import { collection, onSnapshot, query, addDoc, deleteDoc, doc } from 'firebase/firestore';
+import A3BoardComponent from './A3BoardComponent';
 
 interface QuebrasDashboardProps {
   user: Usuario;
@@ -101,7 +102,7 @@ export default function QuebrasDashboard({ user, empresa, onBack }: QuebrasDashb
   const [filterPeriodo, setFilterPeriodo] = useState<'7' | '15' | '30' | 'tudo'>('30');
   const [filterArea, setFilterArea] = useState<string>('TODAS');
   const [filterTurno, setFilterTurno] = useState<string>('TODOS');
-  const [activeSubTab, setActiveSubTab] = useState<'indicadores' | 'planos'>('indicadores');
+  const [activeSubTab, setActiveSubTab] = useState<'indicadores' | 'boarda3'>('indicadores');
   
   // 5W2H state
   const [planos, setPlanos] = useState<ActionPlan5W2H[]>([]);
@@ -355,10 +356,10 @@ export default function QuebrasDashboard({ user, empresa, onBack }: QuebrasDashb
               Quebras & BI
             </button>
             <button 
-              onClick={() => setActiveSubTab('planos')}
-              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'planos' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              onClick={() => setActiveSubTab('boarda3')}
+              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
-              Planos de Ação 5W2H
+              Quadro de Ações
             </button>
           </div>
         </div>
@@ -697,7 +698,11 @@ export default function QuebrasDashboard({ user, empresa, onBack }: QuebrasDashb
       )}
 
       {/* ── SEÇÃO PLANOS DE AÇÃO 5W2H ── */}
-      {activeSubTab === 'planos' && (
+      {activeSubTab === 'boarda3' && (
+        <A3BoardComponent user={user} empresa={empresa} dashboard="quebras" />
+      )}
+
+      {false && activeSubTab === 'planos' && (
         <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
         <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-4">
           <div>

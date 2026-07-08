@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
+import appletConfig from '../firebase-applet-config.json';
 
 interface FirebaseConfigExtended {
   apiKey: string;
@@ -14,14 +15,14 @@ interface FirebaseConfigExtended {
 }
 
 const DEFAULT_CONFIG: FirebaseConfigExtended = {
-  apiKey: "AIzaSyA_ykhJGRk1DbPuDNYooM1VvB2DeVzp2VE",
-  authDomain: "armazemfacil-b2292.firebaseapp.com",
-  projectId: "armazemfacil-b2292",
-  storageBucket: "armazemfacil-b2292.appspot.com",
-  messagingSenderId: "688234941301",
-  appId: "1:688234941301:web:153e2ad3f634379fe3213c",
-  measurementId: "G-6HFDEKWVDB",
-  firestoreDatabaseId: undefined
+  apiKey: appletConfig.apiKey || "AIzaSyA_ykhJGRk1DbPuDNYooM1VvB2DeVzp2VE",
+  authDomain: appletConfig.authDomain || "armazemfacil-b2292.firebaseapp.com",
+  projectId: appletConfig.projectId || "armazemfacil-b2292",
+  storageBucket: appletConfig.storageBucket || "armazemfacil-b2292.appspot.com",
+  messagingSenderId: appletConfig.messagingSenderId || "688234941301",
+  appId: appletConfig.appId || "1:688234941301:web:153e2ad3f634379fe3213c",
+  measurementId: appletConfig.measurementId || "G-6HFDEKWVDB",
+  firestoreDatabaseId: appletConfig.firestoreDatabaseId || undefined
 };
 
 // Check if there is a custom configuration saved in localStorage
@@ -58,6 +59,18 @@ const auth = getAuth(app);
 const db = firebaseConfig.firestoreDatabaseId 
   ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
   : getFirestore(app);
+
+// Validation check on boot
+async function testConnection() {
+  try {
+    await getDocFromServer(doc(db, 'test', 'connection'));
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.error("Please check your Firebase configuration.");
+    }
+  }
+}
+testConnection();
 
 // Helper to determine if we are using custom config
 export const isCustomFirebaseConnected = () => {

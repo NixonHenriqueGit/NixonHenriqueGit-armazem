@@ -37,16 +37,16 @@ import { db, isCustomFirebaseConnected } from '../firebase';
 const getRoleLabel = (role?: string) => {
   if (!role) return '';
   switch (role) {
-    case 'repack': return '🛠 Operador Repack';
-    case 'despejo': return '🗑 Operador Despejo';
-    case 'armazem': return '📦 Armazém Fácil';
-    case 'quebras': return '⚠️ Fiscal de Quebras';
-    case 'validades': return '📅 Gestor de Validades (FEFO)';
-    case 'refugo': return '🔍 Operador Blitz Refugo';
-    case 'empilhador': return '🚜 Picking/Empilhadeira';
-    case 'conferente': return '📋 Conferente Geral';
-    case 'controle': return '👮 Supervisor de Controle';
-    case 'admin': return '🔑 Administrador';
+    case 'repack': return 'Operador Repack';
+    case 'despejo': return 'Operador Despejo';
+    case 'armazem': return 'Armazém Fácil';
+    case 'quebras': return 'Fiscal de Quebras';
+    case 'validades': return 'Gestor de Validades (FEFO)';
+    case 'refugo': return 'Operador Blitz Refugo';
+    case 'empilhador': return 'Picking/Empilhadeira';
+    case 'conferente': return 'Conferente Geral';
+    case 'controle': return 'Supervisor de Controle';
+    case 'admin': return 'Administrador';
     default: return role.toUpperCase();
   }
 };
@@ -493,7 +493,7 @@ export default function DashboardOverview({
           <div className="space-y-2 flex-1">
             <div className="flex flex-wrap items-center gap-2.5">
               <h2 className="font-sans font-black text-2xl tracking-tight text-snow leading-none">
-                {getGreeting()}, <span className="text-transparent bg-clip-text bg-gradient-to-r from-snow to-[#f5a623]">{user.nome}</span>!
+                Colaborador: <span className="text-transparent bg-clip-text bg-gradient-to-r from-snow to-[#f5a623]">{user.nome}</span>
               </h2>
               
               {/* Badges de Cargo e Status */}
@@ -509,11 +509,17 @@ export default function DashboardOverview({
               </div>
             </div>
 
-            <p className="text-xs text-slate-400 font-medium leading-relaxed max-w-2xl">
-              {getRoleTip(user.papel)}
-            </p>
+            <div className="bg-[#f5a623]/10 border border-[#f5a623]/25 rounded-xl p-3.5 mt-2 flex items-start gap-3 max-w-2xl shadow-inner">
+              <span className="text-lg leading-none shrink-0">📢</span>
+              <div className="flex-1">
+                <span className="block text-[10px] font-black uppercase text-[#f5a623] tracking-widest">Informe Operacional Padrão</span>
+                <span className="text-xs text-slate-300 block mt-1 leading-relaxed">
+                  Atenção plena às regras de ouro, preenchimento rigoroso de relatórios diários de picking, e contagem cíclica. Certifique-se de realizar a conferência dos dados antes do encerramento do turno operacional.
+                </span>
+              </div>
+            </div>
             
-            <p className="text-[10px] text-dim flex items-center gap-1.5 font-bold uppercase tracking-wider">
+            <p className="text-[10px] text-dim flex items-center gap-1.5 font-bold uppercase tracking-wider pt-1">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
               Diretriz Operacional: Respeite rigorosamente as Regras de Ouro de Segurança.
             </p>
@@ -612,13 +618,6 @@ export default function DashboardOverview({
               ))}
             </div>
           </div>
-          
-          <button 
-            onClick={() => onNavigate('conferente')}
-            className="w-full text-center py-2.5 bg-[#151b23] hover:bg-[#1c2530] text-[#6a7d92] hover:text-[#e8eef5] rounded-xl text-xs uppercase font-extrabold tracking-wider border border-[#1c2530] transition-all cursor-pointer mt-4"
-          >
-            Ver fila de despachos conferente →
-          </button>
         </div>
 
         {/* Safety Standards Checklist Card */}
@@ -647,7 +646,7 @@ export default function DashboardOverview({
 
           <div className="mt-8 pt-4 border-t border-[#1ca0d3]/10 flex flex-col gap-2">
             {user.isControle && (
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-1.5">
+              <div className="grid grid-cols-3 md:grid-cols-7 gap-1.5">
                 <button 
                   onClick={() => onNavigate('repack-dashboard')}
                   className="text-center py-2.5 bg-[#f5a623]/10 hover:bg-[#f5a623]/20 text-[#f5a623] hover:text-white rounded-xl text-[8px] uppercase font-black tracking-wider border border-[#f5a623]/25 transition-all cursor-pointer flex items-center justify-center gap-1"
@@ -683,6 +682,12 @@ export default function DashboardOverview({
                   className="text-center py-2.5 bg-[#3b82f6]/10 hover:bg-[#3b82f6]/20 text-[#3b82f6] hover:text-white rounded-xl text-[8px] uppercase font-black tracking-wider border border-[#3b82f6]/25 transition-all cursor-pointer flex items-center justify-center gap-1"
                 >
                   📊 Blitz
+                </button>
+                <button 
+                  onClick={() => onNavigate('picking-dashboard')}
+                  className="text-center py-2.5 bg-[#f5a623]/10 hover:bg-[#f5a623]/20 text-[#f5a623] hover:text-white rounded-xl text-[8px] uppercase font-black tracking-wider border border-[#f5a623]/25 transition-all cursor-pointer flex items-center justify-center gap-1"
+                >
+                  📊 Picking
                 </button>
               </div>
             )}

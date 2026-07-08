@@ -26,6 +26,7 @@ import {
 import { Usuario, Empresa, BlitzRefugoRow } from '../types';
 import { db, isCustomFirebaseConnected } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
+import A3BoardComponent from './A3BoardComponent';
 
 interface BlitzDashboardProps {
   user: Usuario;
@@ -35,7 +36,7 @@ interface BlitzDashboardProps {
 
 export default function BlitzDashboard({ user, empresa, onBack }: BlitzDashboardProps) {
   const [blitzRows, setBlitzRows] = useState<BlitzRefugoRow[]>([]);
-  const [activeSubTab, setActiveSubTab] = useState<'indicadores' | 'planos'>('indicadores');
+  const [activeSubTab, setActiveSubTab] = useState<'indicadores' | 'boarda3'>('indicadores');
 
   useEffect(() => {
     const companyId = empresa?.id || 'demo';
@@ -215,10 +216,10 @@ export default function BlitzDashboard({ user, empresa, onBack }: BlitzDashboard
               Blitz & BI
             </button>
             <button 
-              onClick={() => setActiveSubTab('planos')}
-              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'planos' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              onClick={() => setActiveSubTab('boarda3')}
+              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
-              Plano de Ação Refugo
+              Quadro de Ações
             </button>
           </div>
         </div>
@@ -475,9 +476,13 @@ export default function BlitzDashboard({ user, empresa, onBack }: BlitzDashboard
       </div>
     )}
 
-        {/* Seção 4 — Plano de Ação (Refugo) */}
-        {activeSubTab === 'planos' && (
-          <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm animate-fadeIn">
+      {/* Seção 4 — Plano de Ação (Refugo) */}
+      {activeSubTab === 'boarda3' && (
+        <A3BoardComponent user={user} empresa={empresa} dashboard="blitz" />
+      )}
+
+      {false && activeSubTab === 'planos' && (
+        <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm animate-fadeIn">
           <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-4">
             <div>
               <h3 className="font-sans font-black text-xs text-[#032b5e] uppercase tracking-wider flex items-center gap-2">

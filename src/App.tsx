@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
 import LoginAuth from './components/LoginAuth';
 import Sidebar from './components/Sidebar';
+import { BrandLogo } from './components/BrandLogo';
 import DashboardOverview from './components/DashboardOverview';
 import RepackPanel from './components/RepackPanel';
 import DespejoPanel from './components/DespejoPanel';
@@ -21,6 +22,7 @@ import LogisticaDashboard from './components/LogisticaDashboard';
 import QuebrasDashboard from './components/QuebrasDashboard';
 import FefoDashboard from './components/FefoDashboard';
 import BlitzDashboard from './components/BlitzDashboard';
+import PickingDashboard from './components/PickingDashboard';
 
 import { auth, db, isCustomFirebaseConnected } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -208,6 +210,8 @@ export default function App() {
         return <FefoDashboard user={user} empresa={empresa} onBack={() => setActivePanel('visao-geral')} />;
       case 'blitz-dashboard':
         return <BlitzDashboard user={user} empresa={empresa} onBack={() => setActivePanel('visao-geral')} />;
+      case 'picking-dashboard':
+        return <PickingDashboard user={user} empresa={empresa} onBack={() => setActivePanel('visao-geral')} />;
       case 'despejo':
         return <DespejoPanel user={user} empresa={empresa} />;
       case 'armazem':
@@ -250,10 +254,10 @@ export default function App() {
 
   const getHeaderInfo = (panel: string) => {
     const defaultInfo = {
-      breadcrumbs: ['Armazém Fácil', 'Painel'],
+      breadcrumbs: ['Pau Brasil', 'Painel'],
       title: 'Painel Geral',
-      subtitle: 'Visão operacional e de monitoramento do pátio.',
-      color: 'from-amber-500/5 to-transparent'
+      subtitle: 'Controle de retornos e conciliação de rotas.',
+      color: 'from-[#1e56f0]/5 to-transparent'
     };
     
     switch (panel) {
@@ -262,7 +266,7 @@ export default function App() {
           breadcrumbs: ['Início', 'Visão Geral'],
           title: 'Visão Geral do Pátio',
           subtitle: 'Acompanhamento em tempo real das movimentações, alertas de vencimento e produtividade do pátio.',
-          color: 'from-amber-500/10 to-transparent'
+          color: 'from-[#1e56f0]/10 to-transparent'
         };
       case 'repack-dashboard':
         return {
@@ -290,7 +294,7 @@ export default function App() {
           breadcrumbs: ['Analytics & B.I.', 'Dashboard Quebras'],
           title: 'Dashboard Quebras',
           subtitle: 'Análise detalhada de avarias, perdas por setor e motivos de quebra.',
-          color: 'from-amber-500/10 to-transparent'
+          color: 'from-sky-500/10 to-transparent'
         };
       case 'fefo-dashboard':
         return {
@@ -305,6 +309,13 @@ export default function App() {
           title: 'Dashboard Blitz (Refugo)',
           subtitle: 'Monitoramento de blitz preventivas e refugo de embalagens recuperáveis.',
           color: 'from-indigo-500/10 to-transparent'
+        };
+      case 'picking-dashboard':
+        return {
+          breadcrumbs: ['Analytics & B.I.', 'Dashboard Picking'],
+          title: 'BI de Picking e Abastecimento',
+          subtitle: 'Gargalos operacionais, eficiência de turnos, telemetria de empilhadeira e produtividade.',
+          color: 'from-[#1e56f0]/10 to-transparent'
         };
       case 'repack':
         return {
@@ -322,9 +333,9 @@ export default function App() {
         };
       case 'armazem':
         return {
-          breadcrumbs: ['Setores de Operação', 'Armazém Fácil'],
-          title: 'Armazém Fácil',
-          subtitle: 'Controle de posições de estoque, endereçamento e contagens cíclicas.',
+          breadcrumbs: ['Setores de Operação', 'Operação de Pátio'],
+          title: 'Operação de Pátio',
+          subtitle: 'Controle de fluxo de carretas, carregamento e janelas logísticas de faturamento.',
           color: 'from-sky-500/10 to-transparent'
         };
       case 'quebras':
@@ -352,8 +363,8 @@ export default function App() {
         return {
           breadcrumbs: ['Setores de Operação', 'Movimentação Picking'],
           title: 'Operação Picking',
-          subtitle: 'Atribuição e acompanhamento de tarefas para operadores de empilhadeira.',
-          color: 'from-amber-500/10 to-transparent'
+          subtitle: 'Atribuição and acompanhamento de tarefas para operadores de empilhadeira.',
+          color: 'from-sky-500/10 to-transparent'
         };
       case 'conferente':
         return {
@@ -367,7 +378,7 @@ export default function App() {
           breadcrumbs: ['Administrativo', 'Painel Controle'],
           title: 'Painel Controle',
           subtitle: 'Gerenciamento de operadores, atribuição de senhas, liberação de turnos.',
-          color: 'from-amber-500/10 to-transparent'
+          color: 'from-[#1e56f0]/10 to-transparent'
         };
       case 'exportar':
         return {
@@ -381,14 +392,14 @@ export default function App() {
           breadcrumbs: ['Sistemas', 'Status do Banco'],
           title: 'Conexão Firestore',
           subtitle: 'Configuração e teste de latência do banco de dados na nuvem corporativa.',
-          color: 'from-amber-500/10 to-transparent'
+          color: 'from-sky-500/10 to-transparent'
         };
       case 'admin':
         return {
           breadcrumbs: ['Sistemas', 'Painel Admin'],
           title: 'Painel do Administrador',
           subtitle: 'Gerenciamento global de unidades, parâmetros e chaves de API.',
-          color: 'from-amber-500/10 to-transparent'
+          color: 'from-[#1e56f0]/10 to-transparent'
         };
       default:
         return defaultInfo;
@@ -397,15 +408,17 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#07090d] flex flex-col items-center justify-center text-snow">
+      <div className="min-h-screen bg-transparent flex flex-col items-center justify-center text-[#1f2937] dark:text-[#f8fafc]">
         <motion.div 
-          initial={{ scale: 0.8, opacity: 0 }}
+          initial={{ scale: 0.85, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ duration: 0.3 }}
-          className="flex flex-col items-center"
+          transition={{ duration: 0.4 }}
+          className="flex flex-col items-center select-none"
         >
-          <div className="w-10 h-10 border-2 border-t-transparent border-[#f5a623] rounded-full animate-spin"></div>
-          <span className="text-xs font-bold tracking-widest text-[#f5a623] uppercase mt-4">Carregando Instância de Pátio...</span>
+          <BrandLogo size="xl" variant="icon-only" className="mb-6 animate-bounce" />
+          <div className="w-8 h-8 border-3 border-t-transparent border-[#1e56f0] rounded-full animate-spin mb-4"></div>
+          <span className="text-xs font-black tracking-[3px] text-[#1e56f0] uppercase">PAU BRASIL DISTRIBUIDORA</span>
+          <span className="text-[10px] text-[#6b7280] dark:text-[#94a3b8] uppercase tracking-[2px] mt-1.5 font-bold">Carregando Unidade Guarabira...</span>
         </motion.div>
       </div>
     );
@@ -414,7 +427,7 @@ export default function App() {
   // Active view layout branches
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#07090d] text-[#e8eef5] overflow-x-hidden">
+      <div className={`min-h-screen ${showAuthGate ? 'bg-gradient-to-b from-[#eef2f7] to-[#ffffff]' : 'bg-[#07090d]'} text-[#1f2937] overflow-x-hidden transition-colors duration-300`}>
         <AnimatePresence mode="wait">
           {showAuthGate ? (
             <motion.div 
@@ -423,12 +436,12 @@ export default function App() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center bg-[#07090d]"
+              className="relative min-h-screen py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center bg-transparent"
             >
               {/* Absolute close button */}
               <button 
                 onClick={() => setShowAuthGate(false)} 
-                className="absolute top-6 right-6 p-2.5 rounded-xl border border-[#222d3a] hover:bg-[#151b23] text-xs font-bold text-[#6a7d92] hover:text-snow cursor-pointer tracking-wider uppercase transition-all"
+                className="absolute top-6 right-6 p-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-xs font-bold text-slate-600 hover:text-slate-900 cursor-pointer tracking-wider uppercase transition-all"
               >
                 ✕ Voltar ao Início
               </button>
@@ -481,13 +494,13 @@ export default function App() {
           <div className="flex-1 min-w-0">
             {/* Breadcrumbs */}
             <div className="flex items-center gap-1.5 text-[10px] uppercase font-black tracking-widest text-[#6a7d92]">
-              <span>{empresa?.nome || 'Enterprise Unit'}</span>
+              <span>Colaborador: {user.nome}</span>
               <span className="text-[#1c2530] font-bold">/</span>
               <span>{headerInfo.breadcrumbs[0]}</span>
               {headerInfo.breadcrumbs[1] && (
                 <>
                   <span className="text-[#1c2530] font-bold">/</span>
-                  <span className="text-[#f5a623]">{headerInfo.breadcrumbs[1]}</span>
+                  <span className="text-[#1e56f0]">{headerInfo.breadcrumbs[1]}</span>
                 </>
               )}
             </div>
@@ -518,7 +531,7 @@ export default function App() {
 
             {/* Live Indicator Widget */}
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#11151c] border border-[#1c2530] text-[10px] font-sans font-black tracking-wider text-[#6a7d92]">
-              <span className="w-2 h-2 rounded-full bg-[#f5a623] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#1e56f0] animate-pulse" />
               <span className="uppercase text-gray-300">Setores Ativos: 8</span>
             </div>
           </div>

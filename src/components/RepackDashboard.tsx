@@ -9,7 +9,8 @@ import {
   doc,
   updateDoc
 } from 'firebase/firestore';
-import { RepackRow, Usuario, Empresa, RepackActionPlan } from '../types';
+import { RepackRow, Usuario, Empresa, RepackActionPlan, RepackA3Board } from '../types';
+import A3BoardComponent from './A3BoardComponent';
 import { 
   Box, 
   Clock, 
@@ -29,7 +30,11 @@ import {
   Play,
   Square,
   Zap,
-  Calendar
+  Calendar,
+  Save,
+  Star,
+  Trophy,
+  Check
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -195,11 +200,19 @@ const COLORS = {
 const PIE_COLORS = [COLORS.azul, COLORS.verde, COLORS.amarelo, COLORS.roxo, COLORS.vermelho];
 
 export default function RepackDashboard({ user, empresa, onBack }: RepackDashboardProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'produtividade' | 'planos'>('produtividade');
+  const [activeSubTab, setActiveSubTab] = useState<'produtividade' | 'boarda3'>('produtividade');
   const [actualRepackRows, setActualRepackRows] = useState<RepackRow[]>([]);
   const [actualActionPlans, setActualActionPlans] = useState<RepackActionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDemoMode, setIsDemoMode] = useState(false);
+
+  // A3 Problem Solving Board states
+  const [boards, setBoards] = useState<RepackA3Board[]>([]);
+  const [activeBoard, setActiveBoard] = useState<RepackA3Board | null>(null);
+  const [savingBoard, setSavingBoard] = useState(false);
+  const [boardSaveStatus, setBoardSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [currentA3Step, setCurrentA3Step] = useState<number>(1);
+  const [a3ViewMode, setA3ViewMode] = useState<'passo-a-passo' | 'tabuleiro'>('passo-a-passo');
 
   const seedRows = useMemo(() => {
     return generateSeedRepackRows(empresa?.id || 'demo');
@@ -345,6 +358,104 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
     });
     return () => unsub();
   }, []);
+
+  // A3 Board helpers and fallback seed
+  const fallbackSeedBoard = useMemo<RepackA3Board>(() => {
+    return {
+      _docId: 'seed-board-1',
+      empresaId: empresa?.id || 'demo',
+      titulo: 'Redução do Tempo de Repack de Lata 350ml - Guarabira',
+      dataCriacaoISO: new Date().toISOString().split('T')[0],
+      problemaDesc: 'O tempo médio de reembalagem da Lata 350ml está em 04:30 minutos, o que excede a nossa meta operacional estabelecida pelo VPO de 04:00 minutos por caixa, causando gargalos no fluxo de expedição.',
+      problemaImpacto: 'Atrasos recorrentes no carregamento das rotas de distribuição urbana de Guarabira, gerando horas extras para os conferentes e insatisfação no cliente final devido à perda do horário de recebimento.',
+      problemaCausa: '1. Desorganização do layout de insumos (caixas novas a 5 metros de distância).\n2. Operadores não treinados no novo padrão de dobra das divisórias (Procedimento SOP-04).\n3. Falta de suporte adequado para posicionamento do rolo de fita plástica.',
+      problemaEvidencias: 'Relatório de produtividade do BI do Repack mostrando eficiência de 88% na média semanal da Lata 350ml e 4 ocorrências de atraso de saída de rota registradas em Junho.',
+      recursos: '1. Cavalete portátil para suporte de fita adesiva (custo estimado R$120).\n2. 2 horas de liberação dos operadores para reciclagem de SOP.',
+      comentarios: 'Acompanhamento diário no Matinal de 5 minutos. Equipe engajada na solução. Ozenildo dando suporte.',
+      concluidas: '1. Criação do cavalete de fita portátil por manutenção preventiva.\n2. Treinamento prático em bancada da SOP-04 para todos os operadores do turno.',
+      aprendizados: 'O layout de posicionamento de insumos impacta em até 15% no tempo de ciclo. Pequenas melhorias ergonômicas eliminam movimentos desnecessários.',
+      padronizacao: 'Inclusão do novo layout de bancada padrão no Checklist de 5S semanal e atualização da folha de instrução de trabalho (LPP) na bancada 1.',
+      resultadosDesc: 'Redução significativa do tempo de ciclo após as ações corretivas. A meta de 04:00 foi atingida e estabilizada.',
+      impactoNegocio: 'Eliminação de 100% das reclamações de atraso de carregamento e redução de horas extras operacionais em cerca de R$1.800/mês.',
+      proximosPassos: 'Replicar o mesmo layout de bancada e o suporte de fita para as demais linhas de PET e Vidro no próximo ciclo de PDCA.',
+      dataRevisao: '2026-07-20',
+      actions: [
+        { acao: 'Fabricar suporte portátil para rolo de fita plástica', responsavel: 'Ozenildo Silva', prazo: '10/07/2026', status: 'Concluído', pct: 100 },
+        { acao: 'Treinar operadores no padrão de dobra SOP-04', responsavel: 'Matheus Barbosa', prazo: '12/07/2026', status: 'Concluído', pct: 100 },
+        { acao: 'Reorganizar layout da bancada (aproximar caixas)', responsavel: 'Paulo Pereira', prazo: '08/07/2026', status: 'Concluído', pct: 100 },
+        { acao: 'Realizar cronometragem de validação do tempo de ciclo', responsavel: 'Matheus Barbosa', prazo: '15/07/2026', status: 'Em Andamento', pct: 60 },
+        { acao: 'Padronizar o novo checklist de 5S na rotina', responsavel: 'Paulo Pereira', prazo: '20/07/2026', status: 'Pendente', pct: 0 }
+      ],
+      indicadores: [
+        { indicador: 'Tempo ciclo Lata 350ml', antes: '04:30', depois: '03:55', variacao: '-13.0%' },
+        { indicador: 'Eficiência do Repack', antes: '88%', depois: '102%', variacao: '+15.9%' },
+        { indicador: 'Atrasos de Rota por Repack', antes: '4', depois: '0', variacao: '-100.0%' }
+      ]
+    };
+  }, [empresa?.id]);
+
+  const getEmptyBoard = (empresaId: string, titulo: string): Omit<RepackA3Board, '_docId'> => ({
+    empresaId,
+    dashboard: 'repack',
+    titulo,
+    dataCriacaoISO: new Date().toISOString().split('T')[0],
+    problemaDesc: '',
+    problemaImpacto: '',
+    problemaCausa: '',
+    problemaEvidencias: '',
+    actions: [
+      { acao: '', responsavel: '', prazo: '', status: 'Pendente', pct: 0 },
+      { acao: '', responsavel: '', prazo: '', status: 'Pendente', pct: 0 },
+      { acao: '', responsavel: '', prazo: '', status: 'Pendente', pct: 0 },
+      { acao: '', responsavel: '', prazo: '', status: 'Pendente', pct: 0 },
+      { acao: '', responsavel: '', prazo: '', status: 'Pendente', pct: 0 }
+    ],
+    recursos: '',
+    comentarios: '',
+    concluidas: '',
+    aprendizados: '',
+    padronizacao: '',
+    resultadosDesc: '',
+    indicadores: [
+      { indicador: '', antes: '', depois: '', variacao: '' },
+      { indicador: '', antes: '', depois: '', variacao: '' },
+      { indicador: '', antes: '', depois: '', variacao: '' }
+    ],
+    impactoNegocio: '',
+    proximosPassos: '',
+    dataRevisao: ''
+  });
+
+  // Sync A3 Boards from firestore
+  useEffect(() => {
+    const companyId = empresa?.id || 'demo';
+    const q = query(collection(db, 'repack_a3_boards'));
+    const unsub = onSnapshot(q, (snap) => {
+      const list = snap.docs.map(docSnap => ({
+        _docId: docSnap.id,
+        ...docSnap.data()
+      } as RepackA3Board));
+      
+      const filtered = list.filter(b => b.empresaId === companyId && (!b.dashboard || b.dashboard === 'repack'));
+      setBoards(filtered);
+    }, (err) => {
+      console.error('Error loading A3 boards:', err);
+    });
+    return () => unsub();
+  }, [empresa?.id]);
+
+  // Handle active A3 board selection
+  useEffect(() => {
+    if (activeSubTab === 'boarda3') {
+      if (!activeBoard) {
+        if (boards.length > 0) {
+          setActiveBoard(boards[0]);
+        } else {
+          setActiveBoard(fallbackSeedBoard);
+        }
+      }
+    }
+  }, [activeSubTab, boards, activeBoard, fallbackSeedBoard]);
 
   const distinctOperadores = useMemo(() => {
     const ops = new Set<string>();
@@ -756,6 +867,166 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
     doc.save('Relatorio_Repack.pdf');
   };
 
+  // A3 Board state update and action handlers
+  const updateField = (field: keyof RepackA3Board, value: any) => {
+    if (!activeBoard) return;
+    setActiveBoard(prev => {
+      if (!prev) return null;
+      return { ...prev, [field]: value };
+    });
+  };
+
+  const updateAction = (index: number, key: string, value: any) => {
+    if (!activeBoard) return;
+    const newActions = [...activeBoard.actions];
+    newActions[index] = { ...newActions[index], [key]: value };
+    
+    // Auto-set percentage and completed actions list if status is Concluído!
+    if (key === 'status') {
+      if (value === 'Concluído') {
+        newActions[index].pct = 100;
+      } else if (value === 'Pendente') {
+        newActions[index].pct = 0;
+      } else if (value === 'Em Andamento' && newActions[index].pct === 100) {
+        newActions[index].pct = 50;
+      }
+    } else if (key === 'pct') {
+      if (value === 100) {
+        newActions[index].status = 'Concluído';
+      } else if (value === 0) {
+        newActions[index].status = 'Pendente';
+      } else if (newActions[index].status === 'Concluído' && value < 100) {
+        newActions[index].status = 'Em Andamento';
+      }
+    }
+
+    // Auto compile concluded list
+    const concludedList = newActions
+      .filter(a => a.status === 'Concluído' || a.pct === 100)
+      .map((a, i) => `${i + 1}. ${a.acao || '(Sem nome)'}`)
+      .join('\n');
+
+    setActiveBoard(prev => {
+      if (!prev) return null;
+      return { 
+        ...prev, 
+        actions: newActions,
+        concluidas: concludedList || prev.concluidas
+      };
+    });
+  };
+
+  const updateIndicador = (index: number, key: string, value: any) => {
+    if (!activeBoard) return;
+    const newIndicators = [...activeBoard.indicadores];
+    newIndicators[index] = { ...newIndicators[index], [key]: value };
+    
+    // If we change 'antes' or 'depois', try to auto-calculate 'variacao' if they are numbers!
+    if (key === 'antes' || key === 'depois') {
+      const antesVal = parseFloat(newIndicators[index].antes.replace(',', '.'));
+      const depoisVal = parseFloat(newIndicators[index].depois.replace(',', '.'));
+      if (!isNaN(antesVal) && !isNaN(depoisVal)) {
+        if (antesVal === 0) {
+          newIndicators[index].variacao = '0%';
+        } else {
+          const diff = ((depoisVal - antesVal) / antesVal) * 100;
+          const sign = diff >= 0 ? '+' : '';
+          newIndicators[index].variacao = `${sign}${diff.toFixed(1)}%`;
+        }
+      }
+    }
+    
+    setActiveBoard(prev => {
+      if (!prev) return null;
+      return { ...prev, indicadores: newIndicators };
+    });
+  };
+
+  const handleSaveBoard = async () => {
+    if (!activeBoard) return;
+    setSavingBoard(true);
+    setBoardSaveStatus('idle');
+    try {
+      const companyId = empresa?.id || 'demo';
+      const payload = {
+        ...activeBoard,
+        empresaId: companyId
+      };
+      
+      if (activeBoard._docId === 'seed-board-1') {
+        const { _docId, ...cleanPayload } = payload;
+        const docRef = await addDoc(collection(db, 'repack_a3_boards'), {
+          ...cleanPayload,
+          _criadoEm: new Date().toISOString()
+        });
+        setActiveBoard({
+          ...activeBoard,
+          _docId: docRef.id
+        });
+      } else if (activeBoard._docId) {
+        const { _docId, ...saveData } = activeBoard;
+        await updateDoc(doc(db, 'repack_a3_boards', _docId), saveData);
+      } else {
+        const docRef = await addDoc(collection(db, 'repack_a3_boards'), {
+          ...payload,
+          _criadoEm: new Date().toISOString()
+        });
+        setActiveBoard({
+          ...activeBoard,
+          _docId: docRef.id
+        });
+      }
+      setBoardSaveStatus('success');
+      setTimeout(() => setBoardSaveStatus('idle'), 3000);
+    } catch (err) {
+      console.error('Error saving A3 board:', err);
+      setBoardSaveStatus('error');
+      setTimeout(() => setBoardSaveStatus('idle'), 3000);
+    } finally {
+      setSavingBoard(false);
+    }
+  };
+
+  const handleCreateNewBoard = async () => {
+    const title = prompt('Digite o título para o novo Quadro de Resolução de Problemas A3:');
+    if (!title) return;
+    
+    const companyId = empresa?.id || 'demo';
+    const newBoard = getEmptyBoard(companyId, title);
+    
+    try {
+      const docRef = await addDoc(collection(db, 'repack_a3_boards'), {
+        ...newBoard,
+        _criadoEm: new Date().toISOString()
+      });
+      const created = {
+        _docId: docRef.id,
+        ...newBoard
+      } as RepackA3Board;
+      setActiveBoard(created);
+    } catch (err) {
+      console.error('Error creating A3 board:', err);
+    }
+  };
+
+  const handleDeleteBoard = async () => {
+    if (!activeBoard) return;
+    if (activeBoard._docId === 'seed-board-1') {
+      setActiveBoard(null);
+      return;
+    }
+    
+    const confirmDelete = window.confirm(`Deseja realmente excluir o quadro "${activeBoard.titulo}"? Esta operação é irreversível.`);
+    if (!confirmDelete) return;
+    
+    try {
+      await deleteDoc(doc(db, 'repack_a3_boards', activeBoard._docId!));
+      setActiveBoard(null);
+    } catch (err) {
+      console.error('Error deleting A3 board:', err);
+    }
+  };
+
   return (
     <div className="w-full bg-[#f8fafc] min-h-screen text-[#0f172a] p-6 rounded-2xl shadow-sm border border-gray-200/80 relative">
 
@@ -792,10 +1063,10 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
               Produtividade & BI
             </button>
             <button 
-              onClick={() => setActiveSubTab('planos')}
-              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'planos' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              onClick={() => setActiveSubTab('boarda3')}
+              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
-              Planos de Ação VPO
+              Quadro de Ações
             </button>
           </div>
 
@@ -1534,123 +1805,610 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
         </div>
       )}
 
-      {activeSubTab === 'planos' && (
-        <section className="space-y-4">
-          <div className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm">
-            <h2 className="font-sans font-black text-sm uppercase text-[#032b5e] tracking-wider mb-1">Planos de Ação VPO (Meta nos últimos 4 meses)</h2>
-            <p className="text-[10px] text-gray-400 font-bold uppercase mb-4">Mapeie problemas com causa raiz 4M e crie planos preventivos/corretivos.</p>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-              {/* Form */}
-              <div className="lg:col-span-4 bg-slate-50 border border-gray-200 p-4 rounded-xl">
-                <form onSubmit={handleAddPlan} className="space-y-3 text-xs">
-                  <h3 className="font-sans font-black text-xs uppercase text-[#032b5e] tracking-wider mb-2">Novo Plano de Ação</h3>
-                  
-                  <div className="flex flex-col gap-1">
-                    <label className="text-gray-400 uppercase font-bold text-[9px] tracking-wider">Descrição da Ação / Problema</label>
-                    <textarea
-                      value={apDesc}
-                      onChange={(e) => setApDesc(e.target.value)}
-                      placeholder="Ex: Treinar operador na máquina LATA 473..."
-                      className="bg-white border border-gray-200 text-slate-800 rounded-lg p-2 h-20 resize-none focus:border-[#032b5e] outline-none"
-                      required
-                    />
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-gray-400 uppercase font-bold text-[9px] tracking-wider">Causa Raiz 4M</label>
-                      <select
-                        value={apCausa}
-                        onChange={(e: any) => setApCausa(e.target.value)}
-                        className="bg-white border border-gray-200 text-slate-800 rounded-lg p-2 focus:border-[#032b5e] outline-none"
-                      >
-                        <option value="Método">Método</option>
-                        <option value="Mão de Obra">Mão de Obra</option>
-                        <option value="Máquina">Máquina</option>
-                        <option value="Material">Material</option>
-                      </select>
-                    </div>
+      {activeSubTab === 'boarda3' && (
+        <A3BoardComponent user={user} empresa={empresa} dashboard="repack" />
+      )}
 
-                    <div className="flex flex-col gap-1">
-                      <label className="text-gray-400 uppercase font-bold text-[9px] tracking-wider">Responsável</label>
-                      <input
-                        type="text"
-                        value={apResp}
-                        onChange={(e) => setApResp(e.target.value)}
-                        placeholder="Nome supervisor"
-                        className="bg-white border border-gray-200 text-slate-800 rounded-lg p-2 focus:border-[#032b5e] outline-none"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-gray-400 uppercase font-bold text-[9px] tracking-wider">Prazo Limite</label>
-                    <input
-                      type="date"
-                      value={apPrazo}
-                      onChange={(e) => setApPrazo(e.target.value)}
-                      className="bg-white border border-gray-200 text-slate-800 rounded-lg p-2 focus:border-[#032b5e] outline-none"
-                      required
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full h-10 bg-[#032b5e] hover:bg-[#021f44] text-white font-sans font-bold rounded-lg uppercase tracking-wider cursor-pointer border-none transition-colors"
-                  >
-                    Criar Plano de Ação
-                  </button>
-                </form>
+      {/* REMAINDER OF INLINE A3 BOARD REMOVED */}
+      {false && activeBoard && (
+        <section className="space-y-6 animate-fade-in text-slate-800">
+          {/* ── BARRA DE CONTROLE DO QUADRO A3 ── */}
+          <div className="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+              <label className="text-gray-500 uppercase font-black text-[10px] tracking-wider shrink-0 mt-1 sm:mt-0">
+                Selecione o Quadro:
+              </label>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={activeBoard._docId || 'seed-board-1'}
+                  onChange={(e) => {
+                    const selected = boards.find(b => b._docId === e.target.value);
+                    if (selected) {
+                      setActiveBoard(selected);
+                    } else if (e.target.value === 'seed-board-1') {
+                      setActiveBoard(fallbackSeedBoard);
+                    }
+                  }}
+                  className="bg-[#f8fafc] border border-gray-200 text-[#032b5e] font-sans font-bold text-xs rounded-xl px-3 py-2 focus:border-[#032b5e] outline-none min-w-[200px] max-w-full"
+                >
+                  <option value="seed-board-1">💡 Exemplo: {fallbackSeedBoard.titulo}</option>
+                  {boards.map(b => (
+                    <option key={b._docId} value={b._docId}>
+                      📋 {b.titulo}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={activeBoard.titulo}
+                  onChange={(e) => updateField('titulo', e.target.value)}
+                  placeholder="Título do quadro..."
+                  className="bg-white border border-gray-200 text-slate-800 font-sans font-bold text-xs rounded-xl px-3 py-2 focus:border-[#032b5e] outline-none flex-1 max-w-[250px]"
+                />
               </div>
+            </div>
 
-              {/* List */}
-              <div className="lg:col-span-8 space-y-2">
-                {actionPlans.map(plan => (
-                  <div key={plan._docId} className="bg-white border border-gray-200 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs shadow-sm">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded font-black text-[9px] uppercase tracking-wider">
-                          {plan.causaRaiz4M}
-                        </span>
-                        <span className="text-gray-400 text-[10px] font-bold uppercase">Criado em {plan.dataCriacao}</span>
-                      </div>
-                      <p className="font-sans font-black text-sm text-[#032b5e]">{plan.descricao}</p>
-                      <div className="flex gap-4 text-gray-400 text-[11px] font-semibold">
-                        <span>Resp: <strong className="text-slate-700">{plan.responsavel}</strong></span>
-                        <span>Prazo: <strong className="text-amber-600">{plan.prazo.split('-').reverse().join('/')}</strong></span>
-                      </div>
-                    </div>
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+              <button
+                type="button"
+                onClick={handleCreateNewBoard}
+                className="px-3.5 py-2 bg-[#032b5e] hover:bg-[#021f44] text-white font-sans font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer border-none transition-all shadow-sm"
+              >
+                <Plus className="w-4 h-4" /> Novo Quadro
+              </button>
 
-                    <div className="flex items-center gap-3">
-                      <div className="flex bg-slate-100 p-0.5 rounded-lg border border-gray-200 font-bold text-[10px]">
-                        {(['Pendente', 'Em Andamento', 'Concluído'] as const).map(st => (
-                          <button
-                            key={st}
-                            type="button"
-                            onClick={() => handleChangeApStatus(plan._docId || '', st)}
-                            className={`px-2.5 py-1 rounded cursor-pointer transition-colors border-none ${plan.status === st ? 'bg-[#032b5e] text-white font-bold' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
-                          >
-                            {st}
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        onClick={() => handleDeleteAp(plan._docId || '')}
-                        className="p-1.5 text-gray-400 hover:text-rose-500 rounded bg-slate-50 border border-gray-200 cursor-pointer"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+              <button
+                type="button"
+                onClick={handleSaveBoard}
+                disabled={savingBoard}
+                className={`px-3.5 py-2 text-white font-sans font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer border-none transition-all shadow-sm ${
+                  boardSaveStatus === 'success' 
+                    ? 'bg-emerald-500 hover:bg-emerald-600' 
+                    : boardSaveStatus === 'error' 
+                      ? 'bg-rose-500 hover:bg-rose-600' 
+                      : 'bg-amber-500 hover:bg-amber-600'
+                }`}
+              >
+                <Save className="w-4 h-4" /> 
+                {savingBoard ? 'Salvando...' : boardSaveStatus === 'success' ? 'Salvo!' : boardSaveStatus === 'error' ? 'Erro ao Salvar' : 'Salvar Quadro'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDeleteBoard}
+                className="px-3.5 py-2 bg-white hover:bg-rose-50 border border-gray-200 text-rose-600 font-sans font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer transition-all"
+              >
+                <Trash2 className="w-4 h-4" /> Excluir
+              </button>
+            </div>
+          </div>
+
+          {/* ── HEADER DE PASSOS DO PROCESSO ── */}
+          <div className="bg-white border border-gray-200/80 p-4 rounded-2xl shadow-sm flex flex-col xl:flex-row items-center justify-between gap-3 overflow-x-auto">
+            {[
+              {
+                step: 1,
+                numBg: 'bg-[#ef4444]',
+                title: '1. IDENTIFICAR O PROBLEMA',
+                titleColor: 'text-[#ef4444]',
+                desc: 'Mapeamento e causas',
+                icon: <Search className="w-4 h-4 text-white" />,
+                iconBg: 'bg-[#ef4444]'
+              },
+              {
+                step: 2,
+                numBg: 'bg-[#f5a623]',
+                title: '2. QUADRO DE AÇÕES',
+                titleColor: 'text-[#f5a623]',
+                desc: 'Definir contramedidas',
+                icon: <Zap className="w-4 h-4 text-white" />,
+                iconBg: 'bg-[#f5a623]'
+              },
+              {
+                step: 3,
+                numBg: 'bg-[#1e56f0]',
+                title: '3. ACOMPANHAR AÇÕES',
+                titleColor: 'text-[#1e56f0]',
+                desc: 'Status e progresso',
+                icon: <Calendar className="w-4 h-4 text-white" />,
+                iconBg: 'bg-[#1e56f0]'
+              },
+              {
+                step: 4,
+                numBg: 'bg-[#22c55e]',
+                title: '4. CONCLUIR & APRENDER',
+                titleColor: 'text-[#22c55e]',
+                desc: 'Padronização e SOP',
+                icon: <Check className="w-4 h-4 text-white" />,
+                iconBg: 'bg-[#22c55e]'
+              },
+              {
+                step: 5,
+                numBg: 'bg-[#8b5cf6]',
+                title: '5. RESULTADOS DO PLANO',
+                titleColor: 'text-[#8b5cf6]',
+                desc: 'Impacto e indicadores',
+                icon: <Trophy className="w-4 h-4 text-white" />,
+                iconBg: 'bg-[#8b5cf6]'
+              }
+            ].map((item, idx) => (
+              <React.Fragment key={item.step}>
+                <button
+                  type="button"
+                  onClick={() => setCurrentA3Step(item.step)}
+                  className={`flex items-start gap-2.5 flex-1 min-w-[190px] text-left border-none bg-transparent p-2 rounded-xl transition-all cursor-pointer ${currentA3Step === item.step ? 'ring-2 ring-[#032b5e]/20 bg-slate-50' : 'hover:bg-slate-50/50 opacity-75'}`}
+                >
+                  <div className="relative shrink-0">
+                    <div className={`w-9 h-9 rounded-xl ${item.iconBg} flex items-center justify-center shadow-md transition-transform ${currentA3Step === item.step ? 'scale-105' : ''}`}>
+                      {item.icon}
                     </div>
                   </div>
-                ))}
-                {actionPlans.length === 0 && (
-                  <div className="py-12 border border-dashed border-gray-200 rounded-xl text-center text-gray-400 text-xs font-bold uppercase">
-                    Nenhum Plano de Ação cadastrado ainda.
+                  <div className="space-y-0.5">
+                    <h4 className={`font-sans font-black text-[10px] tracking-tight ${item.titleColor} uppercase`}>
+                      {item.title}
+                    </h4>
+                    <p className="text-[9px] text-gray-400 font-bold uppercase leading-tight">
+                      {item.desc}
+                    </p>
+                  </div>
+                </button>
+                {idx < 4 && (
+                  <div className="hidden xl:block text-gray-300 flex-shrink-0">
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </div>
                 )}
+              </React.Fragment>
+            ))}
+          </div>
+
+          {/* ── PAINEL DO PASSO SELECIONADO ── */}
+          <div className="grid grid-cols-1 gap-4">
+            
+            {/* ── COLUNA 1: DETALHES DO PROBLEMA ── */}
+            {currentA3Step === 1 && (
+              <div className="bg-white rounded-2xl border-t-4 border-t-rose-500 border-x border-b border-gray-200 shadow-sm p-5 flex flex-col justify-between min-h-[500px] space-y-4 animate-fade-in w-full">
+              <div className="space-y-4">
+                <div className="border-b border-gray-100 pb-2">
+                  <h3 className="font-sans font-black text-xs uppercase text-rose-500 tracking-wider">
+                    1. Detalhes do Problema
+                  </h3>
+                  <p className="text-[9px] text-gray-400 font-semibold uppercase">Mapeamento e evidências</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Descrição do Problema
+                  </label>
+                  <textarea
+                    value={activeBoard.problemaDesc}
+                    onChange={(e) => updateField('problemaDesc', e.target.value)}
+                    placeholder="Descreva o problema identificado de forma clara e objetiva..."
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-24 focus:border-rose-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Impacto do Problema
+                  </label>
+                  <textarea
+                    value={activeBoard.problemaImpacto}
+                    onChange={(e) => updateField('problemaImpacto', e.target.value)}
+                    placeholder="Qual o impacto nas rotas, carregamento, perdas ou custos?"
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-24 focus:border-rose-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Causa Raiz
+                  </label>
+                  <textarea
+                    value={activeBoard.problemaCausa}
+                    onChange={(e) => updateField('problemaCausa', e.target.value)}
+                    placeholder="Qual a causa raiz? (Use 5 porquês, Ishikawa...)"
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-24 focus:border-rose-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Evidências / Dados
+                  </label>
+                  <textarea
+                    value={activeBoard.problemaEvidencias}
+                    onChange={(e) => updateField('problemaEvidencias', e.target.value)}
+                    placeholder="Insira dados, fotos, links de relatórios ou indicadores..."
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-24 focus:border-rose-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
               </div>
+
+              <div className="bg-rose-500/5 border border-rose-500/10 p-3.5 rounded-xl flex items-start gap-2.5">
+                <Target className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-sans font-black text-[10px] text-rose-600 uppercase">FOCO</h4>
+                  <p className="text-[9px] text-rose-900/80 leading-normal font-bold uppercase">
+                    Ter clareza absoluta do problema é o primeiro passo para resolver.
+                  </p>
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* ── COLUNA 2: PLANO DE AÇÃO ── */}
+            {currentA3Step === 2 && (
+              <div className="bg-white rounded-2xl border-t-4 border-t-amber-500 border-x border-b border-gray-200 shadow-sm p-5 flex flex-col justify-between min-h-[500px] space-y-4 animate-fade-in w-full">
+              <div className="space-y-4">
+                <div className="border-b border-gray-100 pb-2">
+                  <h3 className="font-sans font-black text-xs uppercase text-amber-500 tracking-wider">
+                    2. Plano de Ação
+                  </h3>
+                  <p className="text-[9px] text-gray-400 font-semibold uppercase">Contramedidas definidas</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Ações Corretivas
+                  </label>
+                  
+                  <div className="space-y-3">
+                    {activeBoard.actions.map((act, index) => (
+                      <div key={index} className="bg-slate-50 p-2 rounded-xl border border-gray-200/80 space-y-1.5">
+                        <span className="text-[9px] font-black text-amber-600 block">AÇÃO #{index + 1}</span>
+                        <input
+                          type="text"
+                          value={act.acao}
+                          onChange={(e) => updateAction(index, 'acao', e.target.value)}
+                          placeholder="O que fazer?"
+                          className="w-full bg-white border border-gray-200 text-slate-800 text-[11px] rounded-lg p-1.5 focus:border-amber-500 outline-none"
+                        />
+                        <div className="grid grid-cols-2 gap-1.5">
+                          <input
+                            type="text"
+                            value={act.responsavel}
+                            onChange={(e) => updateAction(index, 'responsavel', e.target.value)}
+                            placeholder="Quem?"
+                            className="w-full bg-white border border-gray-200 text-slate-800 text-[10px] rounded-lg p-1.5 focus:border-amber-500 outline-none"
+                          />
+                          <input
+                            type="text"
+                            value={act.prazo}
+                            onChange={(e) => updateAction(index, 'prazo', e.target.value)}
+                            placeholder="Prazo (dd/mm)"
+                            className="w-full bg-white border border-gray-200 text-slate-800 text-[10px] rounded-lg p-1.5 focus:border-amber-500 outline-none"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Recursos Necessários
+                  </label>
+                  <textarea
+                    value={activeBoard.recursos}
+                    onChange={(e) => updateField('recursos', e.target.value)}
+                    placeholder="Quais verbas, ferramentas ou permissões serão requeridas?"
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-20 focus:border-amber-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-amber-500/5 border border-amber-500/10 p-3.5 rounded-xl flex items-start gap-2.5">
+                <Star className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-sans font-black text-[10px] text-amber-600 uppercase">DISCIPLINA</h4>
+                  <p className="text-[9px] text-amber-900/80 leading-normal font-bold uppercase">
+                    Planejar bem é definir o caminho para gerar resultados consistentes.
+                  </p>
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* ── COLUNA 3: ACOMPANHAMENTO DAS AÇÕES ── */}
+            {currentA3Step === 3 && (
+              <div className="bg-white rounded-2xl border-t-4 border-t-blue-500 border-x border-b border-gray-200 shadow-sm p-5 flex flex-col justify-between min-h-[500px] space-y-4 animate-fade-in w-full">
+              <div className="space-y-4">
+                <div className="border-b border-gray-100 pb-2">
+                  <h3 className="font-sans font-black text-xs uppercase text-blue-500 tracking-wider">
+                    3. Acompanhar Ações
+                  </h3>
+                  <p className="text-[9px] text-gray-400 font-semibold uppercase">Execução e Status do Plano</p>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Status e Progresso
+                  </label>
+                  
+                  <div className="space-y-3">
+                    {activeBoard.actions.map((act, index) => (
+                      <div key={index} className="bg-slate-50 p-2 rounded-xl border border-gray-200/80 space-y-1.5">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[9px] font-black text-blue-600">AÇÃO #{index + 1}</span>
+                          <span className="text-[9px] font-mono font-bold text-gray-400">
+                            {act.prazo ? `Até ${act.prazo}` : 'Sem prazo'}
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-bold text-slate-800 truncate" title={act.acao}>
+                          {act.acao || '(Ação não definida)'}
+                        </p>
+                        <p className="text-[9px] font-semibold text-gray-400">
+                          Resp: {act.responsavel || '—'}
+                        </p>
+                        <div className="grid grid-cols-2 gap-1.5 pt-1">
+                          <select
+                            value={act.status}
+                            onChange={(e) => updateAction(index, 'status', e.target.value)}
+                            className="bg-white border border-gray-200 text-[#0f172a] text-[10px] font-bold rounded-lg p-1.5 focus:border-blue-500 outline-none"
+                          >
+                            <option value="Pendente">🟡 Pendente</option>
+                            <option value="Em Andamento">🔵 Em Andamento</option>
+                            <option value="Bloqueado">🔴 Bloqueado</option>
+                            <option value="Concluído">🟢 Concluído</option>
+                          </select>
+                          <select
+                            value={act.pct}
+                            onChange={(e) => updateAction(index, 'pct', Number(e.target.value))}
+                            className="bg-white border border-gray-200 text-[#0f172a] text-[10px] font-bold rounded-lg p-1.5 focus:border-blue-500 outline-none"
+                          >
+                            {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map(p => (
+                              <option key={p} value={p}>{p}%</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Comentários / Observações
+                  </label>
+                  <textarea
+                    value={activeBoard.comentarios}
+                    onChange={(e) => updateField('comentarios', e.target.value)}
+                    placeholder="Registre aqui os principais pontos, riscos resolvidos e decisões..."
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-20 focus:border-blue-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-blue-500/5 border border-blue-500/10 p-3.5 rounded-xl flex items-start gap-2.5">
+                <Clock className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-sans font-black text-[10px] text-blue-600 uppercase">ROTINA</h4>
+                  <p className="text-[9px] text-blue-900/80 leading-normal font-bold uppercase">
+                    Acompanhar com frequência garante entrega e permite ajustes a tempo.
+                  </p>
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* ── COLUNA 4: CONCLUSÃO DAS AÇÕES ── */}
+            {currentA3Step === 4 && (
+              <div className="bg-white rounded-2xl border-t-4 border-t-emerald-500 border-x border-b border-gray-200 shadow-sm p-5 flex flex-col justify-between min-h-[500px] space-y-4 animate-fade-in w-full">
+              <div className="space-y-4">
+                <div className="border-b border-gray-100 pb-2">
+                  <h3 className="font-sans font-black text-xs uppercase text-emerald-500 tracking-wider">
+                    4. Concluir Ação
+                  </h3>
+                  <p className="text-[9px] text-gray-400 font-semibold uppercase">Resultados e Padronização</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Ações Concluídas
+                  </label>
+                  <textarea
+                    value={activeBoard.concluidas}
+                    onChange={(e) => updateField('concluidas', e.target.value)}
+                    placeholder="Registre quais ações foram dadas como concluídas operacionais..."
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-36 focus:border-emerald-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Principais Aprendizados
+                  </label>
+                  <textarea
+                    value={activeBoard.aprendizados}
+                    onChange={(e) => updateField('aprendizados', e.target.value)}
+                    placeholder="Quais foram as lições aprendidas durante este processo de resolução?"
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-28 focus:border-emerald-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Padronização (SOP/LPP)
+                  </label>
+                  <textarea
+                    value={activeBoard.padronizacao}
+                    onChange={(e) => updateField('padronizacao', e.target.value)}
+                    placeholder="Como vamos garantir que este problema nunca mais volte a ocorrer?"
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-28 focus:border-emerald-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-emerald-500/5 border border-emerald-500/10 p-3.5 rounded-xl flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-sans font-black text-[10px] text-emerald-600 uppercase">DONO</h4>
+                  <p className="text-[9px] text-emerald-900/80 leading-normal font-bold uppercase">
+                    Concluir é validar, aprender e garantir que o ganho fique.
+                  </p>
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* ── COLUNA 5: RESULTADOS E IMPACTOS ── */}
+            {currentA3Step === 5 && (
+              <div className="bg-white rounded-2xl border-t-4 border-t-purple-500 border-x border-b border-gray-200 shadow-sm p-5 flex flex-col justify-between min-h-[500px] space-y-4 animate-fade-in w-full">
+              <div className="space-y-4">
+                <div className="border-b border-gray-100 pb-2">
+                  <h3 className="font-sans font-black text-xs uppercase text-purple-500 tracking-wider">
+                    5. Resultados e Impactos
+                  </h3>
+                  <p className="text-[9px] text-gray-400 font-semibold uppercase">Mensuração dos ganhos</p>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Resultados Alcançados
+                  </label>
+                  <textarea
+                    value={activeBoard.resultadosDesc}
+                    onChange={(e) => updateField('resultadosDesc', e.target.value)}
+                    placeholder="Descreva de forma geral o resultado final do plano de ação..."
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-24 focus:border-purple-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Indicadores Impactados
+                  </label>
+                  
+                  <div className="space-y-2.5">
+                    {activeBoard.indicadores.map((ind, indIdx) => (
+                      <div key={indIdx} className="bg-slate-50 p-2 rounded-xl border border-gray-200/80 space-y-1">
+                        <span className="text-[9px] font-black text-purple-600 block">INDICADOR #{indIdx + 1}</span>
+                        <input
+                          type="text"
+                          value={ind.indicador}
+                          onChange={(e) => updateIndicador(indIdx, 'indicador', e.target.value)}
+                          placeholder="Nome do indicador (ex: eficiência)"
+                          className="w-full bg-white border border-gray-200 text-slate-800 text-[10px] rounded-lg p-1 focus:border-purple-500 outline-none"
+                        />
+                        <div className="grid grid-cols-3 gap-1">
+                          <input
+                            type="text"
+                            value={ind.antes}
+                            onChange={(e) => updateIndicador(indIdx, 'antes', e.target.value)}
+                            placeholder="Antes"
+                            className="w-full bg-white border border-gray-200 text-slate-800 text-[10px] rounded-lg p-1 focus:border-purple-500 outline-none text-center"
+                          />
+                          <input
+                            type="text"
+                            value={ind.depois}
+                            onChange={(e) => updateIndicador(indIdx, 'depois', e.target.value)}
+                            placeholder="Depois"
+                            className="w-full bg-white border border-gray-200 text-slate-800 text-[10px] rounded-lg p-1 focus:border-purple-500 outline-none text-center"
+                          />
+                          <div className="w-full bg-purple-50 border border-purple-200/50 text-purple-700 text-[9px] font-black rounded-lg p-1 flex items-center justify-center font-mono">
+                            {ind.variacao || 'Var'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                    Impacto no Negócio
+                  </label>
+                  <textarea
+                    value={activeBoard.impactoNegocio}
+                    onChange={(e) => updateField('impactoNegocio', e.target.value)}
+                    placeholder="Quais foram as reduções de custos, horas extras ou gargalos geradas?"
+                    className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-2.5 h-20 focus:border-purple-500 bg-white outline-none resize-none transition-all shadow-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-purple-500/5 border border-purple-500/10 p-3.5 rounded-xl flex items-start gap-2.5">
+                <Trophy className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-sans font-black text-[10px] text-purple-600 uppercase">RESULTADOS</h4>
+                  <p className="text-[9px] text-purple-900/80 leading-normal font-bold uppercase">
+                    Medir os resultados é reconhecer o esforço e gerar valor para o negócio.
+                  </p>
+                </div>
+              </div>
+            </div>
+            )}
+
+          </div>
+
+          {/* ── BOTÕES DE NAVEGAÇÃO DOS PASSOS E REVISÃO DE ROTINA ── */}
+          <div className="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+            <button
+              type="button"
+              onClick={() => setCurrentA3Step(p => Math.max(1, p - 1))}
+              disabled={currentA3Step === 1}
+              className="px-4 py-2.5 bg-white hover:bg-slate-50 border border-gray-200 rounded-xl text-slate-700 font-sans font-bold text-xs flex items-center gap-2 cursor-pointer disabled:opacity-50 transition-all w-full md:w-auto justify-center animate-fade-in"
+            >
+              <ChevronLeft className="w-4 h-4" /> Passo Anterior
+            </button>
+
+            <span className="text-gray-400 font-sans font-black text-[10px] uppercase text-center shrink-0">
+              Visualizando passo <strong className="text-[#032b5e]">{currentA3Step} de 5</strong>
+            </span>
+
+            {currentA3Step < 5 ? (
+              <button
+                type="button"
+                onClick={() => setCurrentA3Step(p => Math.min(5, p + 1))}
+                className="px-4 py-2.5 bg-[#032b5e] hover:bg-[#021f44] text-white font-sans font-bold text-xs flex items-center gap-2 cursor-pointer transition-all border-none rounded-xl w-full md:w-auto justify-center animate-fade-in"
+              >
+                Próximo Passo <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSaveBoard}
+                disabled={savingBoard}
+                className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-bold text-xs flex items-center gap-2 cursor-pointer transition-all border-none rounded-xl w-full md:w-auto justify-center animate-fade-in"
+              >
+                <Save className="w-4 h-4" /> {savingBoard ? 'Salvando...' : 'Salvar e Concluir'}
+              </button>
+            )}
+          </div>
+
+          {/* ── PRÓXIMOS PASSOS E REVISÃO DE ROTINA (SEMPRE VISÍVEIS ABAIXO PARA MELHOR ACOMPANHAMENTO) ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            <div className="lg:col-span-8 bg-white border border-gray-200 p-4 rounded-2xl shadow-sm space-y-2">
+              <label className="text-gray-500 uppercase font-black text-[10px] tracking-wider block">
+                Próximos Passos recomendados para consolidar
+              </label>
+              <textarea
+                value={activeBoard.proximosPassos}
+                onChange={(e) => updateField('proximosPassos', e.target.value)}
+                placeholder="O que precisa ser feito agora? Replicar melhorias? Nova cronometragem?"
+                className="w-full border border-gray-200 text-slate-800 text-xs rounded-xl p-3 h-20 focus:border-[#032b5e] bg-white outline-none resize-none transition-all shadow-sm"
+              />
+            </div>
+
+            <div className="lg:col-span-4 bg-white border border-gray-200 p-4 rounded-2xl shadow-sm flex flex-col justify-between">
+              <div className="space-y-1.5">
+                <label className="text-gray-500 uppercase font-black text-[10px] tracking-wider block">
+                  Data da Revisão de Rotina
+                </label>
+                <div className="relative">
+                  <input
+                    type="date"
+                    value={activeBoard.dataRevisao}
+                    onChange={(e) => updateField('dataRevisao', e.target.value)}
+                    className="w-full bg-[#f8fafc] border border-gray-200 text-[#032b5e] font-sans font-bold text-xs rounded-xl px-3 py-2.5 focus:border-[#032b5e] outline-none"
+                  />
+                </div>
+              </div>
+              <p className="text-[9px] text-gray-400 font-bold uppercase leading-normal mt-2">
+                A data de revisão serve para reavaliar a sustentabilidade da melhoria no Matinal de Rotina Operacional.
+              </p>
             </div>
           </div>
         </section>

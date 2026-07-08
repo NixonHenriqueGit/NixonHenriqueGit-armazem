@@ -36,6 +36,7 @@ import {
 import { Usuario, Empresa, DespejoRow } from '../types';
 import { db, isCustomFirebaseConnected } from '../firebase';
 import { collection, query, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
+import A3BoardComponent from './A3BoardComponent';
 
 interface DespejoDashboardProps {
   user: Usuario;
@@ -191,6 +192,7 @@ const DEMO_DESPEJO_ROWS: DespejoRow[] = [
 ];
 
 export default function DespejoDashboard({ user, empresa, onBack }: DespejoDashboardProps) {
+  const [activeSubTab, setActiveSubTab] = useState<'produtividade' | 'boarda3'>('produtividade');
   // Database rows
   const [despejoRows, setDespejoRows] = useState<DespejoRow[]>([]);
 
@@ -659,13 +661,32 @@ export default function DespejoDashboard({ user, empresa, onBack }: DespejoDashb
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
-          <Calendar className="w-4 h-4 text-[#f5a623]" />
-          <span>Controle de Despejo</span>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200/60">
+            <button 
+              onClick={() => setActiveSubTab('produtividade')}
+              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'produtividade' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+            >
+              Produtividade & BI
+            </button>
+            <button 
+              onClick={() => setActiveSubTab('boarda3')}
+              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+            >
+              Quadro de Ações
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-sm">
+            <Calendar className="w-4 h-4 text-[#f5a623]" />
+            <span>Controle de Despejo</span>
+          </div>
         </div>
       </div>
 
-      {/* ── SEÇÃO DE FILTROS INTERATIVOS ── */}
+      {activeSubTab === 'produtividade' ? (
+        <>
+          {/* ── SEÇÃO DE FILTROS INTERATIVOS ── */}
       <div id="despejo-filters-container" className="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex flex-col gap-4">
         <div className="flex items-center gap-2 border-b border-gray-100 pb-2">
           <Filter className="w-4 h-4 text-[#032b5e]" />
@@ -1127,6 +1148,10 @@ export default function DespejoDashboard({ user, empresa, onBack }: DespejoDashb
         </div>
 
       </div>
+        </>
+      ) : (
+        <A3BoardComponent user={user} empresa={empresa} dashboard="despejo" />
+      )}
 
       {/* FOOTER BAR */}
       <div className="flex items-center justify-between border-t border-gray-200 pt-4 mt-2">

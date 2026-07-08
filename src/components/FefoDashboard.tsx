@@ -46,6 +46,7 @@ import { Usuario, Empresa, ValidadeRow } from '../types';
 import { db, isCustomFirebaseConnected } from '../firebase';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { PRODUCTS } from '../planosData';
+import A3BoardComponent from './A3BoardComponent';
 
 interface FefoDashboardProps {
   user: Usuario;
@@ -54,7 +55,7 @@ interface FefoDashboardProps {
 }
 
 // Sub-pages defined by user
-type FefoPage = 'executiva' | 'fefo' | 'estoque-picking' | 'estoque-estoque' | 'rlp' | 'detalhes';
+type FefoPage = 'executiva' | 'fefo' | 'estoque-picking' | 'estoque-estoque' | 'rlp' | 'detalhes' | 'boarda3';
 
 interface RLPMeeting {
   id: string;
@@ -600,10 +601,10 @@ export default function FefoDashboard({ user, empresa, onBack }: FefoDashboardPr
             Estoque x Estoque (Rua x Rua)
           </button>
           <button 
-            onClick={() => setActiveTab('rlp')}
-            className={`px-3 py-2 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeTab === 'rlp' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+            onClick={() => setActiveTab('boarda3')}
+            className={`px-3 py-2 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
           >
-            Plano RLP &amp; Ações
+            Quadro de Ações
           </button>
           <button 
             onClick={() => setActiveTab('detalhes')}
@@ -1259,7 +1260,11 @@ export default function FefoDashboard({ user, empresa, onBack }: FefoDashboardPr
       {/* ─────────────────────────────────────────────────────────────────
           TAB 5: PLANO RLP & ACOES
           ───────────────────────────────────────────────────────────────── */}
-      {activeTab === 'rlp' && (
+      {activeTab === 'boarda3' && (
+        <A3BoardComponent user={user} empresa={empresa} dashboard="fefo" />
+      )}
+
+      {false && activeTab === 'rlp' && (
         <div className="flex flex-col gap-6">
           
           {/* RLP WEEKLY MEETINGS SCHEDULE */}

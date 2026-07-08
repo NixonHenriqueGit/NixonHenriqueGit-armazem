@@ -1,8 +1,67 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permite leitura e escrita para todas as coleções do Armazém Fácil
+    
+    // Global catch-all safety block
     match /{document=**} {
+      allow read, write: if true;
+    }
+
+    // Explicit Match Blocks for All Identified Collections
+    
+    match /usuarios/{userId} {
+      allow read, write: if true;
+    }
+
+    match /empresas/{empresaId} {
+      allow read, write: if true;
+    }
+
+    match /colaboradores/{colabId} {
+      allow read, write: if true;
+    }
+
+    match /repack/{docId} {
+      allow read, write: if true;
+    }
+
+    match /despejo/{docId} {
+      allow read, write: if true;
+    }
+
+    match /armazem/{docId} {
+      allow read, write: if true;
+    }
+
+    match /quebras/{docId} {
+      allow read, write: if true;
+    }
+
+    match /validades/{docId} {
+      allow read, write: if true;
+    }
+
+    match /blitz_refugo/{docId} {
+      allow read, write: if true;
+    }
+
+    match /tarefas/{docId} {
+      allow read, write: if true;
+    }
+
+    match /registros/{docId} {
+      allow read, write: if true;
+    }
+
+    match /repack_action_plans/{docId} {
+      allow read, write: if true;
+    }
+
+    match /repack_a3_boards/{docId} {
+      allow read, write: if true;
+    }
+
+    match /dpo_audits/{docId} {
       allow read, write: if true;
     }
   }
