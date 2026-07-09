@@ -1257,10 +1257,9 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
         </div>
 
       </div>
-        </>
+      </>
       )}
 
-      {/* SECTION 5: PLANO DE AÇÃO (INTERACTIVE TABLE) */}
       {activeSubTab === 'boarda3' && (
         <A3BoardComponent user={user} empresa={empresa} dashboard="logistica" />
       )}

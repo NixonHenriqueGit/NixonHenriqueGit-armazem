@@ -363,6 +363,7 @@ export default function QuebrasDashboard({ user, empresa, onBack }: QuebrasDashb
             </button>
           </div>
         </div>
+
       </div>
 
       {activeSubTab === 'indicadores' && (
@@ -694,13 +695,6 @@ export default function QuebrasDashboard({ user, empresa, onBack }: QuebrasDashb
         </div>
 
       </div>
-        </>
-      )}
-
-      {/* ── SEÇÃO PLANOS DE AÇÃO 5W2H ── */}
-      {activeSubTab === 'boarda3' && (
-        <A3BoardComponent user={user} empresa={empresa} dashboard="quebras" />
-      )}
 
       {false && activeSubTab === 'planos' && (
         <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
@@ -1004,6 +998,13 @@ export default function QuebrasDashboard({ user, empresa, onBack }: QuebrasDashb
 
       </div>
         </>
+      )}
+
+      </>
+      )}
+
+      {activeSubTab === 'boarda3' && (
+        <A3BoardComponent user={user} empresa={empresa} dashboard="quebras" />
       )}
 
       {/* FOOTER BLOCK */}

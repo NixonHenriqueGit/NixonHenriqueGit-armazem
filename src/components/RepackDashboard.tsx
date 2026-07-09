@@ -1723,8 +1723,6 @@ export default function RepackDashboard({ user, empresa, onBack }: RepackDashboa
         </div>
       )}
 
-
-
       {activeSubTab === 'boarda3' && (
         <A3BoardComponent user={user} empresa={empresa} dashboard="repack" />
       )}

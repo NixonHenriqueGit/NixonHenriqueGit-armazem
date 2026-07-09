@@ -206,28 +206,26 @@ export default function BlitzDashboard({ user, empresa, onBack }: BlitzDashboard
           </div>
         </div>
 
-        {/* Subtab Selector */}
-        <div className="flex flex-wrap items-center gap-4 self-stretch sm:self-auto">
-          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200/60 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center bg-gray-100 p-0.5 rounded-lg border border-gray-200/60">
             <button 
               onClick={() => setActiveSubTab('indicadores')}
-              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'indicadores' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              className={`px-3 py-1 rounded font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'indicadores' ? 'bg-[#032b5e] text-white shadow-xs' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
-              Blitz & BI
+              Indicadores & BI
             </button>
             <button 
               onClick={() => setActiveSubTab('boarda3')}
-              className={`flex-1 sm:flex-initial px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              className={`px-3 py-1 rounded font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-xs' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
               Quadro de Ações
             </button>
           </div>
         </div>
+
       </div>
 
-      {/* ========================================================
-          CONTEÚDO ÚNICO: CONTROLE & BLITZ DE REFUGO
-          ======================================================== */}
+      {/* CONTEÚDO ÚNICO: CONTROLE & BLITZ DE REFUGO */}
       {activeSubTab === 'indicadores' && (
         <div className="flex flex-col gap-6 animate-fadeIn">
         
@@ -474,9 +472,8 @@ export default function BlitzDashboard({ user, empresa, onBack }: BlitzDashboard
 
         </div>
       </div>
-    )}
+      )}
 
-      {/* Seção 4 — Plano de Ação (Refugo) */}
       {activeSubTab === 'boarda3' && (
         <A3BoardComponent user={user} empresa={empresa} dashboard="blitz" />
       )}

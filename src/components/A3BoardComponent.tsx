@@ -20,7 +20,16 @@ import {
   Trophy, 
   Check,
   Zap,
-  Calendar
+  Calendar,
+  BarChart3,
+  AlertCircle,
+  Users,
+  Activity,
+  CheckCircle2,
+  Clock,
+  TrendingUp,
+  Sliders,
+  User
 } from 'lucide-react';
 
 interface A3BoardComponentProps {
@@ -35,7 +44,10 @@ export default function A3BoardComponent({ user, empresa, dashboard }: A3BoardCo
   const [savingBoard, setSavingBoard] = useState(false);
   const [boardSaveStatus, setBoardSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [currentA3Step, setCurrentA3Step] = useState<number>(1);
-  const [viewMode, setViewMode] = useState<'landscape' | 'steps'>('landscape');
+  const [viewMode, setViewMode] = useState<'landscape' | 'steps'>('steps');
+  const [activeTab, setActiveTab] = useState<'passos' | 'dashboard_acoes'>('passos');
+  const [actionSearch, setActionSearch] = useState('');
+  const [actionFilter, setActionFilter] = useState<'todos' | 'Pendente' | 'Em Andamento' | 'Bloqueado' | 'Concluído'>('todos');
 
   // Fallback seed template depending on dashboard
   const fallbackSeedBoard = useMemo<RepackA3Board>(() => {
@@ -351,6 +363,90 @@ export default function A3BoardComponent({ user, empresa, dashboard }: A3BoardCo
     }
   }, [boards, activeBoard, fallbackSeedBoard]);
 
+  // ── METRICAS DO DASHBOARD DE AÇÕES ──
+  const actionMetrics = useMemo(() => {
+    if (!activeBoard || !activeBoard.actions) {
+      return {
+        total: 0,
+        concluidas: 0,
+        emAndamento: 0,
+        pendentes: 0,
+        bloqueadas: 0,
+        pctMedio: 0,
+        responsiblesData: [] as Array<{
+          name: string;
+          total: number;
+          concluidas: number;
+          emAndamento: number;
+          pendentes: number;
+          bloqueadas: number;
+          pctMedio: number;
+        }>
+      };
+    }
+
+    const actions = activeBoard.actions;
+    const total = actions.length;
+    let concluidas = 0;
+    let emAndamento = 0;
+    let pendentes = 0;
+    let bloqueadas = 0;
+    let somaPct = 0;
+
+    interface RespData {
+      total: number;
+      concluidas: number;
+      emAndamento: number;
+      pendentes: number;
+      bloqueadas: number;
+      somaPct: number;
+    }
+    const respMap: { [key: string]: RespData } = {};
+
+    actions.forEach(act => {
+      somaPct += Number(act.pct || 0);
+      const statusNormal = (act.status || 'Pendente').trim();
+      
+      if (statusNormal === 'Concluído') concluidas++;
+      else if (statusNormal === 'Em Andamento') emAndamento++;
+      else if (statusNormal === 'Bloqueado') bloqueadas++;
+      else pendentes++;
+
+      const resp = (act.responsavel || 'Não Definido').trim() || 'Não Definido';
+      if (!respMap[resp]) {
+        respMap[resp] = { total: 0, concluidas: 0, emAndamento: 0, pendentes: 0, bloqueadas: 0, somaPct: 0 };
+      }
+      respMap[resp].total++;
+      respMap[resp].somaPct += Number(act.pct || 0);
+      if (statusNormal === 'Concluído') respMap[resp].concluidas++;
+      else if (statusNormal === 'Em Andamento') respMap[resp].emAndamento++;
+      else if (statusNormal === 'Bloqueado') respMap[resp].bloqueadas++;
+      else respMap[resp].pendentes++;
+    });
+
+    const pctMedio = total > 0 ? Math.round(somaPct / total) : 0;
+
+    const responsiblesData = Object.entries(respMap).map(([name, data]) => ({
+      name,
+      total: data.total,
+      concluidas: data.concluidas,
+      emAndamento: data.emAndamento,
+      pendentes: data.pendentes,
+      bloqueadas: data.bloqueadas,
+      pctMedio: data.total > 0 ? Math.round(data.somaPct / data.total) : 0
+    })).sort((a, b) => b.total - a.total);
+
+    return {
+      total,
+      concluidas,
+      emAndamento,
+      pendentes,
+      bloqueadas,
+      pctMedio,
+      responsiblesData
+    };
+  }, [activeBoard]);
+
   const updateField = (key: keyof RepackA3Board, value: any) => {
     if (!activeBoard) return;
     setActiveBoard(prev => {
@@ -579,28 +675,28 @@ export default function A3BoardComponent({ user, empresa, dashboard }: A3BoardCo
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
-          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 mr-1.5">
+          <div className="flex items-center bg-gray-100 p-0.5 rounded-xl border border-gray-200 mr-1.5">
             <button
               type="button"
-              onClick={() => setViewMode('landscape')}
-              className={`px-3 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer flex items-center gap-1 ${
-                viewMode === 'landscape' 
-                  ? 'bg-[#032b5e] text-white shadow-sm' 
-                  : 'text-gray-500 hover:text-[#032b5e] bg-transparent'
-              }`}
-            >
-              📄 Folha Horizontal A3
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('steps')}
-              className={`px-3 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer flex items-center gap-1 ${
-                viewMode === 'steps' 
-                  ? 'bg-[#032b5e] text-white shadow-sm' 
+              onClick={() => setActiveTab('passos')}
+              className={`px-3 py-1.5 rounded-lg font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer flex items-center gap-1 ${
+                activeTab === 'passos' 
+                  ? 'bg-[#032b5e] text-white shadow-xs' 
                   : 'text-gray-500 hover:text-[#032b5e] bg-transparent'
               }`}
             >
               🔄 Passo a Passo (A4)
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('dashboard_acoes')}
+              className={`px-3 py-1.5 rounded-lg font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer flex items-center gap-1 ${
+                activeTab === 'dashboard_acoes' 
+                  ? 'bg-[#032b5e] text-white shadow-xs' 
+                  : 'text-gray-500 hover:text-[#032b5e] bg-transparent'
+              }`}
+            >
+              📊 Painel de Ações
             </button>
           </div>
 
@@ -638,7 +734,387 @@ export default function A3BoardComponent({ user, empresa, dashboard }: A3BoardCo
         </div>
       </div>
 
-      {viewMode === 'steps' ? (
+      {activeTab === 'dashboard_acoes' ? (
+        <div className="space-y-6 animate-fade-in text-slate-800">
+          {/* DASHBOARD DE AÇÕES COMPONENT */}
+          <div className="bg-gradient-to-r from-[#032b5e] to-[#0d4b96] rounded-2xl p-6 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-blue-200">GESTÃO INTEGRADA DE ROTINA (VPO)</span>
+              <h2 className="font-sans font-black text-xl tracking-tight leading-tight text-white flex items-center gap-2">
+                <BarChart3 className="w-6 h-6 text-amber-400" /> DASHBOARD DE CONTROLE DE AÇÕES
+              </h2>
+              <p className="text-[11px] text-blue-100/80 font-semibold max-w-xl">
+                Acompanhamento dinâmico de contramedidas e responsabilidades do quadro: <strong className="text-white underline">{activeBoard?.titulo || '(Quadro sem título)'}</strong>
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-3 bg-white/10 px-4 py-3 rounded-xl border border-white/10 shrink-0">
+              <div className="text-right">
+                <span className="text-[9px] font-bold text-blue-200 uppercase tracking-wider block">Progresso Geral</span>
+                <span className="text-xl font-mono font-black text-white">{actionMetrics.pctMedio}%</span>
+              </div>
+              <div className="w-12 h-12 rounded-full border-4 border-white/20 flex items-center justify-center relative overflow-hidden">
+                <div 
+                  className="absolute bottom-0 left-0 right-0 bg-emerald-400 transition-all duration-500" 
+                  style={{ height: `${actionMetrics.pctMedio}%`, opacity: 0.8 }}
+                />
+                <span className="relative font-mono text-[10px] font-black text-white z-10">{actionMetrics.pctMedio}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
+                <Activity className="w-5 h-5 text-slate-500" />
+              </div>
+              <div>
+                <span className="text-gray-400 font-bold uppercase tracking-wider text-[8px] block">Ações Totais</span>
+                <span className="text-xl font-mono font-black text-slate-800">{actionMetrics.total}</span>
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+              </div>
+              <div>
+                <span className="text-gray-400 font-bold uppercase tracking-wider text-[8px] block">Concluídas</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-mono font-black text-slate-800">{actionMetrics.concluidas}</span>
+                  <span className="text-[9px] font-bold text-emerald-600">
+                    ({actionMetrics.total > 0 ? Math.round((actionMetrics.concluidas / actionMetrics.total) * 100) : 0}%)
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white border border-gray-200 p-4 rounded-2xl shadow-sm flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                <Clock className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <span className="text-gray-400 font-bold uppercase tracking-wider text-[8px] block">Em Andamento</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="text-xl font-mono font-black text-slate-800">{actionMetrics.emAndamento + actionMetrics.pendentes}</span>
+                  <span className="text-[9px] font-bold text-blue-600">
+                    ({actionMetrics.emAndamento} ativa{actionMetrics.emAndamento !== 1 ? 's' : ''})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className={`border p-4 rounded-2xl shadow-sm flex items-center gap-3 transition-all ${
+              actionMetrics.bloqueadas > 0 
+                ? 'bg-rose-50 border-rose-200/80 animate-pulse' 
+                : 'bg-white border-gray-200'
+            }`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                actionMetrics.bloqueadas > 0 ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-500'
+              }`}>
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-gray-400 font-bold uppercase tracking-wider text-[8px] block">Bloqueadas</span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className={`text-xl font-mono font-black ${actionMetrics.bloqueadas > 0 ? 'text-rose-600' : 'text-slate-800'}`}>
+                    {actionMetrics.bloqueadas}
+                  </span>
+                  {actionMetrics.bloqueadas > 0 && (
+                    <span className="text-[8px] font-black text-rose-700 bg-rose-200/50 px-1 py-0.5 rounded uppercase">Urgente</span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div className="lg:col-span-5 bg-white border border-gray-200 rounded-2xl shadow-sm p-5 space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                <div className="flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-[#032b5e]" />
+                  <h3 className="font-sans font-black text-[11px] text-[#032b5e] uppercase tracking-wider">
+                    Liderança & Carga de Trabalho
+                  </h3>
+                </div>
+                <span className="text-[9px] font-bold text-gray-400 uppercase">Donos das Ações</span>
+              </div>
+
+              {actionMetrics.responsiblesData.length === 0 ? (
+                <div className="text-center py-8 text-gray-400 uppercase text-[9px] font-bold">
+                  Nenhum responsável atribuído às ações.
+                </div>
+              ) : (
+                <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+                  {actionMetrics.responsiblesData.map((resp, idx) => {
+                    const initials = resp.name.substring(0, 2).toUpperCase();
+                    const colors = [
+                      'bg-indigo-500 text-white', 
+                      'bg-emerald-500 text-white', 
+                      'bg-amber-500 text-white', 
+                      'bg-rose-500 text-white', 
+                      'bg-sky-500 text-white', 
+                      'bg-purple-500 text-white'
+                    ];
+                    const avatarColor = colors[idx % colors.length];
+
+                    return (
+                      <div key={idx} className="bg-slate-50/50 hover:bg-slate-50 border border-gray-100 p-3 rounded-xl flex items-center gap-3 transition-all">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${avatarColor}`}>
+                          {initials}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2 mb-0.5">
+                            <span className="font-sans font-black text-[10px] text-slate-800 truncate uppercase">{resp.name}</span>
+                            <span className="font-mono text-[9px] font-bold text-[#032b5e] bg-[#032b5e]/5 px-1.5 py-0.5 rounded">
+                              {resp.total} ação{resp.total !== 1 ? 'es' : ''}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-emerald-500 rounded-full transition-all duration-300" 
+                                style={{ width: `${resp.pctMedio}%` }}
+                              />
+                            </div>
+                            <span className="text-[9px] font-mono font-bold text-emerald-600">{resp.pctMedio}%</span>
+                          </div>
+
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {resp.concluidas > 0 && (
+                              <span className="text-[7px] font-bold bg-emerald-100 text-emerald-700 px-1 py-0.2 rounded">{resp.concluidas} OK</span>
+                            )}
+                            {resp.emAndamento > 0 && (
+                              <span className="text-[7px] font-bold bg-blue-100 text-blue-700 px-1 py-0.2 rounded">{resp.emAndamento} Em Andamento</span>
+                            )}
+                            {resp.bloqueadas > 0 && (
+                              <span className="text-[7px] font-black bg-rose-100 text-rose-700 px-1 py-0.2 rounded animate-pulse">{resp.bloqueadas} BLOQUEADO</span>
+                            )}
+                            {resp.pendentes > 0 && (
+                              <span className="text-[7px] font-bold bg-gray-100 text-gray-700 px-1 py-0.2 rounded">{resp.pendentes} Pendente</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="lg:col-span-7 bg-white border border-gray-200 rounded-2xl shadow-sm p-5 flex flex-col justify-between space-y-4">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                  <div className="flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4 text-rose-500" />
+                    <h3 className="font-sans font-black text-[11px] text-rose-600 uppercase tracking-wider">
+                      Pontos Críticos / Gargalos Ativos
+                    </h3>
+                  </div>
+                  <span className="text-[9px] font-black text-rose-500 uppercase">Atenção Necessária</span>
+                </div>
+
+                {!activeBoard || activeBoard.actions.filter(a => a.status === 'Bloqueado' || (a.status === 'Pendente' && a.pct === 0)).length === 0 ? (
+                  <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl flex items-center gap-3">
+                    <Trophy className="w-5 h-5 text-emerald-500 shrink-0" />
+                    <div>
+                      <h4 className="font-sans font-black text-[10px] text-emerald-800 uppercase">Tudo Sob Controle!</h4>
+                      <p className="text-[9px] text-emerald-700 leading-normal font-bold uppercase">
+                        Nenhuma ação se encontra bloqueada ou totalmente estagnada neste momento. Continue assim!
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                    {activeBoard?.actions.filter(a => a.status === 'Bloqueado' || (a.status === 'Pendente' && a.pct === 0)).map((act, idx) => (
+                      <div key={idx} className="border border-rose-100 bg-rose-50/30 p-2.5 rounded-xl flex items-start gap-2.5 animate-fade-in">
+                        <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0 mt-0.5" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-0.5">
+                            <span className="text-[8px] font-black text-rose-600 uppercase">
+                              {act.status === 'Bloqueado' ? '🔴 BLOQUEADO' : '⚠️ ESTAGNADO'}
+                            </span>
+                            <span className="text-[9px] font-mono font-bold text-gray-500 uppercase">{act.prazo}</span>
+                          </div>
+                          <p className="text-[10px] font-bold text-slate-800 truncate">{act.acao}</p>
+                          <span className="text-[9px] text-gray-400 font-semibold">
+                            Dono: <strong className="text-slate-600 uppercase">{act.responsavel || 'Não definido'}</strong>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-gray-100">
+                <span className="text-gray-500 uppercase font-black text-[9px] tracking-wider block">
+                  🚀 Próximos Passos recomendados pelo plano
+                </span>
+                <div className="bg-[#032b5e]/5 p-3 rounded-xl border border-[#032b5e]/10">
+                  <p className="text-[10px] font-bold text-[#032b5e] leading-relaxed">
+                    {activeBoard?.proximosPassos || 'Nenhum próximo passo cadastrado no momento. Preencha na etapa 4 ou 5 do Passo a Passo.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-3">
+              <div>
+                <h3 className="font-sans font-black text-xs text-[#032b5e] uppercase tracking-wider flex items-center gap-1.5">
+                  <Sliders className="w-4 h-4 text-[#032b5e]" />
+                  Quadro Geral & Edição Rápida de Ações
+                </h3>
+                <p className="text-[9px] text-gray-400 font-bold uppercase leading-tight mt-0.5">
+                  Atualize prazos, progresso ou responsáveis diretamente neste painel
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={actionSearch}
+                    onChange={(e) => setActionSearch(e.target.value)}
+                    placeholder="Buscar ação..."
+                    className="pl-8 pr-3 py-1 bg-gray-50 border border-gray-200 text-slate-800 text-[10px] rounded-lg focus:border-[#032b5e] outline-none w-[150px] font-bold"
+                  />
+                </div>
+
+                <select
+                  value={actionFilter}
+                  onChange={(e) => setActionFilter(e.target.value as any)}
+                  className="bg-gray-50 border border-gray-200 text-slate-700 font-sans font-bold text-[10px] rounded-lg px-2 py-1 focus:border-[#032b5e] outline-none"
+                >
+                  <option value="todos">Todos os Status</option>
+                  <option value="Pendente">Pendentes</option>
+                  <option value="Em Andamento">Em Andamento</option>
+                  <option value="Bloqueado">Bloqueados</option>
+                  <option value="Concluído">Concluídos</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+              {activeBoard?.actions && activeBoard.actions.filter(act => {
+                const matchesSearch = (act.acao || '').toLowerCase().includes(actionSearch.toLowerCase()) || 
+                                      (act.responsavel || '').toLowerCase().includes(actionSearch.toLowerCase());
+                const matchesFilter = actionFilter === 'todos' || act.status === actionFilter;
+                return matchesSearch && matchesFilter;
+              }).length === 0 ? (
+                <div className="text-center py-10 text-gray-400 uppercase text-[9px] font-bold">
+                  Nenhuma ação encontrada para os filtros aplicados.
+                </div>
+              ) : (
+                activeBoard?.actions.map((act, actIdx) => {
+                  const matchesSearch = (act.acao || '').toLowerCase().includes(actionSearch.toLowerCase()) || 
+                                        (act.responsavel || '').toLowerCase().includes(actionSearch.toLowerCase());
+                  const matchesFilter = actionFilter === 'todos' || act.status === actionFilter;
+                  if (!matchesSearch || !matchesFilter) return null;
+
+                  return (
+                    <div key={actIdx} className="bg-slate-50 hover:bg-slate-50/80 border border-gray-200 p-3.5 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all animate-fade-in">
+                      <div className="flex-1 space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[8px] font-black text-slate-400">AÇÃO #{actIdx + 1}</span>
+                          <span className={`px-2 py-0.2 rounded text-[7px] font-black uppercase tracking-wider ${
+                            act.status === 'Concluído' 
+                              ? 'bg-emerald-100 text-emerald-700' 
+                              : act.status === 'Em Andamento' 
+                                ? 'bg-blue-100 text-blue-700' 
+                                : act.status === 'Bloqueado'
+                                  ? 'bg-rose-100 text-rose-700'
+                                  : 'bg-gray-100 text-gray-700'
+                          }`}>
+                            {act.status}
+                          </span>
+                        </div>
+                        <input
+                          type="text"
+                          value={act.acao}
+                          onChange={(e) => updateAction(actIdx, 'acao', e.target.value)}
+                          placeholder="Qual a ação?"
+                          className="w-full bg-white border border-gray-200 text-slate-800 text-xs font-bold rounded-lg p-1.5 focus:border-[#032b5e] outline-none"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:w-[450px]">
+                        <div>
+                          <label className="text-gray-400 text-[8px] uppercase font-bold block mb-1">Dono</label>
+                          <input
+                            type="text"
+                            value={act.responsavel}
+                            onChange={(e) => updateAction(actIdx, 'responsavel', e.target.value)}
+                            placeholder="Dono..."
+                            className="w-full bg-white border border-gray-200 text-slate-800 text-[10px] font-bold rounded-lg p-1.5 focus:border-[#032b5e] outline-none"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-gray-400 text-[8px] uppercase font-bold block mb-1">Prazo</label>
+                          <input
+                            type="text"
+                            value={act.prazo}
+                            onChange={(e) => updateAction(actIdx, 'prazo', e.target.value)}
+                            placeholder="DD/MM/AAAA"
+                            className="w-full bg-white border border-gray-200 text-slate-800 text-[10px] font-bold rounded-lg p-1.5 focus:border-[#032b5e] outline-none text-center"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-gray-400 text-[8px] uppercase font-bold block mb-1">Progresso</label>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="text-[10px] font-mono font-black text-slate-700 w-8">{act.pct}%</span>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="10"
+                              value={act.pct}
+                              onChange={(e) => updateAction(actIdx, 'pct', e.target.value)}
+                              className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="text-gray-400 text-[8px] uppercase font-bold block mb-1">Status</label>
+                          <select
+                            value={act.status}
+                            onChange={(e) => updateAction(actIdx, 'status', e.target.value)}
+                            className="w-full bg-white border border-gray-200 text-[#032b5e] font-sans font-black text-[10px] rounded-lg p-1.5 focus:border-[#032b5e] outline-none"
+                          >
+                            <option value="Pendente">Pendente</option>
+                            <option value="Em Andamento">Em Andamento</option>
+                            <option value="Bloqueado">Bloqueado</option>
+                            <option value="Concluído">Concluído</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="flex justify-end pt-2 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={handleSaveBoard}
+                disabled={savingBoard}
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white font-sans font-bold text-xs rounded-xl flex items-center gap-1.5 cursor-pointer border-none transition-all shadow-sm"
+              >
+                <Save className="w-4 h-4" />
+                {savingBoard ? 'Salvando...' : 'Salvar Alterações do Quadro'}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : viewMode === 'steps' ? (
         <>
           {/* ── HEADER DE PASSOS DO PROCESSO ── */}
           <div className="bg-white border border-gray-200/80 p-4 rounded-2xl shadow-sm flex flex-col xl:flex-row items-center justify-between gap-3 overflow-x-auto">

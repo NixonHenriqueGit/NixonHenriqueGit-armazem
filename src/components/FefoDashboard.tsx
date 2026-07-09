@@ -601,16 +601,16 @@ export default function FefoDashboard({ user, empresa, onBack }: FefoDashboardPr
             Estoque x Estoque (Rua x Rua)
           </button>
           <button 
-            onClick={() => setActiveTab('boarda3')}
-            className={`px-3 py-2 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
-          >
-            Quadro de Ações
-          </button>
-          <button 
             onClick={() => setActiveTab('detalhes')}
             className={`px-3 py-2 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeTab === 'detalhes' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
           >
             Detalhamento SKUs
+          </button>
+          <button 
+            onClick={() => setActiveTab('boarda3')}
+            className={`px-3 py-2 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+          >
+            Quadro de Ações
           </button>
         </div>
       </div>
@@ -1257,12 +1257,7 @@ export default function FefoDashboard({ user, empresa, onBack }: FefoDashboardPr
       )}
 
 
-      {/* ─────────────────────────────────────────────────────────────────
-          TAB 5: PLANO RLP & ACOES
-          ───────────────────────────────────────────────────────────────── */}
-      {activeTab === 'boarda3' && (
-        <A3BoardComponent user={user} empresa={empresa} dashboard="fefo" />
-      )}
+
 
       {false && activeTab === 'rlp' && (
         <div className="flex flex-col gap-6">
@@ -1724,6 +1719,11 @@ export default function FefoDashboard({ user, empresa, onBack }: FefoDashboardPr
           </div>
 
         </div>
+      )}
+
+
+      {activeTab === 'boarda3' && (
+        <A3BoardComponent user={user} empresa={empresa} dashboard="fefo" />
       )}
 
 

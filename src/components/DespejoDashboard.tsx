@@ -661,17 +661,17 @@ export default function DespejoDashboard({ user, empresa, onBack }: DespejoDashb
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200/60">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center bg-gray-100 p-0.5 rounded-lg border border-gray-200/60">
             <button 
               onClick={() => setActiveSubTab('produtividade')}
-              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'produtividade' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              className={`px-3 py-1 rounded font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'produtividade' ? 'bg-[#032b5e] text-white shadow-xs' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
               Produtividade & BI
             </button>
             <button 
               onClick={() => setActiveSubTab('boarda3')}
-              className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+              className={`px-3 py-1 rounded font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-xs' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
               Quadro de Ações
             </button>
@@ -684,7 +684,8 @@ export default function DespejoDashboard({ user, empresa, onBack }: DespejoDashb
         </div>
       </div>
 
-      {activeSubTab === 'produtividade' ? (
+      {/* DESPEJO VIEW */}
+      {activeSubTab === 'produtividade' && (
         <>
           {/* ── SEÇÃO DE FILTROS INTERATIVOS ── */}
       <div id="despejo-filters-container" className="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex flex-col gap-4">
@@ -1148,8 +1149,10 @@ export default function DespejoDashboard({ user, empresa, onBack }: DespejoDashb
         </div>
 
       </div>
-        </>
-      ) : (
+      </>
+      )}
+
+      {activeSubTab === 'boarda3' && (
         <A3BoardComponent user={user} empresa={empresa} dashboard="despejo" />
       )}
 

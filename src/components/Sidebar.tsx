@@ -111,28 +111,28 @@ export default function Sidebar({
     {
       id: 'logistica-dashboard',
       label: 'Dashboard Logística',
-      icon: <Truck className="w-4 h-4 text-sky-400" />,
+      icon: <BarChart2 className="w-4 h-4 text-sky-400" />,
       category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
     {
       id: 'quebras-dashboard',
       label: 'Dashboard Quebras',
-      icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
+      icon: <BarChart2 className="w-4 h-4 text-amber-500" />,
       category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
     {
       id: 'fefo-dashboard',
       label: 'Dashboard FEFO (Validades)',
-      icon: <Calendar className="w-4 h-4 text-emerald-500" />,
+      icon: <BarChart2 className="w-4 h-4 text-emerald-500" />,
       category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },
     {
       id: 'blitz-dashboard',
       label: 'Dashboard Blitz (Refugo)',
-      icon: <Search className="w-4 h-4 text-indigo-400" />,
+      icon: <BarChart2 className="w-4 h-4 text-indigo-400" />,
       category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
     },

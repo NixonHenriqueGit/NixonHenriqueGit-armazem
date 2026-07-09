@@ -3,6 +3,7 @@ import { db } from '../firebase';
 import { collection, onSnapshot, query, addDoc, getDocs } from 'firebase/firestore';
 import { Usuario, Empresa, Tarefa } from '../types';
 import { PRODUCTS } from '../planosData';
+import A3BoardComponent from './A3BoardComponent';
 import { 
   BarChart2, 
   Package, 
@@ -56,6 +57,7 @@ export default function PickingDashboard({ user, empresa, onBack }: PickingDashb
   const [selectedMode, setSelectedMode] = useState('all');
   const [seeding, setSeeding] = useState(false);
   const [selectedTaskDetails, setSelectedTaskDetails] = useState<Tarefa | null>(null);
+  const [activeSubTab, setActiveSubTab] = useState<'indicadores' | 'boarda3'>('indicadores');
 
   const empresaId = empresa?.id || 'demo';
 
@@ -420,6 +422,21 @@ export default function PickingDashboard({ user, empresa, onBack }: PickingDashb
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center bg-gray-100 p-0.5 rounded-lg border border-gray-200/60">
+            <button 
+              onClick={() => setActiveSubTab('indicadores')}
+              className={`px-3 py-1 rounded font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'indicadores' ? 'bg-[#032b5e] text-white shadow-xs' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+            >
+              Indicadores & BI
+            </button>
+            <button 
+              onClick={() => setActiveSubTab('boarda3')}
+              className={`px-3 py-1 rounded font-sans font-bold text-[9px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'boarda3' ? 'bg-[#032b5e] text-white shadow-xs' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
+            >
+              Quadro de Ações
+            </button>
+          </div>
+
           {tasks.length === 0 && (
             <button 
               onClick={handleGenerateSeedData}
@@ -448,6 +465,8 @@ export default function PickingDashboard({ user, empresa, onBack }: PickingDashb
         </div>
       ) : (
         <>
+          {activeSubTab === 'indicadores' ? (
+            <>
           {/* Real-time operational queues summary */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             
@@ -916,6 +935,10 @@ export default function PickingDashboard({ user, empresa, onBack }: PickingDashb
               </table>
             </div>
           </div>
+          </>
+          ) : (
+            <A3BoardComponent user={user} empresa={empresa} dashboard="picking" />
+          )}
         </>
       )}
 
