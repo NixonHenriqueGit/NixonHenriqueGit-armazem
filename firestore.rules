@@ -64,5 +64,9 @@ service cloud.firestore {
     match /dpo_audits/{docId} {
       allow read, write: if true;
     }
+
+    match /acessos/{docId} {
+      allow read, write: if true;
+    }
   }
 }

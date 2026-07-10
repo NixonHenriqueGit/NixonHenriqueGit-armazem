@@ -61,6 +61,27 @@
         "timestamp": { "type": "string" }
       },
       "required": ["data", "colaborador", "embalagem", "quantidade", "empresaId"]
+    },
+    "Acesso": {
+      "title": "Acesso",
+      "description": "Logs de controle de acessos de segurança e auditoria de navegação",
+      "type": "object",
+      "properties": {
+        "empresaId": { "type": "string" },
+        "userId": { "type": "string" },
+        "nome": { "type": "string" },
+        "email": { "type": "string" },
+        "papel": { "type": "string" },
+        "loginEm": { "type": "string" },
+        "loginData": { "type": "string" },
+        "loginHora": { "type": "string" },
+        "logoutEm": { "type": "string" },
+        "ultimoAcesso": { "type": "string" },
+        "abasAcessadas": { "type": "array" },
+        "atividades": { "type": "array" },
+        "ativo": { "type": "boolean" }
+      },
+      "required": ["empresaId", "userId", "nome", "email", "loginEm", "ativo"]
     }
   },
   "firestore": {
@@ -79,6 +100,10 @@
     "/despejo/{docId}": {
       "schema": "Despejo",
       "description": "Coleção de registros de despejo"
+    },
+    "/acessos/{docId}": {
+      "schema": "Acesso",
+      "description": "Coleção de logs de acesso e auditoria de segurança"
     }
   }
 }

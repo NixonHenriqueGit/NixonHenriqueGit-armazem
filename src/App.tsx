@@ -24,6 +24,7 @@ import FefoDashboard from './components/FefoDashboard';
 import BlitzDashboard from './components/BlitzDashboard';
 import PickingDashboard from './components/PickingDashboard';
 import RegistrosPanel from './components/RegistrosPanel';
+import AcessosPanel from './components/AcessosPanel';
 
 import { auth, db, isCustomFirebaseConnected } from './firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -49,6 +50,122 @@ export default function App() {
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, []);
+
+  // Session Access Tracking for Security
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+    const empresaId = user.empresaId || 'demo';
+    const sessionKey = `af_session_doc_id_${user.uid}`;
+    let currentSessionId = sessionStorage.getItem(sessionKey);
+
+    const trackSession = async () => {
+      // Don't log landing or empty panels
+      if (activePanel === 'landing' || !activePanel) return;
+
+      const nowStr = new Date().toISOString();
+      const friendlyTime = new Date().toLocaleTimeString('pt-BR', { hour12: false });
+      const friendlyDate = new Date().toLocaleDateString('pt-BR');
+
+      const activityItem = {
+        aba: activePanel,
+        hora: friendlyTime,
+        timestamp: nowStr
+      };
+
+      if (!currentSessionId) {
+        // Create new session document
+        const newSession = {
+          empresaId,
+          userId: user.uid,
+          nome: user.nome,
+          email: user.email,
+          papel: user.papel || 'operador',
+          loginEm: nowStr,
+          loginData: friendlyDate,
+          loginHora: friendlyTime,
+          logoutEm: null,
+          ultimoAcesso: nowStr,
+          abasAcessadas: [activePanel],
+          atividades: [activityItem],
+          ativo: true
+        };
+
+        if (db) {
+          try {
+            const { collection, addDoc } = await import('firebase/firestore');
+            const docRef = await addDoc(collection(db, 'acessos'), newSession);
+            currentSessionId = docRef.id;
+            sessionStorage.setItem(sessionKey, docRef.id);
+          } catch (e) {
+            console.error('Error creating access log in Firestore:', e);
+            // Fallback locally
+            currentSessionId = 'local_' + Date.now();
+            sessionStorage.setItem(sessionKey, currentSessionId);
+            const localSessions = JSON.parse(localStorage.getItem(`local_acessos_${empresaId}`) || '[]');
+            localSessions.unshift({ id: currentSessionId, ...newSession });
+            localStorage.setItem(`local_acessos_${empresaId}`, JSON.stringify(localSessions.slice(0, 100)));
+          }
+        } else {
+          // No DB, handle locally
+          currentSessionId = 'local_' + Date.now();
+          sessionStorage.setItem(sessionKey, currentSessionId);
+          const localSessions = JSON.parse(localStorage.getItem(`local_acessos_${empresaId}`) || '[]');
+          localSessions.unshift({ id: currentSessionId, ...newSession });
+          localStorage.setItem(`local_acessos_${empresaId}`, JSON.stringify(localSessions.slice(0, 100)));
+        }
+      } else {
+        // Update existing session
+        if (db && !currentSessionId.startsWith('local_')) {
+          try {
+            const { doc, getDoc, updateDoc } = await import('firebase/firestore');
+            const docRef = doc(db, 'acessos', currentSessionId);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+              const data = docSnap.data();
+              const existingAbas = data.abasAcessadas || [];
+              const updatedAbas = existingAbas.includes(activePanel) 
+                ? existingAbas 
+                : [...existingAbas, activePanel];
+              const existingAtividades = data.atividades || [];
+              
+              // Only add if the last activity was a different panel
+              const lastAct = existingAtividades[existingAtividades.length - 1];
+              const updatedAtividades = lastAct?.aba === activePanel 
+                ? existingAtividades 
+                : [...existingAtividades, activityItem];
+
+              await updateDoc(docRef, {
+                ultimoAcesso: nowStr,
+                abasAcessadas: updatedAbas,
+                atividades: updatedAtividades
+              });
+            }
+          } catch (e) {
+            console.error('Error updating access log in Firestore:', e);
+          }
+        } else {
+          // Local fallback update
+          const localSessions = JSON.parse(localStorage.getItem(`local_acessos_${empresaId}`) || '[]');
+          const idx = localSessions.findIndex((s: any) => s.id === currentSessionId);
+          if (idx !== -1) {
+            const sess = localSessions[idx];
+            if (!sess.abasAcessadas.includes(activePanel)) {
+              sess.abasAcessadas.push(activePanel);
+            }
+            if (sess.atividades[sess.atividades.length - 1]?.aba !== activePanel) {
+              sess.atividades.push(activityItem);
+            }
+            sess.ultimoAcesso = nowStr;
+            localStorage.setItem(`local_acessos_${empresaId}`, JSON.stringify(localSessions));
+          }
+        }
+      }
+    };
+
+    trackSession();
+  }, [user, activePanel]);
 
   // Sync theme to body element and localStorage
   useEffect(() => {
@@ -167,6 +284,35 @@ export default function App() {
   };
 
   const handleLogout = async () => {
+    if (user) {
+      const sessionKey = `af_session_doc_id_${user.uid}`;
+      const sessionDocId = sessionStorage.getItem(sessionKey);
+      if (sessionDocId) {
+        const nowStr = new Date().toISOString();
+        if (db && !sessionDocId.startsWith('local_')) {
+          try {
+            const { updateDoc, doc } = await import('firebase/firestore');
+            await updateDoc(doc(db, 'acessos', sessionDocId), {
+              logoutEm: nowStr,
+              ativo: false
+            });
+          } catch (e) {
+            console.error('Error logging out session in Firestore:', e);
+          }
+        } else {
+          const empresaId = user.empresaId || 'demo';
+          const localSessions = JSON.parse(localStorage.getItem(`local_acessos_${empresaId}`) || '[]');
+          const idx = localSessions.findIndex((s: any) => s.id === sessionDocId);
+          if (idx !== -1) {
+            localSessions[idx].logoutEm = nowStr;
+            localSessions[idx].ativo = false;
+            localStorage.setItem(`local_acessos_${empresaId}`, JSON.stringify(localSessions));
+          }
+        }
+        sessionStorage.removeItem(sessionKey);
+      }
+    }
+
     if (auth) {
       await signOut(auth);
     }
@@ -230,6 +376,8 @@ export default function App() {
         return <ConferentePanel user={user} empresa={empresa} />;
       case 'registros':
         return <RegistrosPanel user={user} empresa={empresa} onNavigate={setActivePanel} />;
+      case 'acessos':
+        return <AcessosPanel user={user} empresa={empresa} />;
       case 'controle':
         return <ControlePanel user={user} empresa={empresa} />;
       case 'firebase':
@@ -383,6 +531,13 @@ export default function App() {
           title: 'Registros de Setores',
           subtitle: 'Visão unificada para acessar os lançamentos e auditorias de todas as frentes de trabalho.',
           color: 'from-emerald-500/10 to-transparent'
+        };
+      case 'acessos':
+        return {
+          breadcrumbs: ['Administração & Gestão', 'Controle de Acessos'],
+          title: 'Controle de Acessos e Segurança',
+          subtitle: 'Auditoria de logins, sessões ativas, horários de entrada/saída e navegação de abas.',
+          color: 'from-indigo-500/10 to-transparent'
         };
       case 'controle':
         return {

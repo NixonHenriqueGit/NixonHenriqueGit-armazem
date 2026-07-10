@@ -211,6 +211,13 @@ export default function Sidebar({
       visible: isSupervisorOrAdmin
     },
     {
+      id: 'acessos',
+      label: 'Controle de Acessos',
+      icon: <Shield className="w-4 h-4 text-indigo-400" />,
+      category: 'ADMINISTRAÇÃO & GESTÃO',
+      visible: isSupervisorOrAdmin
+    },
+    {
       id: 'controle',
       label: 'Painel Controle',
       icon: <Sliders className="w-4 h-4 text-amber-500" />,
