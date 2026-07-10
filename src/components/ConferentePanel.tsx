@@ -10,22 +10,84 @@ interface ConferentePanelProps {
 }
 
 export default function ConferentePanel({ user, empresa }: ConferentePanelProps) {
-  const [conferente, setConferente] = useState('');
+  const empresaId = empresa?.id || 'demo';
+  const draftKey = `conferente_draft_${empresaId}_${user.nome || 'guest'}`;
+
+  // Helper to load safe initial state
+  const getDraftValue = (key: string, defaultValue: any) => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed[key] !== undefined) return parsed[key];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return defaultValue;
+  };
+
+  const [conferente, setConferente] = useState<string>(() => getDraftValue('conferente', ''));
   const [conferentes, setConferentes] = useState<string[]>(['GILSON ROSA DA SILVA', 'MATHEUS']);
   const [newConfName, setNewConfName] = useState('');
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProd, setSelectedProd] = useState<{ codigo: number, descricao: string } | null>(null);
-  const [quantidade, setQuantidade] = useState(1);
-  const [operator, setOperator] = useState('');
+  const [searchQuery, setSearchQuery] = useState<string>(() => getDraftValue('searchQuery', ''));
+  const [selectedProd, setSelectedProd] = useState<{ codigo: number, descricao: string } | null>(() => getDraftValue('selectedProd', null));
+  const [quantidade, setQuantidade] = useState<number>(() => getDraftValue('quantidade', 1));
+  const [operator, setOperator] = useState<string>(() => getDraftValue('operator', ''));
   const [operators, setOperators] = useState<string[]>(['MARIVALDO ARTHUR', 'RONILDO', 'PAULO PEREIRA']);
 
   // Tasks lists
   const [tasks, setTasks] = useState<Tarefa[]>([]);
   const [activeTab, setActiveTab] = useState<'open' | 'done'>('open');
   const [creating, setCreating] = useState(false);
+  const [draftRestored, setDraftRestored] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return !!(parsed.searchQuery || parsed.selectedProd || parsed.quantidade > 1 || parsed.operator);
+      }
+    } catch (e) {}
+    return false;
+  });
 
-  const empresaId = empresa?.id || 'demo';
+  // Sync state with local draft saving
+  useEffect(() => {
+    const draftData = {
+      conferente,
+      searchQuery,
+      selectedProd,
+      quantidade,
+      operator
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draftData));
+  }, [conferente, searchQuery, selectedProd, quantidade, operator, draftKey]);
+
+  // Sync with prop updates / user changing
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setConferente(parsed.conferente || '');
+        setSearchQuery(parsed.searchQuery || '');
+        setSelectedProd(parsed.selectedProd || null);
+        setQuantidade(parsed.quantidade || 1);
+        setOperator(parsed.operator || '');
+        setDraftRestored(!!(parsed.searchQuery || parsed.selectedProd || parsed.quantidade > 1 || parsed.operator));
+      } else {
+        setConferente('');
+        setSearchQuery('');
+        setSelectedProd(null);
+        setQuantidade(1);
+        setOperator('');
+        setDraftRestored(false);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [draftKey]);
 
   // Read config list and user states from local storage (recovery)
   useEffect(() => {
@@ -113,6 +175,9 @@ export default function ConferentePanel({ user, empresa }: ConferentePanelProps)
       setSelectedProd(null);
       setSearchQuery('');
       setQuantidade(1);
+      setOperator('');
+      setDraftRestored(false);
+      localStorage.removeItem(draftKey);
       toast('Tarefa #' + newRow.id + ' despachada para ' + operator);
     } catch(e) {
       alert('Erro ao despachar tarefa: ' + e);
@@ -204,7 +269,38 @@ export default function ConferentePanel({ user, empresa }: ConferentePanelProps)
 
       {/* Nova Tarefa Picker */}
       <div className="g-card p-6 flex flex-col gap-5">
-        <h4 className="font-sans font-bold text-xs uppercase tracking-wider text-[#f5a623]">Despachar Nova Tarefa no Pátio</h4>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222d3a] pb-3">
+          <h4 className="font-sans font-bold text-xs uppercase tracking-wider text-[#f5a623]">Despachar Nova Tarefa no Pátio</h4>
+          <div className="flex items-center gap-1.5 text-[9px] text-[#22c55e] font-black uppercase tracking-wider bg-[#22c55e]/5 px-2.5 py-1 rounded-lg border border-[#22c55e]/15">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+            </span>
+            Salvo automaticamente
+          </div>
+        </div>
+
+        {draftRestored && (
+          <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/25 px-4 py-3 rounded-xl text-xs text-amber-300">
+            <div className="flex items-center gap-2 font-medium">
+              <span>⚡ Dados anteriores restaurados do rascunho salvo!</span>
+            </div>
+            <button 
+              type="button"
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedProd(null);
+                setQuantidade(1);
+                setOperator('');
+                setDraftRestored(false);
+                localStorage.removeItem(draftKey);
+              }}
+              className="text-[9px] uppercase font-black tracking-wider text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+            >
+              Limpar formulário
+            </button>
+          </div>
+        )}
         
         {/* Busca SKU */}
         <div className="flex flex-col gap-1.5">

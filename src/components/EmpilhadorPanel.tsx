@@ -9,47 +9,98 @@ interface EmpilhadorPanelProps {
 }
 
 export default function EmpilhadorPanel({ user, empresa }: EmpilhadorPanelProps) {
-  const [operatorName, setOperatorName] = useState('');
-  const [operators, setOperators] = useState<string[]>(['MARIVALDO ARTHUR', 'RONILDO', 'PAULO PEREIRA']);
-  const [newOpName, setNewOpName] = useState('');
+  const empresaId = empresa?.id || 'demo';
+  const draftKey = `empilhador_draft_${empresaId}_${user.nome || 'guest'}`;
 
-  // Pre-operation checklist blocks
-  const [checklist, setChecklist] = useState([
+  // Helper to load safe initial state
+  const getDraftValue = (key: string, defaultValue: any) => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed[key] !== undefined) return parsed[key];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return defaultValue;
+  };
+
+  const [operatorName, setOperatorName] = useState<string>(() => getDraftValue('operatorName', ''));
+  const [operators, setOperators] = useState<string[]>(() => getDraftValue('operators', ['MARIVALDO ARTHUR', 'RONILDO', 'PAULO PEREIRA']));
+  const [newOpName, setNewOpName] = useState<string>(() => getDraftValue('newOpName', ''));
+
+  const defaultChecklist = [
     { id: 1, label: 'Corredor de operação isolado', desc: 'Isolamento com cones ou fitas refletivas nas duas cabeceiras do corredor.', checked: false },
     { id: 2, label: 'Zonas de pedestre livres', desc: 'Confirmado que nenhum pedestre transita dentro da área operacional de manobra.', checked: false },
     { id: 3, label: 'Sinalização visual ativa', desc: 'Luz giratória (giroflex) ou strobo e buzina atestadas como operacionais.', checked: false },
     { id: 4, label: 'Piso livre de resíduos', desc: 'Obstáculos, paletes avariados, plásticos ou fitas de arquear removidos do piso.', checked: false },
     { id: 5, label: 'Iluminação de pátio adequada', desc: 'Visibilidade regular para empilhadeira atestada na zona operativa.', checked: false },
-  ]);
-  const [checklistDone, setChecklistDone] = useState(false);
-
-  // Operation Modes
-  const [operMode, setOperMode] = useState<'durante' | 'apos' | null>(null);
+  ];
+  const [checklist, setChecklist] = useState(() => getDraftValue('checklist', defaultChecklist));
+  const [checklistDone, setChecklistDone] = useState<boolean>(() => getDraftValue('checklistDone', false));
+  const [operMode, setOperMode] = useState<'durante' | 'apos' | null>(() => getDraftValue('operMode', null));
 
   // Tasks States
   const [tasks, setTasks] = useState<Tarefa[]>([]);
   const [activeTaskTrack, setActiveTaskTrack] = useState<number | null>(null);
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
+  const [draftRestored, setDraftRestored] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const hasChecks = (parsed.checklist || []).some((item: any) => item.checked);
+        return !!(parsed.operatorName || parsed.newOpName || hasChecks || parsed.checklistDone || parsed.operMode);
+      }
+    } catch (e) {}
+    return false;
+  });
 
   const toggleDateGroup = (dateKey: string) => {
     setExpandedDates(prev => ({ ...prev, [dateKey]: !prev[dateKey] }));
   };
 
-  const empresaId = empresa?.id || 'demo';
-
-  // Read operators lists and active checklist/opMode states from sessionStorage (local recovery)
+  // Sync state with local draft saving
   useEffect(() => {
-    const cached = localStorage.getItem(`empilhador_state_${empresaId}`);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        if (parsed.operators) setOperators(parsed.operators);
-        if (parsed.operatorName) setOperatorName(parsed.operatorName);
-        if (parsed.checklistDone) setChecklistDone(parsed.checklistDone);
-        if (parsed.operMode) setOperMode(parsed.operMode);
-      } catch(e) {}
+    const draftData = {
+      operatorName,
+      operators,
+      newOpName,
+      checklist,
+      checklistDone,
+      operMode
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draftData));
+  }, [operatorName, operators, newOpName, checklist, checklistDone, operMode, draftKey]);
+
+  // Sync with prop updates / user changing
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setOperatorName(parsed.operatorName || '');
+        setOperators(parsed.operators || ['MARIVALDO ARTHUR', 'RONILDO', 'PAULO PEREIRA']);
+        setNewOpName(parsed.newOpName || '');
+        setChecklist(parsed.checklist || defaultChecklist);
+        setChecklistDone(parsed.checklistDone || false);
+        setOperMode(parsed.operMode || null);
+        const hasChecks = (parsed.checklist || []).some((item: any) => item.checked);
+        setDraftRestored(!!(parsed.operatorName || parsed.newOpName || hasChecks || parsed.checklistDone || parsed.operMode));
+      } else {
+        setOperatorName('');
+        setOperators(['MARIVALDO ARTHUR', 'RONILDO', 'PAULO PEREIRA']);
+        setNewOpName('');
+        setChecklist(defaultChecklist);
+        setChecklistDone(false);
+        setOperMode(null);
+        setDraftRestored(false);
+      }
+    } catch (e) {
+      console.error(e);
     }
-  }, [empresaId]);
+  }, [draftKey]);
 
   // Sync with Firestore Tasks (scoped to company matching operator)
   useEffect(() => {
@@ -244,7 +295,16 @@ export default function EmpilhadorPanel({ user, empresa }: EmpilhadorPanelProps)
       {!checklistDone ? (
         <div className="g-card p-6 md:p-8 flex flex-col gap-5 border border-[#f5a623]/20 bg-[#11151c]/90">
           <div className="text-5xl text-center mb-3">✅</div>
-          <h3 className="font-sans font-black text-center text-xl tracking-widest text-[#f5a623] uppercase">CHECKLIST PRÉ-OPERAÇÃO</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222d3a] pb-3">
+            <h3 className="font-sans font-black text-sm tracking-widest text-[#f5a623] uppercase">CHECKLIST PRÉ-OPERAÇÃO</h3>
+            <div className="flex items-center gap-1.5 text-[9px] text-[#22c55e] font-black uppercase tracking-wider bg-[#22c55e]/5 px-2.5 py-1 rounded-lg border border-[#22c55e]/15">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              Salvo automaticamente
+            </div>
+          </div>
           <p className="text-xs text-[#6a7d92] text-center leading-relaxed max-w-md mx-auto">
             Por normas de segurança da plataforma, confirme cada item de segurança antes de liberar o painel de reabastecimento.
           </p>
@@ -291,7 +351,39 @@ export default function EmpilhadorPanel({ user, empresa }: EmpilhadorPanelProps)
           
           {/* Operator identification settings card */}
           <div className="g-card p-6 flex flex-col gap-5">
-            <h4 className="font-sans font-bold text-xs uppercase tracking-wider text-[#f5a623]">Identificação do Operador e Modo</h4>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222d3a] pb-3">
+              <h4 className="font-sans font-bold text-xs uppercase tracking-wider text-[#f5a623]">Identificação do Operador e Modo</h4>
+              <div className="flex items-center gap-1.5 text-[9px] text-[#22c55e] font-black uppercase tracking-wider bg-[#22c55e]/5 px-2.5 py-1 rounded-lg border border-[#22c55e]/15">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                </span>
+                Salvo automaticamente
+              </div>
+            </div>
+
+            {draftRestored && (
+              <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/25 px-4 py-3 rounded-xl text-xs text-amber-300">
+                <div className="flex items-center gap-2 font-medium">
+                  <span>⚡ Dados anteriores restaurados do rascunho salvo!</span>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setOperatorName('');
+                    setNewOpName('');
+                    setChecklist(defaultChecklist);
+                    setChecklistDone(false);
+                    setOperMode(null);
+                    setDraftRestored(false);
+                    localStorage.removeItem(draftKey);
+                  }}
+                  className="text-[9px] uppercase font-black tracking-wider text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+                >
+                  Limpar formulário
+                </button>
+              </div>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-end">
               <div className="flex flex-col gap-1.5">

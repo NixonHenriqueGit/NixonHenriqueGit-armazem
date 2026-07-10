@@ -26,16 +26,77 @@ const REPACK_EMBALAGENS = [
 ];
 
 export default function RepackPanel({ user, empresa }: RepackPanelProps) {
-  const [embalagem, setEmbalagem] = useState(REPACK_EMBALAGENS[0].nome);
-  const [quantidade, setQuantidade] = useState(1);
-  const [inicio, setInicio] = useState('');
-  const [fim, setFim] = useState('');
+  const empresaId = empresa?.id || 'demo';
+  const draftKey = `repack_draft_${empresaId}_${user.nome || 'guest'}`;
+
+  // Helper to load safe initial state
+  const getDraftValue = (key: string, defaultValue: any) => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed[key] !== undefined) return parsed[key];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return defaultValue;
+  };
+
+  const [embalagem, setEmbalagem] = useState<string>(() => getDraftValue('embalagem', REPACK_EMBALAGENS[0].nome));
+  const [quantidade, setQuantidade] = useState<number>(() => getDraftValue('quantidade', 1));
+  const [inicio, setInicio] = useState<string>(() => getDraftValue('inicio', ''));
+  const [fim, setFim] = useState<string>(() => getDraftValue('fim', ''));
   const [duracao, setDuracao] = useState('00:00:00');
   const [statusMeta, setStatusMeta] = useState('—');
   const [activeTab, setActiveTab] = useState<'form' | 'stats' | 'hist'>('form');
   const [repackRows, setRepackRows] = useState<RepackRow[]>([]);
   const [registering, setRegistering] = useState(false);
+  const [draftRestored, setDraftRestored] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return !!(parsed.inicio || parsed.fim || parsed.quantidade > 1 || parsed.embalagem !== REPACK_EMBALAGENS[0].nome);
+      }
+    } catch (e) {}
+    return false;
+  });
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
+
+  // Sync state with local draft saving
+  useEffect(() => {
+    const draftData = {
+      embalagem,
+      quantidade,
+      inicio,
+      fim
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draftData));
+  }, [embalagem, quantidade, inicio, fim, draftKey]);
+
+  // Sync with prop updates / user changing
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setEmbalagem(parsed.embalagem || REPACK_EMBALAGENS[0].nome);
+        setQuantidade(parsed.quantidade || 1);
+        setInicio(parsed.inicio || '');
+        setFim(parsed.fim || '');
+        setDraftRestored(!!(parsed.inicio || parsed.fim || parsed.quantidade > 1 || parsed.embalagem !== REPACK_EMBALAGENS[0].nome));
+      } else {
+        setEmbalagem(REPACK_EMBALAGENS[0].nome);
+        setQuantidade(1);
+        setInicio('');
+        setFim('');
+        setDraftRestored(false);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [draftKey]);
 
   const toggleDateGroup = (dateKey: string) => {
     setExpandedDates(prev => ({ ...prev, [dateKey]: !prev[dateKey] }));
@@ -142,6 +203,8 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
       setDuracao('00:00:00');
       setStatusMeta('—');
       setActiveTab('hist');
+      setDraftRestored(false);
+      localStorage.removeItem(draftKey);
     } catch (e) {
       alert('Erro ao registrar repack: ' + e);
     } finally {
@@ -298,7 +361,38 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
 
       {activeTab === 'form' ? (
         <div className="g-card p-6 flex flex-col gap-5">
-          <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#f5a623]">Configurar Lançamento</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222d3a] pb-3">
+            <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#f5a623]">Configurar Lançamento</h3>
+            <div className="flex items-center gap-1.5 text-[9px] text-[#22c55e] font-black uppercase tracking-wider bg-[#22c55e]/5 px-2.5 py-1 rounded-lg border border-[#22c55e]/15">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              Salvo automaticamente
+            </div>
+          </div>
+
+          {draftRestored && (
+            <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/25 px-4 py-3 rounded-xl text-xs text-amber-300">
+              <div className="flex items-center gap-2 font-medium">
+                <span>⚡ Dados anteriores restaurados do rascunho salvo!</span>
+              </div>
+              <button 
+                type="button"
+                onClick={() => {
+                  setQuantidade(1);
+                  setInicio('');
+                  setFim('');
+                  setEmbalagem(REPACK_EMBALAGENS[0].nome);
+                  setDraftRestored(false);
+                  localStorage.removeItem(draftKey);
+                }}
+                className="text-[9px] uppercase font-black tracking-wider text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+              >
+                Limpar formulário
+              </button>
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">

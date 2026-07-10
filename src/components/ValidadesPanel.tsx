@@ -10,21 +10,48 @@ interface ValidadesPanelProps {
 }
 
 export default function ValidadesPanel({ user, empresa }: ValidadesPanelProps) {
-  const [produtoBusca, setProdutoBusca] = useState('');
-  const [selectedProd, setSelectedProd] = useState<{ codigo: number, descricao: string } | null>(null);
+  const empresaId = empresa?.id || 'demo';
+  const draftKey = `validades_draft_${empresaId}_${user.nome || 'guest'}`;
+
+  // Helper to load safe initial state
+  const getDraftValue = (key: string, defaultValue: any) => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed[key] !== undefined) return parsed[key];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return defaultValue;
+  };
+
+  const [produtoBusca, setProdutoBusca] = useState<string>(() => getDraftValue('produtoBusca', ''));
+  const [selectedProd, setSelectedProd] = useState<{ codigo: number, descricao: string } | null>(() => getDraftValue('selectedProd', null));
   const [showDropdown, setShowProdDropdown] = useState(false);
 
-  const [palhete, setPalhete] = useState(0);
-  const [lastro, setLastro] = useState(0);
-  const [caixa, setCaixa] = useState(0);
-  const [validade, setValidade] = useState('');
-  const [localizacao, setLocalizacao] = useState<'picking' | 'central'>('picking');
+  const [palhete, setPalhete] = useState<number>(() => getDraftValue('palhete', 0));
+  const [lastro, setLastro] = useState<number>(() => getDraftValue('lastro', 0));
+  const [caixa, setCaixa] = useState<number>(() => getDraftValue('caixa', 0));
+  const [validade, setValidade] = useState<string>(() => getDraftValue('validade', ''));
+  const [localizacao, setLocalizacao] = useState<'picking' | 'central'>(() => getDraftValue('localizacao', 'picking'));
 
   const [activeTab, setActiveTab] = useState<'form' | 'lista'>('form');
   const [validadesList, setValidadesList] = useState<ValidadeRow[]>([]);
   const [editingRow, setEditingRow] = useState<ValidadeRow | null>(null);
   const [registering, setRegistering] = useState(false);
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
+  const [draftRestored, setDraftRestored] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return !!(parsed.produtoBusca || parsed.selectedProd || parsed.palhete > 0 || parsed.lastro > 0 || parsed.caixa > 0 || parsed.validade || parsed.localizacao !== 'picking');
+      }
+    } catch (e) {}
+    return false;
+  });
 
   const toggleDateGroup = (dateKey: string) => {
     setExpandedDates(prev => ({ ...prev, [dateKey]: !prev[dateKey] }));
@@ -35,7 +62,49 @@ export default function ValidadesPanel({ user, empresa }: ValidadesPanelProps) {
   const [filterStatus, setFilterStatus] = useState<string>('todos');
   const [sortOrder, setSortSort] = useState<'asc' | 'desc'>('asc');
 
-  const empresaId = empresa?.id || 'demo';
+  // Sync state with local draft saving (only when not editing an existing row)
+  useEffect(() => {
+    if (editingRow) return;
+    const draftData = {
+      produtoBusca,
+      selectedProd,
+      palhete,
+      lastro,
+      caixa,
+      validade,
+      localizacao
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draftData));
+  }, [produtoBusca, selectedProd, palhete, lastro, caixa, validade, localizacao, draftKey, editingRow]);
+
+  // Sync with prop updates / user changing
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setProdutoBusca(parsed.produtoBusca || '');
+        setSelectedProd(parsed.selectedProd || null);
+        setPalhete(parsed.palhete || 0);
+        setLastro(parsed.lastro || 0);
+        setCaixa(parsed.caixa || 0);
+        setValidade(parsed.validade || '');
+        setLocalizacao(parsed.localizacao || 'picking');
+        setDraftRestored(!!(parsed.produtoBusca || parsed.selectedProd || parsed.palhete > 0 || parsed.lastro > 0 || parsed.caixa > 0 || parsed.validade || parsed.localizacao !== 'picking'));
+      } else {
+        setProdutoBusca('');
+        setSelectedProd(null);
+        setPalhete(0);
+        setLastro(0);
+        setCaixa(0);
+        setValidade('');
+        setLocalizacao('picking');
+        setDraftRestored(false);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [draftKey]);
 
   // Sync with Firestore (scoped to company)
   useEffect(() => {
@@ -108,6 +177,8 @@ export default function ValidadesPanel({ user, empresa }: ValidadesPanelProps) {
     setValidade('');
     setLocalizacao('picking');
     setEditingRow(null);
+    setDraftRestored(false);
+    localStorage.removeItem(draftKey);
   };
 
   const handleSave = async () => {
@@ -310,9 +381,33 @@ export default function ValidadesPanel({ user, empresa }: ValidadesPanelProps) {
 
       {activeTab === 'form' ? (
         <div className="g-card p-6 flex flex-col gap-5">
-          <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#8b5cf6]">
-            {editingRow ? 'Editar Lote de Validade' : 'Registrar Validade de Lote de Carga'}
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222d3a] pb-3">
+            <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#8b5cf6]">
+              {editingRow ? 'Editar Lote de Validade' : 'Registrar Validade de Lote de Carga'}
+            </h3>
+            <div className="flex items-center gap-1.5 text-[9px] text-[#22c55e] font-black uppercase tracking-wider bg-[#22c55e]/5 px-2.5 py-1 rounded-lg border border-[#22c55e]/15">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              Salvo automaticamente
+            </div>
+          </div>
+
+          {draftRestored && !editingRow && (
+            <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/25 px-4 py-3 rounded-xl text-xs text-amber-300">
+              <div className="flex items-center gap-2 font-medium">
+                <span>⚡ Dados anteriores restaurados do rascunho salvo!</span>
+              </div>
+              <button 
+                type="button"
+                onClick={cleanForm}
+                className="text-[9px] uppercase font-black tracking-wider text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+              >
+                Limpar formulário
+              </button>
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             

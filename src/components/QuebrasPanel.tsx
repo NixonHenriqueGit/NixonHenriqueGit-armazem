@@ -91,18 +91,45 @@ const QB_TIPOS: Record<string, Array<{ cod: number; motivo: string }>> = {
 };
 
 export default function QuebrasPanel({ user, empresa }: QuebrasPanelProps) {
-  const [produtoBusca, setProdutoBusca] = useState('');
-  const [selectedProd, setSelectedProd] = useState<{ codigo: number, descricao: string } | null>(null);
+  const empresaId = empresa?.id || 'demo';
+  const draftKey = `quebras_draft_${empresaId}_${user.nome || 'guest'}`;
+
+  // Helper to load safe initial state
+  const getDraftValue = (key: string, defaultValue: any) => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed[key] !== undefined) return parsed[key];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return defaultValue;
+  };
+
+  const [produtoBusca, setProdutoBusca] = useState<string>(() => getDraftValue('produtoBusca', ''));
+  const [selectedProd, setSelectedProd] = useState<{ codigo: number, descricao: string } | null>(() => getDraftValue('selectedProd', null));
   const [showDropdown, setShowProdDropdown] = useState(false);
-  const [quantidade, setQuantidade] = useState(1);
-  const [area, setArea] = useState('ARMAZEM');
-  const [turno, setTurno] = useState('MANHÃ');
-  const [motivoCod, setMotivoCod] = useState<number>(0);
+  const [quantidade, setQuantidade] = useState<number>(() => getDraftValue('quantidade', 1));
+  const [area, setArea] = useState<string>(() => getDraftValue('area', 'ARMAZEM'));
+  const [turno, setTurno] = useState<string>(() => getDraftValue('turno', 'MANHÃ'));
+  const [motivoCod, setMotivoCod] = useState<number>(() => getDraftValue('motivoCod', 0));
   
   const [activeTab, setActiveTab] = useState<'form' | 'stats' | 'hist'>('form');
   const [quebras, setQuebras] = useState<QuebraRow[]>([]);
   const [registering, setRegistering] = useState(false);
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
+  const [draftRestored, setDraftRestored] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return !!(parsed.produtoBusca || parsed.selectedProd || parsed.quantidade > 1 || parsed.area !== 'ARMAZEM' || parsed.turno !== 'MANHÃ');
+      }
+    } catch (e) {}
+    return false;
+  });
 
   const toggleDateGroup = (dateKey: string) => {
     setExpandedDates(prev => ({ ...prev, [dateKey]: !prev[dateKey] }));
@@ -110,14 +137,59 @@ export default function QuebrasPanel({ user, empresa }: QuebrasPanelProps) {
 
   const motivosDisponiveis = QB_TIPOS[area] || [];
 
-  // Reset selected motive code on area update
+  // Reset selected motive code on area update (only if we don't have a loaded motive yet or area changes)
   useEffect(() => {
     if (motivosDisponiveis.length > 0) {
-      setMotivoCod(motivosDisponiveis[0].cod);
+      const savedMotive = getDraftValue('motivoCod', null);
+      if (savedMotive && motivosDisponiveis.some(m => m.cod === savedMotive)) {
+        setMotivoCod(savedMotive);
+      } else {
+        setMotivoCod(motivosDisponiveis[0].cod);
+      }
     } else {
       setMotivoCod(0);
     }
   }, [area]);
+
+  // Sync state with local draft saving
+  useEffect(() => {
+    const draftData = {
+      produtoBusca,
+      selectedProd,
+      quantidade,
+      area,
+      turno,
+      motivoCod
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draftData));
+  }, [produtoBusca, selectedProd, quantidade, area, turno, motivoCod, draftKey]);
+
+  // Sync with prop updates / user changing
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setProdutoBusca(parsed.produtoBusca || '');
+        setSelectedProd(parsed.selectedProd || null);
+        setQuantidade(parsed.quantidade || 1);
+        setArea(parsed.area || 'ARMAZEM');
+        setTurno(parsed.turno || 'MANHÃ');
+        setMotivoCod(parsed.motivoCod || 0);
+        setDraftRestored(!!(parsed.produtoBusca || parsed.selectedProd || parsed.quantidade > 1 || parsed.area !== 'ARMAZEM' || parsed.turno !== 'MANHÃ'));
+      } else {
+        setProdutoBusca('');
+        setSelectedProd(null);
+        setQuantidade(1);
+        setArea('ARMAZEM');
+        setTurno('MANHÃ');
+        setMotivoCod(0);
+        setDraftRestored(false);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [draftKey]);
 
   // Sync with Firestore (scoped to company)
   useEffect(() => {
@@ -184,6 +256,8 @@ export default function QuebrasPanel({ user, empresa }: QuebrasPanelProps) {
       setProdutoBusca('');
       setSelectedProd(null);
       setQuantidade(1);
+      setDraftRestored(false);
+      localStorage.removeItem(draftKey);
       setActiveTab('hist');
     } catch(e) {
       alert('Erro ao registrar quebra: ' + e);
@@ -331,7 +405,39 @@ export default function QuebrasPanel({ user, empresa }: QuebrasPanelProps) {
 
       {activeTab === 'form' ? (
         <div className="g-card p-6 flex flex-col gap-5">
-          <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#ef4444]">Cadastro de Quebra Operacional</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222d3a] pb-3">
+            <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#ef4444]">Cadastro de Quebra Operacional</h3>
+            <div className="flex items-center gap-1.5 text-[9px] text-[#22c55e] font-black uppercase tracking-wider bg-[#22c55e]/5 px-2.5 py-1 rounded-lg border border-[#22c55e]/15">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              Salvo automaticamente
+            </div>
+          </div>
+
+          {draftRestored && (
+            <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/25 px-4 py-3 rounded-xl text-xs text-amber-300">
+              <div className="flex items-center gap-2 font-medium">
+                <span>⚡ Dados anteriores restaurados do rascunho salvo!</span>
+              </div>
+              <button 
+                type="button"
+                onClick={() => {
+                  setProdutoBusca('');
+                  setSelectedProd(null);
+                  setQuantidade(1);
+                  setArea('ARMAZEM');
+                  setTurno('MANHÃ');
+                  setDraftRestored(false);
+                  localStorage.removeItem(draftKey);
+                }}
+                className="text-[9px] uppercase font-black tracking-wider text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+              >
+                Limpar formulário
+              </button>
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             

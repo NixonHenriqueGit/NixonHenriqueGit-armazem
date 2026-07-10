@@ -31,38 +31,115 @@ const RFG_TIPOS = [
 ];
 
 export default function RefugoPanel({ user, empresa }: RefugoPanelProps) {
-  const [data, setData] = useState('');
-  const [ajudante, setAjudante] = useState('');
-  const [placaPrefix, setPlacaPrefix] = useState('QSK7D92');
-  const [placaCustom, setPlacaOutro] = useState('');
-  const [mapa, setMapa] = useState('');
-  const [rota, setRota] = useState('');
-  const [obs, setObs] = useState('');
+  const empresaId = empresa?.id || 'demo';
+  const draftKey = `refugo_draft_${empresaId}_${user.nome || 'guest'}`;
+
+  // Helper to load safe initial state
+  const getDraftValue = (key: string, defaultValue: any) => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed[key] !== undefined) return parsed[key];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return defaultValue;
+  };
+
+  const [data, setData] = useState<string>(() => getDraftValue('data', ''));
+  const [ajudante, setAjudante] = useState<string>(() => getDraftValue('ajudante', ''));
+  const [placaPrefix, setPlacaPrefix] = useState<string>(() => getDraftValue('placaPrefix', 'QSK7D92'));
+  const [placaCustom, setPlacaOutro] = useState<string>(() => getDraftValue('placaCustom', ''));
+  const [mapa, setMapa] = useState<string>(() => getDraftValue('mapa', ''));
+  const [rota, setRota] = useState<string>(() => getDraftValue('rota', ''));
+  const [obs, setObs] = useState<string>(() => getDraftValue('obs', ''));
 
   // Quantities structure
-  const [inputs, setInputs] = useState<Record<string, Record<string, number>>>({
+  const defaultInputs = {
     '1l': { caixas: 0, quebrada: 0, segunda: 0, bicada_int: 0, bicada_ext: 0, cor_fora: 0, faltante: 0, logomarca: 0, rotulo_plast: 0, sujidade_int: 0, sujidade_ext: 0, tampada: 0, trincada: 0 },
     '600': { caixas: 0, quebrada: 0, segunda: 0, bicada_int: 0, bicada_ext: 0, cor_fora: 0, faltante: 0, logomarca: 0, rotulo_plast: 0, sujidade_int: 0, sujidade_ext: 0, tampada: 0, trincada: 0 },
     '300': { caixas: 0, quebrada: 0, segunda: 0, bicada_int: 0, bicada_ext: 0, cor_fora: 0, faltante: 0, logomarca: 0, rotulo_plast: 0, sujidade_int: 0, sujidade_ext: 0, tampada: 0, trincada: 0 },
-  });
+  };
+  const [inputs, setInputs] = useState<Record<string, Record<string, number>>>(() => getDraftValue('inputs', defaultInputs));
 
   const [activeTab, setActiveTab] = useState<'form' | 'stats' | 'hist'>('form');
   const [blitzRows, setBlitzRows] = useState<BlitzRefugoRow[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [registering, setRegistering] = useState(false);
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
+  const [draftRestored, setDraftRestored] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const hasInputs = Object.values(parsed.inputs || {}).some((cat: any) => Object.values(cat).some((val: any) => val > 0));
+        return !!(parsed.ajudante || parsed.placaCustom || parsed.mapa || parsed.rota || parsed.obs || hasInputs);
+      }
+    } catch (e) {}
+    return false;
+  });
 
   const toggleDateGroup = (dateKey: string) => {
     setExpandedDates(prev => ({ ...prev, [dateKey]: !prev[dateKey] }));
   };
 
-  const empresaId = empresa?.id || 'demo';
-
-  // Tick current date
+  // Tick current date if not set from draft
   useEffect(() => {
-    const today = new Date();
-    setData(today.toISOString().split('T')[0]);
-  }, []);
+    if (!data) {
+      const today = new Date();
+      setData(today.toISOString().split('T')[0]);
+    }
+  }, [data]);
+
+  // Sync state with local draft saving
+  useEffect(() => {
+    const draftData = {
+      data,
+      ajudante,
+      placaPrefix,
+      placaCustom,
+      mapa,
+      rota,
+      obs,
+      inputs
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draftData));
+  }, [data, ajudante, placaPrefix, placaCustom, mapa, rota, obs, inputs, draftKey]);
+
+  // Sync with prop updates / user changing
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setData(parsed.data || '');
+        setAjudante(parsed.ajudante || '');
+        setPlacaPrefix(parsed.placaPrefix || 'QSK7D92');
+        setPlacaOutro(parsed.placaCustom || '');
+        setMapa(parsed.mapa || '');
+        setRota(parsed.rota || '');
+        setObs(parsed.obs || '');
+        setInputs(parsed.inputs || defaultInputs);
+        const hasInputs = Object.values(parsed.inputs || {}).some((cat: any) => Object.values(cat).some((val: any) => val > 0));
+        setDraftRestored(!!(parsed.ajudante || parsed.placaCustom || parsed.mapa || parsed.rota || parsed.obs || hasInputs));
+      } else {
+        const today = new Date();
+        setData(today.toISOString().split('T')[0]);
+        setAjudante('');
+        setPlacaPrefix('QSK7D92');
+        setPlacaOutro('');
+        setMapa('');
+        setRota('');
+        setObs('');
+        setInputs(defaultInputs);
+        setDraftRestored(false);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [draftKey]);
 
   // Sync with Firestore (scoped to company)
   useEffect(() => {
@@ -131,11 +208,14 @@ export default function RefugoPanel({ user, empresa }: RefugoPanelProps) {
     setMapa('');
     setRota('');
     setObs('');
+    setPlacaOutro('');
     setInputs({
       '1l': { caixas: 0, quebrada: 0, segunda: 0, bicada_int: 0, bicada_ext: 0, cor_fora: 0, faltante: 0, logomarca: 0, rotulo_plast: 0, sujidade_int: 0, sujidade_ext: 0, tampada: 0, trincada: 0 },
       '600': { caixas: 0, quebrada: 0, segunda: 0, bicada_int: 0, bicada_ext: 0, cor_fora: 0, faltante: 0, logomarca: 0, rotulo_plast: 0, sujidade_int: 0, sujidade_ext: 0, tampada: 0, trincada: 0 },
       '300': { caixas: 0, quebrada: 0, segunda: 0, bicada_int: 0, bicada_ext: 0, cor_fora: 0, faltante: 0, logomarca: 0, rotulo_plast: 0, sujidade_int: 0, sujidade_ext: 0, tampada: 0, trincada: 0 },
     });
+    setDraftRestored(false);
+    localStorage.removeItem(draftKey);
   };
 
   const handleRegister = async () => {
@@ -197,6 +277,8 @@ export default function RefugoPanel({ user, empresa }: RefugoPanelProps) {
         '600': { caixas: 0, quebrada: 0, segunda: 0, bicada_int: 0, bicada_ext: 0, cor_fora: 0, faltante: 0, logomarca: 0, rotulo_plast: 0, sujidade_int: 0, sujidade_ext: 0, tampada: 0, trincada: 0 },
         '300': { caixas: 0, quebrada: 0, segunda: 0, bicada_int: 0, bicada_ext: 0, cor_fora: 0, faltante: 0, logomarca: 0, rotulo_plast: 0, sujidade_int: 0, sujidade_ext: 0, tampada: 0, trincada: 0 },
       });
+      setDraftRestored(false);
+      localStorage.removeItem(draftKey);
       setActiveTab('hist');
     } catch(e) {
       alert('Erro ao registrar blitz: ' + e);
@@ -366,7 +448,40 @@ export default function RefugoPanel({ user, empresa }: RefugoPanelProps) {
           
           {/* General Fields Header */}
           <div className="g-card p-6 flex flex-col gap-5">
-            <h4 className="font-sans font-bold text-xs uppercase tracking-wider text-[#eab308]">Ficha Geral da Amostragem</h4>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222d3a] pb-3">
+              <h4 className="font-sans font-bold text-xs uppercase tracking-wider text-[#eab308]">Ficha Geral da Amostragem</h4>
+              <div className="flex items-center gap-1.5 text-[9px] text-[#22c55e] font-black uppercase tracking-wider bg-[#22c55e]/5 px-2.5 py-1 rounded-lg border border-[#22c55e]/15">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                </span>
+                Salvo automaticamente
+              </div>
+            </div>
+
+            {draftRestored && (
+              <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/25 px-4 py-3 rounded-xl text-xs text-amber-300">
+                <div className="flex items-center gap-2 font-medium">
+                  <span>⚡ Dados anteriores restaurados do rascunho salvo!</span>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setAjudante('');
+                    setMapa('');
+                    setRota('');
+                    setObs('');
+                    setPlacaOutro('');
+                    setInputs(defaultInputs);
+                    setDraftRestored(false);
+                    localStorage.removeItem(draftKey);
+                  }}
+                  className="text-[9px] uppercase font-black tracking-wider text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+                >
+                  Limpar formulário
+                </button>
+              </div>
+            )}
             
             <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className="flex flex-col gap-1.5 md:col-span-3">

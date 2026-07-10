@@ -16,26 +16,104 @@ const PLACAS = [
 ];
 
 export default function ArmazemPanel({ user, empresa }: ArmazemPanelProps) {
-  const [operacao, setOperacao] = useState<'Carregamento' | 'Descarregamento'>('Carregamento');
-  const [empilhador, setEmpilhador] = useState('');
-  const [turno, setTurno] = useState('Diurno');
-  const [placaSelection, setPlacaSelection] = useState(PLACAS[0]);
-  const [placaOutro, setPlacaOutro] = useState('');
-  const [tipo, setTipo] = useState('rota');
-  const [palhete, setPalhete] = useState(1);
-  const [inicio, setInicio] = useState('');
-  const [fim, setFim] = useState('');
-  const [obs, setObs] = useState('');
+  const empresaId = empresa?.id || 'demo';
+  const draftKey = `armazem_draft_${empresaId}_${user.nome || 'guest'}`;
+
+  // Helper to load safe initial state
+  const getDraftValue = (key: string, defaultValue: any) => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed[key] !== undefined) return parsed[key];
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    return defaultValue;
+  };
+
+  const [operacao, setOperacao] = useState<'Carregamento' | 'Descarregamento'>(() => getDraftValue('operacao', 'Carregamento'));
+  const [empilhador, setEmpilhador] = useState<string>(() => getDraftValue('empilhador', ''));
+  const [turno, setTurno] = useState<string>(() => getDraftValue('turno', 'Diurno'));
+  const [placaSelection, setPlacaSelection] = useState<string>(() => getDraftValue('placaSelection', PLACAS[0]));
+  const [placaOutro, setPlacaOutro] = useState<string>(() => getDraftValue('placaOutro', ''));
+  const [tipo, setTipo] = useState<string>(() => getDraftValue('tipo', 'rota'));
+  const [palhete, setPalhete] = useState<number>(() => getDraftValue('palhete', 1));
+  const [inicio, setInicio] = useState<string>(() => getDraftValue('inicio', ''));
+  const [fim, setFim] = useState<string>(() => getDraftValue('fim', ''));
+  const [obs, setObs] = useState<string>(() => getDraftValue('obs', ''));
   const [statusChip, setStatusChip] = useState('—');
   const [activeTab, setActiveTab] = useState<'form' | 'stats' | 'hist'>('form');
   const [armazemRows, setArmazemRows] = useState<ArmazemRow[]>([]);
   const [registering, setRegistering] = useState(false);
+  const [draftRestored, setDraftRestored] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return !!(parsed.empilhador || parsed.placaOutro || parsed.inicio || parsed.fim || parsed.obs || parsed.palhete > 1 || parsed.operacao !== 'Carregamento');
+      }
+    } catch (e) {}
+    return false;
+  });
   
   // Accordion collapsed state: key is date string, value is true/false (collapsed)
   const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
 
-  function AF_getEmpresaId() { return empresa?.id || 'demo'; }
-  const empresaId = AF_getEmpresaId();
+  // Sync state with local draft saving
+  useEffect(() => {
+    const draftData = {
+      operacao,
+      empilhador,
+      turno,
+      placaSelection,
+      placaOutro,
+      tipo,
+      palhete,
+      inicio,
+      fim,
+      obs
+    };
+    localStorage.setItem(draftKey, JSON.stringify(draftData));
+  }, [operacao, empilhador, turno, placaSelection, placaOutro, tipo, palhete, inicio, fim, obs, draftKey]);
+
+  // Sync with prop updates / user changing
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setOperacao(parsed.operacao || 'Carregamento');
+        setEmpilhador(parsed.empilhador || '');
+        setTurno(parsed.turno || 'Diurno');
+        setPlacaSelection(parsed.placaSelection || PLACAS[0]);
+        setPlacaOutro(parsed.placaOutro || '');
+        setTipo(parsed.tipo || 'rota');
+        setPalhete(parsed.palhete || 1);
+        setInicio(parsed.inicio || '');
+        setFim(parsed.fim || '');
+        setObs(parsed.obs || '');
+        setDraftRestored(!!(parsed.empilhador || parsed.placaOutro || parsed.inicio || parsed.fim || parsed.obs || parsed.palhete > 1 || parsed.operacao !== 'Carregamento'));
+      } else {
+        setOperacao('Carregamento');
+        setEmpilhador('');
+        setTurno('Diurno');
+        setPlacaSelection(PLACAS[0]);
+        setPlacaOutro('');
+        setTipo('rota');
+        setPalhete(1);
+        setInicio('');
+        setFim('');
+        setObs('');
+        setDraftRestored(false);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [draftKey]);
+
+  function AF_getEmpresaId() { return empresaId; }
   function dbOk() { return !!db && !!empresaId; }
 
   const pad2 = (num: number) => String(num).padStart(2, '0');
@@ -166,6 +244,8 @@ export default function ArmazemPanel({ user, empresa }: ArmazemPanelProps) {
       setPlacaOutro('');
       setStatusChip('—');
       setActiveTab('hist');
+      setDraftRestored(false);
+      localStorage.removeItem(draftKey);
     } catch (e) {
       alert('Erro ao salvar no banco: ' + e);
     } finally {
@@ -336,7 +416,41 @@ export default function ArmazemPanel({ user, empresa }: ArmazemPanelProps) {
 
       {activeTab === 'form' ? (
         <div className="g-card p-6 flex flex-col gap-5">
-          <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#7cc6ff]">Formulário Operacional de Pátio</h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222d3a] pb-3">
+            <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#7cc6ff]">Formulário Operacional de Pátio</h3>
+            <div className="flex items-center gap-1.5 text-[9px] text-[#22c55e] font-black uppercase tracking-wider bg-[#22c55e]/5 px-2.5 py-1 rounded-lg border border-[#22c55e]/15">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              Salvo automaticamente
+            </div>
+          </div>
+
+          {draftRestored && (
+            <div className="flex items-center justify-between gap-3 bg-amber-500/10 border border-amber-500/25 px-4 py-3 rounded-xl text-xs text-amber-300">
+              <div className="flex items-center gap-2 font-medium">
+                <span>⚡ Dados anteriores restaurados do rascunho salvo!</span>
+              </div>
+              <button 
+                type="button"
+                onClick={() => {
+                  setInicio('');
+                  setFim('');
+                  setPalhete(1);
+                  setObs('');
+                  setPlacaOutro('');
+                  setEmpilhador('');
+                  setPlacaSelection(PLACAS[0]);
+                  setDraftRestored(false);
+                  localStorage.removeItem(draftKey);
+                }}
+                className="text-[9px] uppercase font-black tracking-wider text-amber-400 hover:text-amber-300 transition-colors cursor-pointer"
+              >
+                Limpar formulário
+              </button>
+            </div>
+          )}
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex flex-col gap-1.5">
