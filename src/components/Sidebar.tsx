@@ -138,7 +138,7 @@ export default function Sidebar({
     },
     {
       id: 'picking-dashboard',
-      label: 'BI de Picking',
+      label: 'Dashboard Picking',
       icon: <BarChart2 className="w-4 h-4 text-amber-500" />,
       category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
@@ -522,30 +522,7 @@ export default function Sidebar({
             {!collapsed && <span>{timeStr}</span>}
           </div>
 
-          {/* Theme switch button */}
-          <button 
-            onClick={onToggleTheme}
-            className={`flex items-center justify-center gap-1.5 px-2 py-1 rounded text-[9px] font-sans font-black tracking-wider transition-all cursor-pointer border ${
-              theme === 'dark'
-                ? 'bg-[#11151c]/60 border-[#1c2530] text-gray-300 hover:text-white hover:border-[#1e56f0]/40'
-                : 'bg-white border-slate-100 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-xs'
-            } ${
-              collapsed ? 'w-8 h-8 p-0' : 'w-full'
-            }`}
-            title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
-          >
-            {theme === 'dark' ? (
-              <>
-                <Sun className="w-3 h-3 text-amber-500 animate-pulse-slow" />
-                {!collapsed && <span className="uppercase">Tema Claro</span>}
-              </>
-            ) : (
-              <>
-                <Moon className="w-3 h-3 text-[#1e56f0]" />
-                {!collapsed && <span className="uppercase">Tema Escuro</span>}
-              </>
-            )}
-          </button>
+
 
           {!collapsed && (
             <div className={`w-full py-1 px-2 rounded font-sans font-black text-[8px] tracking-widest text-center border transition-all flex items-center justify-center gap-1 ${

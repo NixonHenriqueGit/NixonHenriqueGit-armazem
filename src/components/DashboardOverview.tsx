@@ -29,7 +29,11 @@ import {
   Briefcase,
   Clock,
   Sparkles,
-  Shield
+  Shield,
+  Sun,
+  Moon,
+  Megaphone,
+  TrendingUp
 } from 'lucide-react';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { db, isCustomFirebaseConnected } from '../firebase';
@@ -435,127 +439,43 @@ export default function DashboardOverview({
   return (
     <div className="flex flex-col gap-6">
       
-      {/* ── LIVE DATA SYNC STATUS BANNER ── */}
-      <AnimatePresence>
-        {showSyncBanner && (
-          <motion.div 
-            initial={{ opacity: 0, height: 0, y: -10 }}
-            animate={{ opacity: 1, height: 'auto', y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -10 }}
-            className="overflow-hidden z-20"
-          >
-            <div className="bg-gradient-to-r from-[#22c55e]/10 to-[#3b82f6]/10 border border-[#22c55e]/20 p-4 rounded-xl flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-[#22c55e]"></span>
-                </div>
-                <div>
-                  <span className="block font-sans font-black text-[10px] uppercase tracking-widest text-[#22c55e]">
-                    Instância de Banco de Dados Ativa • Conexão Segura
-                  </span>
-                  <span className="text-[10px] text-[#6a7d92] block mt-0.5">
-                    Banco de dados Firebase Firestore e regras de segurança da plataforma sincronizadas em tempo real.
-                  </span>
-                </div>
-              </div>
-              <button 
-                onClick={() => setShowSyncBanner(false)}
-                className="text-xs text-[#6a7d92] hover:text-white transition-colors p-1 px-2.5 rounded border border-[#222d3a] hover:bg-[#151b23] cursor-pointer font-bold uppercase tracking-wider text-[9px]"
-              >
-                Ignorar
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      
       {/* ── HEADER INTRO BLOCK ── */}
-      <div className="flex flex-col lg:flex-row justify-between items-stretch gap-6 p-6 welcome-banner rounded-2xl relative overflow-hidden shadow-xl">
-        <div className="absolute right-[-20px] bottom-[-20px] text-9xl select-none opacity-5 pointer-events-none">
+      <div className="flex flex-col lg:flex-row justify-between items-stretch gap-6 p-6 rounded-2xl relative overflow-hidden border border-slate-100 bg-white shadow-xs">
+        <div className="absolute right-[-20px] bottom-[-20px] text-9xl select-none opacity-[0.01] pointer-events-none">
           {user.papel === 'repack' ? '🛠' : user.papel === 'despejo' ? '🗑' : user.papel === 'armazem' ? '📦' : '🚜'}
         </div>
         
-        <div className="flex flex-col md:flex-row gap-5 items-start md:items-center flex-1">
-          {/* Avatar Icon Accent */}
-          <div className={`p-4 rounded-xl flex items-center justify-center border ${
-            user.papel === 'controle' || user.papel === 'admin'
-              ? 'bg-[#22c55e]/10 border-[#22c55e]/30 text-[#22c55e]'
-              : 'bg-[#3b82f6]/10 border-[#3b82f6]/30 text-[#3b82f6]'
-          }`}>
-            {user.papel === 'controle' || user.papel === 'admin' ? (
-              <Sparkles className="w-8 h-8" />
-            ) : (
-              <Briefcase className="w-8 h-8" />
-            )}
-          </div>
-
-          <div className="space-y-2 flex-1">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <h2 className="font-sans font-black text-2xl tracking-tight text-snow leading-none">
-                Colaborador: <span className="text-transparent bg-clip-text bg-gradient-to-r from-snow to-[#f5a623]">{user.nome}</span>
-              </h2>
-              
-              {/* Badges de Cargo e Status */}
-              <div className="flex flex-wrap gap-1.5 items-center">
-                <span className="text-[10px] px-2.5 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/25 text-indigo-300 font-black uppercase tracking-wider flex items-center gap-1">
-                  {getRoleLabel(user.papel)}
-                </span>
-                
-                <span className="text-[9px] px-2 py-0.5 rounded-md bg-[#22c55e]/10 border border-[#22c55e]/25 text-[#22c55e] font-bold uppercase tracking-wider flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-ping" />
-                  Conectado
-                </span>
-              </div>
-            </div>
-
-            <div className="bg-[#f5a623]/10 border border-[#f5a623]/25 rounded-xl p-3.5 mt-2 flex items-start gap-3 max-w-2xl shadow-inner">
-              <span className="text-lg leading-none shrink-0">📢</span>
-              <div className="flex-1">
-                <span className="block text-[10px] font-black uppercase text-[#f5a623] tracking-widest">Informe Operacional Padrão</span>
-                <span className="text-xs text-slate-300 block mt-1 leading-relaxed">
-                  Atenção plena às regras de ouro, preenchimento rigoroso de relatórios diários de picking, e contagem cíclica. Certifique-se de realizar a conferência dos dados antes do encerramento do turno operacional.
-                </span>
-              </div>
-            </div>
-            
-            <p className="text-[10px] text-dim flex items-center gap-1.5 font-bold uppercase tracking-wider pt-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
-              Diretriz Operacional: Respeite rigorosamente as Regras de Ouro de Segurança.
+        <div className="flex flex-col md:flex-row gap-5 items-center flex-1">
+          <div className="flex-1 min-w-0">
+            <span className="text-xs text-slate-400 font-medium">
+              Bem vindo ao
+            </span>
+            <h1 className="font-black text-2xl sm:text-3xl tracking-tight text-slate-800 leading-tight mt-0.5">
+              Armazém Fácil <span className="text-blue-600">Relatórios</span>
+            </h1>
+            <p className="text-xs text-slate-500 mt-1">
+              Agilidade operacional para <span className="text-blue-600 font-semibold">toda a operação.</span>
             </p>
+            <div className="w-12 h-0.5 bg-blue-500 rounded-full mt-3" />
           </div>
         </div>
 
-        {/* Info lateral (Turno, Unidade, Data) */}
-        <div className="flex flex-col sm:flex-row lg:flex-col justify-center gap-3 pl-0 lg:pl-6 border-t lg:border-t-0 lg:border-l border-[#222d3a] pt-4 lg:pt-0 shrink-0 min-w-[200px]">
-          <div className="flex items-center gap-2 text-xs">
-            <Clock className="w-4 h-4 text-dim" />
-            <div>
-              <span className="text-dim block text-[9px] uppercase tracking-wider font-bold">Turno Operacional</span>
-              <span className="text-snow font-mono font-bold text-xs">
-                {new Date().getHours() >= 7 && new Date().getHours() < 19 ? '☀️ Turno Diurno (A)' : '🌙 Turno Noturno (B)'}
+        {/* Info lateral (Apenas Colaborador, sem turno, sem data e sem botão de alertas) */}
+        <div className="flex flex-col justify-center pl-0 lg:pl-6 border-t lg:border-t-0 lg:border-l border-slate-100 pt-4 lg:pt-0 shrink-0 min-w-[240px]">
+          <div className="flex items-center gap-3 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100/80">
+            <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center font-bold text-xs font-mono shrink-0">
+              {user.nome ? user.nome.substring(0, 2).toUpperCase() : 'US'}
+            </div>
+            <div className="min-w-0">
+              <span className="text-slate-400 block text-[9px] uppercase tracking-wider font-bold">Colaborador Ativo</span>
+              <span className="text-slate-700 font-bold text-xs block truncate">
+                {user.nome}
+              </span>
+              <span className="text-[9px] font-medium text-slate-500 block">
+                {getRoleLabel(user.papel)}
               </span>
             </div>
           </div>
-
-          <div className="flex items-center gap-2 text-xs">
-            <Calendar className="w-4 h-4 text-dim" />
-            <div>
-              <span className="text-dim block text-[9px] uppercase tracking-wider font-bold">Data de Trabalho</span>
-              <span className="text-snow font-mono font-semibold text-xs">
-                {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
-              </span>
-            </div>
-          </div>
-
-          {pushStatus !== 'granted' && (
-            <button 
-              onClick={requestPushPermission}
-              className="mt-1 flex-shrink-0 bg-[#f5a623]/10 hover:bg-[#f5a623]/15 border border-[#f5a623]/25 hover:border-[#f5a623]/50 text-[#f5a623] text-[9px] font-sans font-black tracking-wider uppercase px-3 py-1.5 rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              🔔 Habilitar Alertas Push
-            </button>
-          )}
         </div>
       </div>
 

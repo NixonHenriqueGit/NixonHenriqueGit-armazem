@@ -37,13 +37,7 @@ export default function App() {
   const [activePanel, setActivePanel] = useState<string>('landing');
   const [showAuthGate, setShowAuthGate] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    try {
-      return (localStorage.getItem('af-theme') as 'dark' | 'light') || 'light';
-    } catch (e) {
-      return 'light';
-    }
-  });
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [currentTime, setCurrentTime] = useState('');
 
   useEffect(() => {
@@ -58,17 +52,13 @@ export default function App() {
 
   // Sync theme to body element and localStorage
   useEffect(() => {
-    if (theme === 'light') {
-      document.body.classList.add('light-theme');
-    } else {
-      document.body.classList.remove('light-theme');
-    }
+    document.body.classList.add('light-theme');
     try {
-      localStorage.setItem('af-theme', theme);
+      localStorage.setItem('af-theme', 'light');
     } catch (e) {
       // ignore
     }
-  }, [theme]);
+  }, []);
 
   // Sync auth state
   useEffect(() => {
@@ -327,7 +317,7 @@ export default function App() {
       case 'picking-dashboard':
         return {
           breadcrumbs: ['Dashboard', 'Dashboard Picking'],
-          title: 'BI de Picking e Abastecimento',
+          title: 'Dashboard Picking e Abastecimento',
           subtitle: 'Gargalos operacionais, eficiência de turnos, telemetria de empilhadeira e produtividade.',
           color: 'from-[#1e56f0]/10 to-transparent'
         };
