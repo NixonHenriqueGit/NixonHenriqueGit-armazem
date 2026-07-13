@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db, isCustomFirebaseConnected } from '../firebase';
 import { collection, addDoc, onSnapshot, query, where, deleteDoc, doc } from 'firebase/firestore';
 import { Usuario, Empresa, RepackRow } from '../types';
-import { TrendingUp, CheckCircle, Clock, Award, BarChart2 } from 'lucide-react';
+import { TrendingUp, CheckCircle, Clock, Award, BarChart2, BookOpen, Users, FileText, ChevronDown, ChevronUp, AlertCircle, ShieldAlert } from 'lucide-react';
 
 interface RepackPanelProps {
   user: Usuario;
@@ -49,7 +49,7 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
   const [fim, setFim] = useState<string>(() => getDraftValue('fim', ''));
   const [duracao, setDuracao] = useState('00:00:00');
   const [statusMeta, setStatusMeta] = useState('—');
-  const [activeTab, setActiveTab] = useState<'form' | 'stats' | 'hist'>('form');
+  const [activeTab, setActiveTab] = useState<'form' | 'stats' | 'hist' | 'raci' | 'pop' | 'lup'>('form');
   const [repackRows, setRepackRows] = useState<RepackRow[]>([]);
   const [registering, setRegistering] = useState(false);
   const [draftRestored, setDraftRestored] = useState<boolean>(() => {
@@ -97,6 +97,29 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
       console.error(e);
     }
   }, [draftKey]);
+
+  // Listen for navigation links from the sidebar to open RACI, POP, or LUP reference sections
+  useEffect(() => {
+    const handleSidebarAction = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      const action = customEvent.detail;
+      if (action === 'raci') {
+        setActiveTab('raci');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (action === 'pop') {
+        setActiveTab('pop');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (action === 'lup') {
+        setActiveTab('lup');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    window.addEventListener('repack-sidebar-action', handleSidebarAction);
+    return () => {
+      window.removeEventListener('repack-sidebar-action', handleSidebarAction);
+    };
+  }, []);
 
   const toggleDateGroup = (dateKey: string) => {
     setExpandedDates(prev => ({ ...prev, [dateKey]: !prev[dateKey] }));
@@ -238,7 +261,7 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
         </div>
       </div>
 
-      <div className="ptabs border-b border-[#222d3a] flex gap-2">
+      <div className="ptabs border-b border-[#222d3a] flex gap-2 flex-wrap">
         <button 
           onClick={() => setActiveTab('form')}
           className={`ptab py-2 px-6 font-sans font-bold text-xs uppercase cursor-pointer relative ${activeTab === 'form' ? 'text-[#f5a623] border-b-2 border-b-[#f5a623]' : 'text-[#6a7d92] hover:text-[#e8eef5]'}`}
@@ -257,6 +280,31 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
         >
           📋 Histórico <span className="ml-1.5 px-2 py-0.5 rounded-full bg-[#151b23] border border-[#222d3a] text-[10px] text-snow">{repackRows.length}</span>
         </button>
+
+        {activeTab === 'raci' && (
+          <button 
+            type="button"
+            className="ptab py-2 px-6 font-sans font-bold text-xs uppercase cursor-pointer relative text-[#f5a623] border-b-2 border-b-[#f5a623]"
+          >
+            👥 Matriz RACI
+          </button>
+        )}
+        {activeTab === 'pop' && (
+          <button 
+            type="button"
+            className="ptab py-2 px-6 font-sans font-bold text-xs uppercase cursor-pointer relative text-[#f5a623] border-b-2 border-b-[#f5a623]"
+          >
+            📄 Procedimento POP
+          </button>
+        )}
+        {activeTab === 'lup' && (
+          <button 
+            type="button"
+            className="ptab py-2 px-6 font-sans font-bold text-xs uppercase cursor-pointer relative text-[#f5a623] border-b-2 border-b-[#f5a623]"
+          >
+            ⚠️ Lição LUP
+          </button>
+        )}
       </div>
 
       {activeTab === 'stats' && (
@@ -359,7 +407,7 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
         </div>
       )}
 
-      {activeTab === 'form' ? (
+      {activeTab === 'form' && (
         <div className="g-card p-6 flex flex-col gap-5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#222d3a] pb-3">
             <h3 className="font-sans font-bold text-sm tracking-wider uppercase text-[#f5a623]">Configurar Lançamento</h3>
@@ -482,7 +530,9 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
             {registering ? 'Registrando dados...' : '✅ REGISTRAR PRODUTIVIDADE'}
           </button>
         </div>
-      ) : (
+      )}
+
+      {activeTab === 'hist' && (
         <div className="flex flex-col gap-3">
           {(() => {
             const grouped = repackRows.reduce((acc, r) => {
@@ -577,6 +627,208 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
               );
             });
           })()}
+        </div>
+      )}
+
+      {/* ── SEÇÃO DE REFERÊNCIA OPERACIONAL INDEPENDENTE (RACI, POP, LUP) ── */}
+      {activeTab === 'raci' && (
+        <div className="g-card p-6 bg-gradient-to-br from-[#11151c] to-[#151b23] border border-[#222d3a] flex flex-col gap-6">
+          <div className="flex items-center justify-between border-b border-[#222d3a] pb-4 flex-wrap gap-4">
+            <div className="flex items-center gap-2.5">
+              <Users className="w-5 h-5 text-[#f5a623]" />
+              <div>
+                <h3 className="font-sans font-black text-sm tracking-widest text-[#f5a623] uppercase">MATRIZ RACI — FLUXO DE REPACK</h3>
+                <p className="text-[10px] text-[#6a7d92] font-semibold mt-0.5">Quem executa, quem aprova, quem é consultado e informado no processo de Repack.</p>
+              </div>
+            </div>
+            <button 
+              type="button"
+              onClick={() => setActiveTab('form')}
+              className="px-3 py-1.5 bg-[#1e56f0]/10 hover:bg-[#1e56f0]/20 border border-[#1e56f0]/20 text-[#1e56f0] rounded-lg font-bold text-[10px] transition-colors flex items-center gap-1 cursor-pointer uppercase tracking-wider"
+            >
+              ← Voltar ao Formulário
+            </button>
+          </div>
+
+          <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-4">
+            <div className="flex items-center justify-between border-b border-[#222d3a] pb-2 flex-wrap gap-2">
+              <span className="text-[10px] font-black uppercase tracking-widest text-[#6a7d92]">Legenda de Atribuição</span>
+              <div className="flex gap-1.5 text-[8px] font-black flex-wrap">
+                <span className="px-1.5 py-0.5 bg-[#1e56f0]/15 text-blue-400 rounded border border-[#1e56f0]/30">R: RESPONSIBLE</span>
+                <span className="px-1.5 py-0.5 bg-[#22c55e]/15 text-emerald-400 rounded border border-[#22c55e]/30">A: ACCOUNTABLE</span>
+                <span className="px-1.5 py-0.5 bg-amber-500/15 text-amber-400 rounded border border-amber-500/30">C: CONSULTED</span>
+                <span className="px-1.5 py-0.5 bg-purple-500/15 text-purple-400 rounded border border-purple-500/30">I: INFORMED</span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse min-w-[500px]">
+                <thead>
+                  <tr className="border-b border-[#222d3a] text-[#6a7d92] text-[9px] uppercase font-bold tracking-wider">
+                    <th className="py-2 px-1">Atividade Operacional</th>
+                    <th className="py-2 px-1 text-center w-25">Op. Repack</th>
+                    <th className="py-2 px-1 text-center w-25">Supervisor</th>
+                    <th className="py-2 px-1 text-center w-25">Conferente</th>
+                    <th className="py-2 px-1 text-center w-25">Controle (Mesa)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#222d3a] text-snow/90">
+                  <tr className="hover:bg-[#11151c]/40">
+                    <td className="py-3 px-1 font-semibold">1. Segregação de produtos e avarias físicas</td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-amber-500/15 text-amber-400 border border-amber-500/30">C</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
+                  </tr>
+                  <tr className="hover:bg-[#11151c]/40">
+                    <td className="py-3 px-1 font-semibold">2. Execução da reembalagem física (Repack)</td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-purple-500/15 text-purple-400 border border-purple-500/30">I</span></td>
+                  </tr>
+                  <tr className="hover:bg-[#11151c]/40">
+                    <td className="py-3 px-1 font-semibold">3. Registro de tempos e volumes no aplicativo</td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-purple-500/15 text-purple-400 border border-purple-500/30">I</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
+                  </tr>
+                  <tr className="hover:bg-[#11151c]/40">
+                    <td className="py-3 px-1 font-semibold">4. Aprovação de descarte definitivo (DPO)</td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-amber-500/15 text-amber-400 border border-amber-500/30">C</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
+                  </tr>
+                  <tr className="hover:bg-[#11151c]/40">
+                    <td className="py-3 px-1 font-semibold">5. Devolução de caixas íntegras ao estoque de picking</td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
+                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'pop' && (
+        <div className="g-card p-6 bg-gradient-to-br from-[#11151c] to-[#151b23] border border-[#222d3a] flex flex-col gap-6">
+          <div className="flex items-center justify-between border-b border-[#222d3a] pb-4 flex-wrap gap-4">
+            <div className="flex items-center gap-2.5">
+              <FileText className="w-5 h-5 text-[#f5a623]" />
+              <div>
+                <h3 className="font-sans font-black text-sm tracking-widest text-[#f5a623] uppercase">PROCEDIMENTO OPERACIONAL PADRÃO (POP)</h3>
+                <p className="text-[10px] text-[#6a7d92] font-semibold mt-0.5">Instrução de trabalho padrão para triagem, higienização, montagem e registro.</p>
+              </div>
+            </div>
+            <button 
+              type="button"
+              onClick={() => setActiveTab('form')}
+              className="px-3 py-1.5 bg-[#1e56f0]/10 hover:bg-[#1e56f0]/20 border border-[#1e56f0]/20 text-[#1e56f0] rounded-lg font-bold text-[10px] transition-colors flex items-center gap-1 cursor-pointer uppercase tracking-wider"
+            >
+              ← Voltar ao Formulário
+            </button>
+          </div>
+
+          <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-4 text-snow">
+            <div className="flex flex-col gap-3 font-sans text-xs">
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">1</span>
+                <div>
+                  <h5 className="font-bold text-snow uppercase text-[11px]">Segregação e Inspeção das Avarias</h5>
+                  <p className="text-[#6a7d92] mt-0.5">Retirar do fluxo de pátio todas as caixas molhadas, amassadas ou com suspeita de quebra física. Mover para a baia demarcada de repack.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">2</span>
+                <div>
+                  <h5 className="font-bold text-snow uppercase text-[11px]">Abertura do Timer no Aplicativo</h5>
+                  <p className="text-[#6a7d92] mt-0.5">Antes de iniciar a montagem física, acesse o painel, selecione o tipo de embalagem do lote (ex: LATA 350) e registre o horário de início (botão ⏱ Agora).</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">3</span>
+                <div>
+                  <h5 className="font-bold text-snow uppercase text-[11px]">Montagem Física de Caixas Recuperadas</h5>
+                  <p className="text-[#6a7d92] mt-0.5">Higienizar garrafas/latas íntegras com panos limpos. Montar caixas novas respeitando as divisórias Ambev. Descarte cacos e líquidos no dreno ecológico de refugo.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">4</span>
+                <div>
+                  <h5 className="font-bold text-snow uppercase text-[11px]">Fechamento e Registro de Resultados</h5>
+                  <p className="text-[#6a7d92] mt-0.5">Feche as caixas com fita adesiva padrão. Finalize o timer (botão ⏱ Agora), insira a quantidade exata montada e envie. O sistema calcula a eficácia na hora! (Meta Ambev).</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">5</span>
+                <div>
+                  <h5 className="font-bold text-snow uppercase text-[11px]">Destinação do Estoque e Limpeza</h5>
+                  <p className="text-[#6a7d92] mt-0.5">Leve o pallet de repack finalizado de volta ao endereço de estocagem de origem. Varra os detritos da baia de trabalho para evitar acidentes com resíduos.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'lup' && (
+        <div className="g-card p-6 bg-gradient-to-br from-[#11151c] to-[#151b23] border border-[#222d3a] flex flex-col gap-6">
+          <div className="flex items-center justify-between border-b border-[#222d3a] pb-4 flex-wrap gap-4">
+            <div className="flex items-center gap-2.5">
+              <AlertCircle className="w-5 h-5 text-[#f5a623]" />
+              <div>
+                <h3 className="font-sans font-black text-sm tracking-widest text-[#f5a623] uppercase">LUP — LIÇÃO DE UM PONTO</h3>
+                <p className="text-[10px] text-[#6a7d92] font-semibold mt-0.5">Garantia visual Ambev de qualidade para paletização, montagem e amarração.</p>
+              </div>
+            </div>
+            <button 
+              type="button"
+              onClick={() => setActiveTab('form')}
+              className="px-3 py-1.5 bg-[#1e56f0]/10 hover:bg-[#1e56f0]/20 border border-[#1e56f0]/20 text-[#1e56f0] rounded-lg font-bold text-[10px] transition-colors flex items-center gap-1 cursor-pointer uppercase tracking-wider"
+            >
+              ← Voltar ao Formulário
+            </button>
+          </div>
+
+          <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-4 text-snow">
+            <div className="text-xs bg-[#11151c] p-3 rounded-lg border border-[#222d3a] mb-2">
+              <span className="font-bold text-[#f5a623] block text-[10px] uppercase">TEMA DA LIÇÃO:</span>
+              <span className="font-black text-white text-[13px] uppercase">Padrão de Paletização, Amarração de Repack e Filme Stretch</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* DO */}
+              <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 flex flex-col gap-2">
+                <span className="text-[10px] font-black text-emerald-400 tracking-wider flex items-center gap-1">
+                  🟢 CERTO (Padrão de Qualidade)
+                </span>
+                <ul className="text-xs space-y-2 text-[#a0aec0] list-disc list-inside">
+                  <li><strong className="text-white">Amarração cruzada (tijolinho):</strong> caixas travadas por camadas intercaladas.</li>
+                  <li><strong className="text-white">Filme stretch tensionado:</strong> mínimo de 3 voltas na base de madeira e no topo do pallet.</li>
+                  <li><strong className="text-white">Monolote por pallet:</strong> apenas produtos do mesmo lote de validade e SKU no mesmo pallet.</li>
+                  <li><strong className="text-white">Altura de segurança:</strong> empilhamento máximo de até 5 camadas por pallet.</li>
+                </ul>
+              </div>
+
+              {/* DON'T */}
+              <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 flex flex-col gap-2">
+                <span className="text-[10px] font-black text-red-400 tracking-wider flex items-center gap-1">
+                  🔴 ERRADO (Risco de Tombamento / Quebra)
+                </span>
+                <ul className="text-xs space-y-2 text-[#a0aec0] list-disc list-inside">
+                  <li><strong className="text-white">Empilhamento em coluna direta:</strong> sem cruzamento de camadas (pallet tomba fácil).</li>
+                  <li><strong className="text-white">Falta de amarração na base:</strong> stretch aplicado sem prender na madeira do pallet.</li>
+                  <li><strong className="text-white">SKUs ou validades misturadas:</strong> gera quebra de FEFO e descontrole de inventário.</li>
+                  <li><strong className="text-white">Caixas rasgadas/úmidas:</strong> utilizar caixas danificadas na base causa desmoronamento.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

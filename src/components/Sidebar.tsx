@@ -29,7 +29,10 @@ import {
   Shield,
   HelpCircle,
   Clock,
-  ClipboardList
+  ClipboardList,
+  Users,
+  FileText,
+  AlertCircle
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -80,6 +83,17 @@ export default function Sidebar({
   const handleNavClick = (tabId: string) => {
     onSelectTab(tabId);
     setMobileOpen(false);
+  };
+
+  const handleSubClick = (subId: string) => {
+    if (activeTab !== 'repack') {
+      onSelectTab('repack');
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('repack-sidebar-action', { detail: subId }));
+      }, 150);
+    } else {
+      window.dispatchEvent(new CustomEvent('repack-sidebar-action', { detail: subId }));
+    }
   };
 
   // Let's model all potential navigation items with category tags
@@ -271,28 +285,59 @@ export default function Sidebar({
 
   const renderNavItem = (item: typeof navItems[0]) => {
     const isActive = activeTab === item.id;
+    const isRepack = item.id === 'repack';
 
     return (
-      <button
-        key={item.id}
-        onClick={() => handleNavClick(item.id)}
-        className={`w-full flex items-center px-2.5 py-1.5 rounded-md border-none text-left cursor-pointer transition-all relative overflow-hidden group ${
-          isActive 
-            ? 'bg-[#1e56f0]/10 text-[#1e56f0] border border-[#1e56f0]/15 font-bold' 
-            : 'text-slate-500 dark:text-[#6a7d92] hover:text-[#1e56f0] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#151b23]'
-        }`}
-        title={item.label}
-      >
-        {isActive && (
-          <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#1e56f0] rounded-r" />
+      <div key={item.id} className="w-full flex flex-col gap-0.5">
+        <button
+          onClick={() => handleNavClick(item.id)}
+          className={`w-full flex items-center px-2.5 py-1.5 rounded-md border-none text-left cursor-pointer transition-all relative overflow-hidden group ${
+            isActive 
+              ? 'bg-[#1e56f0]/10 text-[#1e56f0] border border-[#1e56f0]/15 font-bold' 
+              : 'text-slate-500 dark:text-[#6a7d92] hover:text-[#1e56f0] dark:hover:text-white hover:bg-slate-100 dark:hover:bg-[#151b23]'
+          }`}
+          title={item.label}
+        >
+          {isActive && (
+            <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-[#1e56f0] rounded-r" />
+          )}
+          <span className="mr-2 flex-shrink-0 opacity-85 group-hover:opacity-100 transition-opacity [&_svg]:w-3.5 [&_svg]:h-3.5 flex items-center justify-center">
+            {item.icon}
+          </span>
+          <span className="font-sans font-medium text-[9.5px] uppercase tracking-widest flex-1 truncate transition-colors duration-200">
+            {item.label}
+          </span>
+        </button>
+
+        {isRepack && !collapsed && (
+          <div className="pl-6 pr-1 py-1 flex flex-col gap-1 border-l border-[#1c2530] ml-4 mt-0.5 mb-2">
+            <button
+              type="button"
+              onClick={() => handleSubClick('raci')}
+              className="text-left py-1 text-[8px] font-sans font-bold tracking-wider uppercase text-[#6a7d92] hover:text-[#f5a623] transition-colors flex items-center gap-1.5 bg-transparent border-none cursor-pointer"
+            >
+              <Users className="w-2.5 h-2.5 text-[#f5a623]" />
+              Matriz RACI
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSubClick('pop')}
+              className="text-left py-1 text-[8px] font-sans font-bold tracking-wider uppercase text-[#6a7d92] hover:text-[#f5a623] transition-colors flex items-center gap-1.5 bg-transparent border-none cursor-pointer"
+            >
+              <FileText className="w-2.5 h-2.5 text-[#f5a623]" />
+              Procedimento POP
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSubClick('lup')}
+              className="text-left py-1 text-[8px] font-sans font-bold tracking-wider uppercase text-[#6a7d92] hover:text-[#f5a623] transition-colors flex items-center gap-1.5 bg-transparent border-none cursor-pointer"
+            >
+              <AlertCircle className="w-2.5 h-2.5 text-[#f5a623]" />
+              Lição LUP
+            </button>
+          </div>
         )}
-        <span className="mr-2 flex-shrink-0 opacity-85 group-hover:opacity-100 transition-opacity [&_svg]:w-3.5 [&_svg]:h-3.5 flex items-center justify-center">
-          {item.icon}
-        </span>
-        <span className="font-sans font-medium text-[9.5px] uppercase tracking-widest flex-1 truncate transition-colors duration-200">
-          {item.label}
-        </span>
-      </button>
+      </div>
     );
   };
 

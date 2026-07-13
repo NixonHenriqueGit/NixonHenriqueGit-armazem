@@ -33,7 +33,9 @@ import {
   Sun,
   Moon,
   Megaphone,
-  TrendingUp
+  TrendingUp,
+  Zap,
+  Radio
 } from 'lucide-react';
 import { collection, onSnapshot, query } from 'firebase/firestore';
 import { db, isCustomFirebaseConnected } from '../firebase';
@@ -478,6 +480,123 @@ export default function DashboardOverview({
           </div>
         </div>
       </div>
+
+
+      {/* ── MANUAL DE INTEGRAÇÃO E OBJETIVOS DO ARMAZÉM FÁCIL ── */}
+      <div className="g-card p-6 bg-gradient-to-br from-[var(--surf)] to-[var(--surf2)] border border-[var(--edge)] flex flex-col gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--edge)] pb-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-500/10 text-blue-600 rounded-lg shrink-0">
+              <Sparkles className="w-5 h-5 text-blue-500" />
+            </div>
+            <div>
+              <h2 className="font-sans font-black text-sm tracking-widest text-[#f5a623] uppercase">
+                💡 Guia Operacional: Como Funciona o Nosso Armazém Fácil
+              </h2>
+              <p className="text-[10px] text-slate-400 font-semibold mt-0.5 uppercase tracking-wider">
+                O portal oficial de produtividade, agilidade e segurança para o nosso time do armazém
+              </p>
+            </div>
+          </div>
+          <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-[9px] text-blue-500 font-black uppercase tracking-widest self-start sm:self-center">
+            Padrão Ambev de Excelência
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* Coluna 1: Nosso Objetivo (5/12 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-4 bg-slate-50 dark:bg-[#111827]/40 p-5 rounded-xl border border-[var(--edge)]">
+            <h3 className="font-sans font-black text-xs text-slate-700 dark:text-snow uppercase tracking-wider flex items-center gap-2">
+              <Activity className="w-4 h-4 text-blue-600" /> Nosso Objetivo Principal
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              O <strong>Armazém Fácil</strong> foi desenvolvido para dar voz, agilidade e transparência a quem faz o armazém girar todos os dias. Nosso foco é <strong>facilitar o seu trabalho na pista e no galpão</strong>, garantindo que toda a sua produtividade seja devidamente registrada de forma rápida, moderna e segura.
+            </p>
+            <div className="flex flex-col gap-2.5 mt-2">
+              <div className="flex items-start gap-2.5">
+                <span className="text-emerald-500 font-bold text-xs shrink-0">✓</span>
+                <span className="text-xs text-slate-600 dark:text-slate-400"><strong>Zero Papel:</strong> Chega de pranchetas, canetas perdidas ou fichas rasgadas.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="text-emerald-500 font-bold text-xs shrink-0">✓</span>
+                <span className="text-xs text-slate-600 dark:text-slate-400"><strong>Visibilidade:</strong> Sua produção diária vai direto para os indicadores do turno.</span>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <span className="text-emerald-500 font-bold text-xs shrink-0">✓</span>
+                <span className="text-xs text-slate-600 dark:text-slate-400"><strong>Alinhamento:</strong> Informação rápida que evita erros de estoque e retrabalho.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Coluna 2: Como Funciona no Dia a Dia (7/12 cols) */}
+          <div className="lg:col-span-7 flex flex-col gap-4 justify-center">
+            <h3 className="font-sans font-black text-xs text-slate-700 dark:text-snow uppercase tracking-wider flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-blue-600" /> Como a Plataforma Funciona?
+            </h3>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Passo 1 */}
+              <div className="flex gap-3">
+                <span className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-bold text-blue-600 text-xs shrink-0 mt-0.5">1</span>
+                <div>
+                  <h4 className="font-sans font-black text-[11px] text-slate-700 dark:text-snow uppercase tracking-wider">Identifique seu Papel</h4>
+                  <p className="text-[11px] text-slate-400 leading-normal mt-0.5">
+                    Seja você do Repack, Despejo, Quebras, Validades ou Empilhadeira, cada operador possui telas exclusivas adaptadas para sua função.
+                  </p>
+                </div>
+              </div>
+
+              {/* Passo 2 */}
+              <div className="flex gap-3">
+                <span className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-bold text-blue-600 text-xs shrink-0 mt-0.5">2</span>
+                <div>
+                  <h4 className="font-sans font-black text-[11px] text-slate-700 dark:text-snow uppercase tracking-wider">Lançamento em Segundos</h4>
+                  <p className="text-[11px] text-slate-400 leading-normal mt-0.5">
+                    Durante o turno, registre suas atividades diretamente na tela (ex: pallets finalizados, avarias detectadas ou volumes descarregados).
+                  </p>
+                </div>
+              </div>
+
+              {/* Passo 3 */}
+              <div className="flex gap-3">
+                <span className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-bold text-blue-600 text-xs shrink-0 mt-0.5">3</span>
+                <div>
+                  <h4 className="font-sans font-black text-[11px] text-slate-700 dark:text-snow uppercase tracking-wider">Conectado com a Mesa</h4>
+                  <p className="text-[11px] text-slate-400 leading-normal mt-0.5">
+                    Os dados lançados são recebidos instantaneamente pela supervisão e conferência, agilizando liberações e tomadas de decisão rápidas.
+                  </p>
+                </div>
+              </div>
+
+              {/* Passo 4 */}
+              <div className="flex gap-3">
+                <span className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-bold text-blue-600 text-xs shrink-0 mt-0.5">4</span>
+                <div>
+                  <h4 className="font-sans font-black text-[11px] text-slate-700 dark:text-snow uppercase tracking-wider">Padrão na Ponta dos Dedos</h4>
+                  <p className="text-[11px] text-slate-400 leading-normal mt-0.5">
+                    Consulte os Procedimentos Operacionais Padrão (POP), Matriz RACI de responsabilidades e as Lições de Um Ponto (LUP) direto no app.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Rodapé motivacional de segurança */}
+        <div className="bg-[#1e56f0]/5 border border-[#1e56f0]/15 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <span className="text-xl shrink-0">🛡️</span>
+            <div>
+              <p className="text-xs font-bold text-slate-700 dark:text-snow uppercase tracking-wide">Segurança em Primeiro Lugar sempre!</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">O Armazém Fácil te lembra de operar empilhadeiras no limite de velocidade e usar todos os EPIs obrigatórios.</p>
+            </div>
+          </div>
+          <span className="text-xs text-slate-400 shrink-0 font-medium italic">
+            "Fazer o Certo da Maneira Certa!"
+          </span>
+        </div>
+      </div>
+
 
       {/* ── KPI HIGHLIGHT CARDS (Only in Controle/Supervisor mode) ── */}
       {user.isControle && (
