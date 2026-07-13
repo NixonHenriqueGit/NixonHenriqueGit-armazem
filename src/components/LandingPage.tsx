@@ -74,80 +74,73 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
   const modulosLanding = [
     {
       nome: 'Repack (Reembalagem)',
-      icon: <RefreshCw className="w-6 h-6 text-[#1e56f0]" />,
-      desc: 'Monitore a reembalagem de produtos avariados e acompanhe o rendimento individual de cada colaborador.',
-      cor: '#1e56f0',
+      icon: <RefreshCw className="w-6 h-6 text-blue-700" />,
+      desc: 'Monitore a reembalagem de produtos avariados e acompanhe o rendimento individual de cada colaborador com dados agregados na hora.',
       badge: 'Produtividade'
     },
     {
       nome: 'Despejo & Descarte',
-      icon: <Trash2 className="w-6 h-6 text-[#06b6d4]" />,
-      desc: 'Controle rigoroso dos produtos descartados com fluxo de aprovações para eliminar desperdícios.',
-      cor: '#06b6d4',
+      icon: <Trash2 className="w-6 h-6 text-blue-700" />,
+      desc: 'Controle em tempo real de produtos descartados com fluxo de aprovações automáticas para eliminar tempos mortos.',
       badge: 'Auditoria'
     },
     {
       nome: 'Abastecimento & Empilhador',
-      icon: <Truck className="w-6 h-6 text-[#3b82f6]" />,
-      desc: 'Monitore as ordens de reabastecimento de picking e controle os checklists de segurança das empilhadeiras em tempo real.',
-      cor: '#3b82f6',
+      icon: <Truck className="w-6 h-6 text-blue-700" />,
+      desc: 'Monitore ordens de reabastecimento de picking e vistorias de segurança das empilhadeiras instantaneamente.',
       badge: 'Eficiência'
     },
     {
       nome: 'Quebras & Perdas',
-      icon: <AlertTriangle className="w-6 h-6 text-[#ef4444]" />,
-      desc: 'Registre na hora avarias físicas, vazamentos e quebras, identificando instantaneamente as causas.',
-      cor: '#ef4444',
+      icon: <AlertTriangle className="w-6 h-6 text-red-600" />,
+      desc: 'Registre avarias físicas, vazamentos e quebras na mesma hora. Sem planilhas locais lentas, os dados vão direto para o dashboard.',
       badge: 'Redução de Custos'
     },
     {
       nome: 'Validades (FEFO/PVPS)',
-      icon: <Calendar className="w-6 h-6 text-[#8b5cf6]" />,
-      desc: 'Evite a perda de mercadorias no estoque. Alertas inteligentes notificam os produtos mais próximos do vencimento.',
-      cor: '#8b5cf6',
+      icon: <Calendar className="w-6 h-6 text-blue-700" />,
+      desc: 'Evite perdas no estoque por vencimento. Alertas inteligentes atualizam de forma rápida para ações preventivas de venda.',
       badge: 'Prevenção'
     },
     {
       nome: 'Blitz de Refugo',
-      icon: <Search className="w-6 h-6 text-[#3b82f6]" />,
-      desc: 'Inspeções técnicas preventivas nos paletes de refugo para resgatar itens bons e treinar as equipes.',
-      cor: '#3b82f6',
+      icon: <Search className="w-6 h-6 text-blue-700" />,
+      desc: 'Inspeções técnicas nos paletes para resgate de itens e geração imediata de indicadores de treinamento de equipe.',
       badge: 'Qualidade'
     },
     {
       nome: 'Picking (Separação)',
-      icon: <Package className="w-6 h-6 text-[#10b981]" />,
-      desc: 'Acompanhe as metas e a performance dos operadores de picking, garantindo agilidade na expedição.',
-      cor: '#10b981',
+      icon: <Package className="w-6 h-6 text-blue-700" />,
+      desc: 'Acompanhe metas e performance dos operadores em tempo real para tomada de decisão ágil na expedição.',
       badge: 'Operação'
     }
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#f8fafc] text-[#1e293b] relative z-10 selection:bg-[#1e56f0] selection:text-white">
+    <div className="min-h-screen flex flex-col bg-blue-50/40 text-blue-900 relative z-10 selection:bg-blue-600 selection:text-white">
       
       {/* ── TOP NAV BAR ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 h-16 px-6 md:px-12 bg-white/95 backdrop-blur-md border-b border-slate-200 flex items-center justify-between shadow-sm select-none">
+      <nav className="fixed top-0 left-0 right-0 z-50 h-16 px-6 md:px-12 bg-white/95 backdrop-blur-md border-b border-blue-100 flex items-center justify-between shadow-xs select-none">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <div className="w-9 h-9 rounded-lg bg-white flex items-center justify-center shadow-sm border border-slate-100">
+          <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center shadow-xs border border-blue-100">
             <BrandLogo size="sm" variant="icon-only" />
           </div>
           <div className="flex items-center gap-1 font-sans">
-            <span className="font-light text-slate-800 text-sm font-semibold tracking-wider">PAU</span>
-            <span className="font-black text-sm text-[#1e56f0] tracking-wider">BRASIL</span>
+            <span className="font-semibold text-blue-900 text-sm tracking-wider">PAU</span>
+            <span className="font-black text-sm text-blue-700 tracking-wider border-l border-blue-200 pl-1 ml-1">BRASIL</span>
           </div>
         </div>
 
         <div className="hidden md:flex items-center gap-8">
-          <a href="#como" className="text-[11px] font-bold tracking-wider text-[#64748b] hover:text-[#0f172a] transition-colors uppercase">O que é?</a>
-          <a href="#modulos" className="text-[11px] font-bold tracking-wider text-[#64748b] hover:text-[#0f172a] transition-colors uppercase">Módulos</a>
-          <a href="#fluxo" className="text-[11px] font-bold tracking-wider text-[#64748b] hover:text-[#0f172a] transition-colors uppercase">Funcionamento</a>
-          <a href="#vantagens" className="text-[11px] font-bold tracking-wider text-[#64748b] hover:text-[#0f172a] transition-colors uppercase">Vantagens</a>
+          <a href="#como" className="text-[11px] font-bold tracking-wider text-blue-600 hover:text-blue-950 transition-colors uppercase">Agilidade</a>
+          <a href="#modulos" className="text-[11px] font-bold tracking-wider text-blue-600 hover:text-blue-950 transition-colors uppercase">Acompanhamento</a>
+          <a href="#fluxo" className="text-[11px] font-bold tracking-wider text-blue-600 hover:text-blue-950 transition-colors uppercase">Registrou, Atualizou</a>
+          <a href="#vantagens" className="text-[11px] font-bold tracking-wider text-blue-600 hover:text-blue-950 transition-colors uppercase">Benefícios</a>
           <button 
             onClick={onEnterApp}
-            className="font-sans text-xs font-black tracking-[1.5px] uppercase bg-[#1e56f0] text-white px-5 py-2.5 rounded-lg hover:bg-[#1848c8] hover:shadow-[0_4px_15px_rgba(30,86,240,0.25)] transition-all cursor-pointer flex items-center gap-1.5 border-none"
+            className="font-sans text-xs font-black tracking-[1.5px] uppercase bg-blue-600 text-white px-5 py-2.5 rounded-lg hover:bg-blue-700 hover:shadow-md hover:shadow-blue-200 transition-all cursor-pointer flex items-center gap-1.5 border-none"
           >
-            Acessar Sistema <ArrowRight className="w-3.5 h-3.5 stroke-[3px]" />
+            Acessar Painel de Controle <ArrowRight className="w-3.5 h-3.5 stroke-[3px]" />
           </button>
         </div>
 
@@ -155,7 +148,7 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
         <div className="flex md:hidden">
           <button 
             onClick={onEnterApp}
-            className="text-xs font-black tracking-[1px] uppercase bg-[#1e56f0] text-white px-4 py-2 rounded-lg border-none"
+            className="text-xs font-black tracking-[1px] uppercase bg-blue-600 text-white px-4 py-2 rounded-lg border-none"
           >
             Entrar
           </button>
@@ -166,81 +159,84 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
       {/* ── HERO SECTION ── */}
       <header className="min-h-screen flex flex-col items-center justify-center pt-28 pb-16 px-6 text-center max-w-5xl mx-auto">
 
-        <div className="inline-flex items-center gap-2.5 font-sans text-[10px] font-black uppercase tracking-[4px] text-slate-700 bg-slate-100 border border-slate-200 px-5 py-2 rounded-full mb-6 select-none shadow-xs">
-          <span className="w-2 h-2 bg-[#1e56f0] rounded-full animate-pulse-slow"></span>
-          <span>Mesa de Controle Operacional • Guarabira</span>
+        <div className="inline-flex items-center gap-2.5 font-sans text-[10px] font-black uppercase tracking-[4px] text-blue-700 bg-blue-50 border border-blue-100 px-5 py-2 rounded-full mb-6 select-none shadow-xs">
+          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+          <span>Mesa de Controle Logístico • Alta Velocidade</span>
         </div>
 
-        <h1 className="font-sans font-black text-4xl sm:text-5xl md:text-6xl leading-[1.1] tracking-tight mb-6 text-[#0f172a]">
-          Decisões Rápidas e <br />
-          <span className="text-[#1e56f0] bg-gradient-to-r from-[#1e56f0] to-[#1848c8] bg-clip-text text-transparent">Operação 100% Real-Time.</span>
+        <h1 className="font-sans font-black text-4xl sm:text-5xl md:text-6xl leading-[1.1] tracking-tight mb-6 text-blue-950">
+          DECISÕES EM SEGUNDOS.<br />
+          <span className="text-blue-600 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">ACOMPANHAMENTOS REAL-TIME.</span>
         </h1>
 
-        <p className="text-sm sm:text-base md:text-lg text-[#475569] max-w-3xl leading-relaxed mb-8">
-          Substitua o preenchimento manual de planilhas por <strong className="text-[#0f172a]">automação instantânea</strong>. Tudo que é registrado pelos operadores no pátio atualiza em tempo real, gerando <strong className="text-[#1e56f0]">linhas de tendência</strong> automáticas, <strong className="text-[#1e56f0]">alertas de anomalia</strong> imediatos e total validação pela Mesa de Controle.
+        <p className="text-sm sm:text-base md:text-lg text-blue-700/80 max-w-3xl leading-relaxed mb-8 font-medium">
+          Diga adeus à lentidão operacional e à burocracia. Uma plataforma sob medida desenhada para garantir <strong className="text-blue-950">agilidade de resposta máxima</strong> na logística do pátio: <span className="text-blue-700 font-black underline decoration-2 decoration-emerald-500">Registrou, atualizou!</span> Informações consolidadas na mesma hora para decisões automáticas.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14 w-full sm:w-auto">
           <button 
             onClick={onEnterApp} 
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#1e56f0] text-white font-black text-xs uppercase tracking-wider px-8 py-4 rounded-xl shadow-[0_4px_15px_rgba(30,86,240,0.25)] hover:bg-[#1848c8] hover:shadow-[0_8px_25px_rgba(30,86,240,0.35)] hover:-translate-y-0.5 transition-all text-center cursor-pointer border-none"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-black text-xs uppercase tracking-wider px-8 py-4 rounded-xl shadow-md shadow-blue-200 hover:bg-blue-700 hover:-translate-y-0.5 transition-all text-center cursor-pointer border-none"
           >
-            Entrar na Plataforma <ArrowRight className="w-4 h-4 stroke-[2.5px]" />
+            Acessar Sistema Agora <ArrowRight className="w-4 h-4 stroke-[2.5px]" />
           </button>
 
           <a 
             href="#como" 
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold text-xs uppercase tracking-wider px-6 py-4 rounded-xl transition-all text-center"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 bg-white hover:bg-blue-50 border border-blue-150 text-blue-700 hover:text-blue-900 font-bold text-xs uppercase tracking-wider px-6 py-4 rounded-xl transition-all text-center"
           >
-            Entenda Como Funciona
+            Como Funciona a Velocidade?
           </a>
         </div>
 
         {/* Dynamic visual dashboard teaser */}
-        <div className="app-preview w-full max-w-4xl bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-xl">
-          <div className="preview-bar bg-slate-50 border-b border-slate-200 px-4 py-3.5 flex items-center justify-between">
+        <div className="app-preview w-full max-w-4xl bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-xl shadow-blue-100/40">
+          <div className="preview-bar bg-blue-50/50 border-b border-blue-100 px-4 py-3.5 flex items-center justify-between">
             <div className="flex gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-200"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-200"></span>
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-200"></span>
             </div>
-            <div className="flex-1 bg-white border border-slate-200 rounded-lg py-1 px-4 text-[9px] font-mono text-slate-400 max-w-md mx-auto">
-              paubrasil.com/painel/tempo-real
+            <div className="flex-1 bg-white border border-blue-100 rounded-lg py-1 px-4 text-[9px] font-mono text-blue-400 max-w-md mx-auto">
+              paubrasil.com/mesa-de-controle/operacoes-fefo-repack
             </div>
             <div className="w-12 text-right flex items-center justify-end gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-[9px] font-mono text-emerald-600 font-bold">LIVE</span>
+              <span className="text-[9px] font-mono text-emerald-600 font-bold">REAL-TIME</span>
             </div>
           </div>
-          <div className="bg-[#fafbfc] p-6 text-left">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 pb-3 gap-2">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-700">📊 Painel Geral de Performance e Tomada de Decisão</span>
-              <span className="text-[10px] text-slate-400 font-mono">Sincronizado em tempo real</span>
+          <div className="bg-white p-6 text-left">
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between border-b border-blue-50 pb-3 gap-2">
+              <span className="text-xs font-black uppercase tracking-wider text-blue-900">📊 Estatísticas e Indicadores Consolidados</span>
+              <span className="text-[10px] text-emerald-600 font-mono flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                Nuvem Ativa & Sincronizada
+              </span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-white border border-slate-200 rounded-xl relative overflow-hidden shadow-sm">
-                <span className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Status Operação</span>
-                <span className="font-sans font-black text-2xl text-[#1e56f0]">100% Ativa</span>
-                <span className="block text-[9px] text-emerald-600 mt-1.5">✓ Atualizações em milissegundos</span>
-                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#1e56f0] rounded-full"></div>
+              <div className="p-4 bg-blue-50/30 border border-blue-100 rounded-xl relative overflow-hidden">
+                <span className="block text-[10px] uppercase font-bold text-blue-500 mb-1">Velocidade Analítica</span>
+                <span className="font-sans font-black text-2xl text-blue-950">Sub-Segundo</span>
+                <span className="block text-[9px] text-blue-500 mt-1.5">✓ Sem redigitação de dados</span>
+                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
               </div>
-              <div className="p-4 bg-white border border-slate-200 rounded-xl relative overflow-hidden shadow-sm">
-                <span className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Preenchimento</span>
-                <span className="font-sans font-black text-2xl text-emerald-600">Automático</span>
-                <span className="block text-[9px] text-slate-500 mt-1.5">✓ Fim das planilhas manuais</span>
+              <div className="p-4 bg-blue-50/30 border border-blue-100 rounded-xl relative overflow-hidden">
+                <span className="block text-[10px] uppercase font-bold text-blue-500 mb-1">Acompanhamento</span>
+                <span className="font-sans font-black text-2xl text-emerald-600">100% Direto</span>
+                <span className="block text-[9px] text-blue-500 mt-1.5">✓ Salvou, atualizou os gráficos</span>
                 <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
               </div>
-              <div className="p-4 bg-white border border-slate-200 rounded-xl relative overflow-hidden shadow-sm">
-                <span className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Alertas Anomalias</span>
-                <span className="font-sans font-black text-2xl text-red-500">Monitorado</span>
-                <span className="block text-[9px] text-red-500 mt-1.5">⚠ Detecção rápida de falhas</span>
-                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-red-500 rounded-full animate-ping"></div>
+              <div className="p-4 bg-blue-50/30 border border-blue-100 rounded-xl relative overflow-hidden">
+                <span className="block text-[10px] uppercase font-bold text-blue-500 mb-1">Tendência de Desvios</span>
+                <span className="font-sans font-black text-2xl text-blue-950">Mapeada</span>
+                <span className="block text-[9px] text-blue-500 mt-1.5">✓ Visualização imediata de gargalos</span>
+                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
               </div>
-              <div className="p-4 bg-white border border-slate-200 rounded-xl relative overflow-hidden shadow-sm">
-                <span className="block text-[10px] uppercase font-bold text-slate-400 mb-1">Mesa de Controle</span>
-                <span className="font-sans font-black text-2xl text-slate-800">Verificado</span>
-                <span className="block text-[#1e56f0] text-[9px] mt-1.5">✓ Dados auditáveis em nuvem</span>
-                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#1e56f0] rounded-full"></div>
+              <div className="p-4 bg-blue-50/30 border border-blue-100 rounded-xl relative overflow-hidden">
+                <span className="block text-[10px] uppercase font-bold text-blue-500 mb-1">Sincronização de Pátio</span>
+                <span className="font-sans font-black text-2xl text-blue-900">Automatizada</span>
+                <span className="block text-blue-600 text-[9px] mt-1.5">✓ Ligação direta com a Mesa</span>
+                <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
               </div>
             </div>
           </div>
@@ -248,70 +244,72 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
       </header>
 
       {/* ── SEÇÃO EXPLICATIVA: O QUE É O SISTEMA? ── */}
-      <section id="como" className="py-20 border-t border-b border-slate-200 bg-white">
+      <section id="como" className="py-24 border-t border-b border-blue-100 bg-white">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
             
             <div className="md:col-span-6 space-y-5 text-left">
-              <span className="font-sans font-bold text-xs uppercase tracking-[3px] text-[#1e56f0]">SOBRE A DISTRIBUIDORA PAU BRASIL</span>
-              <h2 className="font-sans font-black text-3xl md:text-4xl tracking-tight leading-tight text-slate-900">
-                Agilidade no pátio, <br />
-                Decisão rápida no controle.
+              <span className="font-sans font-bold text-xs uppercase tracking-[3px] text-blue-600">MÁXIMA VELOCIDADE DE RETORNO</span>
+              <h2 className="font-sans font-black text-3xl md:text-4xl tracking-tight leading-tight text-blue-950">
+                Não é sobre ser fácil.<br />
+                É sobre ser Extremamente Ágil.
               </h2>
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Nós sabemos que o Retorno de Rota exige agilidade absoluta. Nossa plataforma foi feita para <strong className="text-slate-900">acelerar o preenchimento de planilhas</strong> que agora é feito de forma 100% automática, trazendo foco à <strong className="text-slate-900">tomada de decisões ágeis</strong> baseadas em dados em tempo real.
+              <p className="text-sm text-blue-800/80 leading-relaxed">
+                No CD da Pau Brasil Distribuidora Ambev, o fluxo do Retorno de Rota demanda reações rápidas. Nossa ferramenta foi desenvolvida para <strong className="text-blue-950">aniquilar o desperdício de tempo</strong>. Cada reembalagem registrada ou descarte lançado sincroniza em nuvem no mesmo milissegundo, permitindo monitoramento de metas em tempo real pela Mesa de Controle.
               </p>
               <div className="space-y-4 pt-2">
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 w-5 h-5 rounded-full bg-[#1e56f0]/15 text-[#1e56f0] flex items-center justify-center shrink-0">
+                  <div className="mt-1 w-5 h-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-100">
                     <Check className="w-3 h-3 stroke-[3px]" />
                   </div>
                   <div>
-                    <strong className="text-xs uppercase text-slate-800 tracking-wider block">Preenchimento Automático</strong>
-                    <span className="text-xs text-slate-500">Esqueça a redigitação manual de planilhas. Todo registro no pátio alimenta o banco de dados e calcula as métricas de forma automatizada.</span>
+                    <strong className="text-xs uppercase text-blue-950 tracking-wider block font-black">Acompanhamentos Automáticos e Diretos</strong>
+                    <span className="text-xs text-blue-600/80">Esqueça a necessidade de compilar ou enviar relatórios semanais. Ao registrar qualquer ocorrência ou blitz, os rankings e dashboards de quebras se atualizam instantaneamente.</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 w-5 h-5 rounded-full bg-[#1e56f0]/15 text-[#1e56f0] flex items-center justify-center shrink-0">
+                  <div className="mt-1 w-5 h-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-100">
                     <Check className="w-3 h-3 stroke-[3px]" />
                   </div>
                   <div>
-                    <strong className="text-xs uppercase text-slate-800 tracking-wider block">Monitoramento 100% Real-Time</strong>
-                    <span className="text-xs text-slate-500">Toda quebra, avaria ou palete conferido atualiza na hora, permitindo que a mesa de controle Ambev acompanhe a operação ao vivo.</span>
+                    <strong className="text-xs uppercase text-blue-950 tracking-wider block font-black">Mapeamento Imediato de Tendências</strong>
+                    <span className="text-xs text-blue-600/80">Veja de forma ágil onde ocorrem os maiores gargalos, quais rotas trazem mais produtos avariados e quem são os operadores mais produtivos.</span>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 w-5 h-5 rounded-full bg-[#1e56f0]/15 text-[#1e56f0] flex items-center justify-center shrink-0">
+                  <div className="mt-1 w-5 h-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center shrink-0 border border-blue-100">
                     <Check className="w-3 h-3 stroke-[3px]" />
                   </div>
                   <div>
-                    <strong className="text-xs uppercase text-slate-800 tracking-wider block">Tendências & Alertas de Anomalia</strong>
-                    <span className="text-xs text-slate-500">Com linhas de tendência inteligentes e alertas visuais de anomalias, sua distribuidora antecipa problemas e age imediatamente no controle físico.</span>
+                    <strong className="text-xs uppercase text-blue-950 tracking-wider block font-black">Planos de Ação e Resoluções no Ato</strong>
+                    <span className="text-xs text-blue-600/80">Abra tratativas e planos de ação 5W2H rápidos para solucionar anomalias recorrentes diretamente no sistema, sem perder o foco na operação física.</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="md:col-span-6 bg-slate-50 border border-slate-200 p-6 rounded-2xl relative shadow-sm">
-              <div className="absolute -top-3 -right-3 bg-gradient-to-br from-[#1e56f0] to-[#12389d] text-white text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-md">
-                ★ 100% Digital e Real-Time
+            <div className="md:col-span-6 bg-blue-50/50 border border-blue-100 p-6 rounded-2xl relative shadow-xs">
+              <div className="absolute -top-3 -right-3 bg-blue-600 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full shadow-sm">
+                ⚡ PRODUTIVIDADE OPERACIONAL
               </div>
-              <h3 className="font-sans font-black text-xs uppercase tracking-widest text-[#1e56f0] mb-4">💡 FIM DOS ATRASOS E CONTROLE MANUAL:</h3>
+              <h3 className="font-sans font-black text-xs uppercase tracking-widest text-blue-800 mb-4">💡 DIFERENÇA EM AGILIDADE:</h3>
               
               <div className="space-y-4">
-                <div className="p-4 bg-white border border-slate-200 rounded-xl flex gap-3 items-start shadow-xs">
-                  <span className="text-xl">📄</span>
+                <div className="p-4 bg-white border border-blue-100 rounded-xl flex gap-3 items-start shadow-xs">
+                  <span className="text-xl">⏳</span>
                   <div>
-                    <h4 className="font-sans font-bold text-xs uppercase text-slate-700">Como era antes: Registros Manuais e Planilhas Lentas</h4>
-                    <p className="text-[11px] text-slate-500 mt-0.5">Anotações em papéis perdidos, redigitação manual de dados que demorava horas e atrasava as tomadas de decisão.</p>
+                    <h4 className="font-sans font-bold text-xs uppercase text-blue-500">Método Tradicional (Lento e Burocrático)</h4>
+                    <p className="text-[11px] text-blue-500 mt-0.5">Esperar o fim do turno para compilar validades vencidas no Excel, transcrever notas fiscais de quebras, e consolidar os dados dias depois.</p>
                   </div>
                 </div>
 
-                <div className="p-4 bg-[#1e56f0]/5 border border-[#1e56f0]/20 rounded-xl flex gap-3 items-start shadow-xs">
-                  <span className="text-xl">⚡</span>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex gap-3 items-start shadow-xs">
+                  <span className="text-xl">🚀</span>
                   <div>
-                    <h4 className="font-sans font-bold text-xs uppercase text-[#1e56f0]">Com o Sistema Real-Time: Automação Imediata</h4>
-                    <p className="text-[11px] text-slate-700 mt-0.5">O registro alimenta instantaneamente os painéis operacionais, preenche as planilhas e permite decisões imediatas validadas pelo controle.</p>
+                    <h4 className="font-sans font-bold text-xs uppercase text-blue-900 flex items-center gap-1.5">
+                      Método Mesa de Controle (Ágil e Real-Time)
+                    </h4>
+                    <p className="text-[11px] text-blue-800 mt-0.5">O operador registra no pátio, a Mesa visualiza as tendências imediatas na tela e toma decisões de venda, descarte ou roteirização no mesmo instante.</p>
                   </div>
                 </div>
               </div>
@@ -322,58 +320,58 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
       </section>
 
       {/* ── COUNTERS / STATS SECTION ── */}
-      <section className="border-b border-slate-200 bg-slate-50 py-16">
+      <section className="border-b border-blue-100 bg-blue-50/20 py-16">
         <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <div className="flex flex-col items-center">
-            <span className="font-sans font-black text-5xl md:text-6xl text-[#1e56f0]">{counts.modulos}</span>
-            <span className="text-slate-600 text-xs uppercase font-bold mt-2.5 text-center tracking-wide">Módulos Logísticos <br />operacionais</span>
+            <span className="font-sans font-black text-5xl md:text-6xl text-blue-600">{counts.modulos}</span>
+            <span className="text-blue-600 font-bold text-xs uppercase mt-2.5 text-center tracking-wide">Módulos de Alta <br />Performance</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="font-sans font-black text-5xl md:text-6xl text-[#06b6d4]">{counts.skus}</span>
-            <span className="text-slate-600 text-xs uppercase font-bold mt-2.5 text-center tracking-wide">Categorias de SKUs <br />configuradas</span>
+            <span className="font-sans font-black text-5xl md:text-6xl text-blue-700">{counts.skus}</span>
+            <span className="text-blue-600 font-bold text-xs uppercase mt-2.5 text-center tracking-wide">SKUs Monitorados <br />Constantemente</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="font-sans font-black text-5xl md:text-6xl text-purple-600">{counts.uptime}%</span>
-            <span className="text-slate-600 text-xs uppercase font-bold mt-2.5 text-center tracking-wide">Integração em Nuvem <br />segura</span>
+            <span className="font-sans font-black text-5xl md:text-6xl text-emerald-600">{counts.uptime}%</span>
+            <span className="text-blue-600 font-bold text-xs uppercase mt-2.5 text-center tracking-wide">Sincronização Direta <br />com Banco de Dados</span>
           </div>
           <div className="flex flex-col items-center">
-            <span className="font-sans font-black text-5xl md:text-6xl text-emerald-600">100%</span>
-            <span className="text-slate-600 text-xs uppercase font-bold mt-2.5 text-center tracking-wide">Operação em Ordem <br />e auditável</span>
+            <span className="font-sans font-black text-5xl md:text-6xl text-blue-900">Zero</span>
+            <span className="text-blue-600 font-bold text-xs uppercase mt-2.5 text-center tracking-wide">Tempo Perdido <br />no Retorno de Rota</span>
           </div>
         </div>
       </section>
 
       {/* ── MODULE CARDS SECTION ── */}
-      <section id="modulos" className="py-24 px-6 max-w-6xl mx-auto bg-white rounded-3xl my-10 shadow-sm border border-slate-200/60">
+      <section id="modulos" className="py-24 px-6 max-w-6xl mx-auto bg-white rounded-3xl my-10 shadow-xs border border-blue-100">
         <div className="text-center mb-16">
-          <span className="font-sans font-bold text-xs uppercase tracking-[3px] text-[#1e56f0] mb-3 block">Módulos Operacionais</span>
-          <h2 className="font-sans font-black text-3xl md:text-5xl tracking-tight text-slate-950 mb-4">Feito para resolver problemas logísticos reais.</h2>
-          <p className="text-slate-600 text-sm md:text-base max-w-3xl mx-auto leading-relaxed">
-            Cada pilar operacional da sua distribuidora possui uma tela limpa e de rápido lançamento para os ajudantes, além de relatórios analíticos para os supervisores.
+          <span className="font-sans font-bold text-xs uppercase tracking-[3px] text-blue-600 mb-3 block">Acompanhamento e Integração</span>
+          <h2 className="font-sans font-black text-3xl md:text-5xl tracking-tight text-blue-950 mb-4">Todo o Fluxo Logístico em um Só Lugar.</h2>
+          <p className="text-blue-700/80 text-sm md:text-base max-w-3xl mx-auto leading-relaxed">
+            Cada área do armazém envia relatórios em tempo real de forma extremamente ágil, consolidando dados operacionais e de segurança.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {modulosLanding.map((m, index) => (
-            <div key={index} className="bg-slate-50 border border-slate-200 hover:border-[#1e56f0]/40 p-6 flex flex-col justify-between hover:bg-white hover:-translate-y-1 relative transition-all duration-300 rounded-2xl group shadow-xs">
+            <div key={index} className="bg-blue-50/20 border border-blue-100 hover:border-blue-300 p-6 flex flex-col justify-between hover:bg-white hover:-translate-y-1 transition-all duration-300 rounded-2xl group shadow-xs">
               <div>
-                <div className="mb-4 bg-white border border-slate-200 p-3 rounded-xl w-fit group-hover:bg-[#1e56f0]/10 transition-colors">
+                <div className="mb-4 bg-white border border-blue-100 p-3 rounded-xl w-fit group-hover:bg-blue-50 transition-colors">
                   {m.icon}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
-                  <h3 className="font-sans font-black text-xs uppercase tracking-wider text-slate-800">{m.nome}</h3>
-                  <span className="text-[8px] px-1.5 py-0.5 rounded bg-white border border-slate-200 font-mono text-slate-500 uppercase font-bold tracking-wider">{m.badge}</span>
+                  <h3 className="font-sans font-black text-xs uppercase tracking-wider text-blue-900">{m.nome}</h3>
+                  <span className="text-[8px] px-1.5 py-0.5 rounded bg-white border border-blue-100 font-mono text-blue-600 uppercase font-bold tracking-wider">{m.badge}</span>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed mb-6">{m.desc}</p>
+                <p className="text-xs text-blue-700/80 leading-relaxed mb-6">{m.desc}</p>
               </div>
-              <div className="space-y-2 mt-auto border-t border-slate-200 pt-4 text-[10px] text-slate-400">
+              <div className="space-y-2 mt-auto border-t border-blue-100 pt-4 text-[10px] text-blue-500">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Histórico completo & exportação fácil</span>
+                  <span className="text-emerald-600 font-bold">✓</span>
+                  <span>Registrou, Atualizou na Hora</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="text-emerald-500 font-bold">✓</span>
-                  <span>Layout adaptado para coletores de dados</span>
+                  <span className="text-blue-700 font-bold">✓</span>
+                  <span>Disponível para tomadas de decisões</span>
                 </div>
               </div>
             </div>
@@ -381,37 +379,37 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
         </div>
       </section>
 
-      {/* ── FLUXO DE OPERAÇÃO ── */}
-      <section id="fluxo" className="py-24 bg-white border-t border-b border-slate-200 px-6">
+      {/* ── FLUXO DE OPERAÇÃO: REGISTROU, ATUALIZOU! ── */}
+      <section id="fluxo" className="py-24 bg-blue-50/30 border-t border-b border-blue-100 px-6">
         <div className="max-w-6xl mx-auto text-center">
-          <span className="font-sans font-bold text-xs uppercase tracking-[3px] text-[#1e56f0] mb-3 block">SISTEMA INTEGRADO PAU BRASIL</span>
-          <h2 className="font-sans font-black text-3xl md:text-5xl tracking-tight text-slate-900 mb-16">
-            Como funciona na prática do dia a dia?
+          <span className="font-sans font-bold text-xs uppercase tracking-[3px] text-blue-600 mb-3 block">FLUXO OPERACIONAL EM ALTA PERFORMANCE</span>
+          <h2 className="font-sans font-black text-3xl md:text-5xl tracking-tight text-blue-950 mb-16">
+            O Ciclo "Registrou, Atualizou"
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
             <div className="flex flex-col items-center relative">
-              <div className="w-12 h-12 bg-white border-2 border-[#1e56f0] text-[#1e56f0] font-sans font-black rounded-full flex items-center justify-center text-md mb-6 shadow-sm">
+              <div className="w-12 h-12 bg-white border-2 border-blue-600 text-blue-600 font-sans font-black rounded-full flex items-center justify-center text-md mb-6 shadow-xs">
                 1
               </div>
-              <h3 className="font-sans font-black text-xs tracking-wider uppercase mb-2 text-slate-800">Lançamento Rápido no Pátio</h3>
-              <p className="text-slate-500 text-xs leading-relaxed max-w-xs">Os colaboradores e motoristas registram tarefas de retorno físico, reembalagem ou validades em segundos direto do celular, sem perda de dados.</p>
+              <h3 className="font-sans font-black text-xs tracking-wider uppercase mb-2 text-blue-900">1. Lançamento Imediato no Pátio</h3>
+              <p className="text-blue-600/80 text-xs leading-relaxed max-w-xs">Os colaboradores registram quebras, validades ou descarte em campo rapidamente, via coletor ou celular.</p>
             </div>
             
             <div className="flex flex-col items-center relative">
-              <div className="w-12 h-12 bg-white border-2 border-[#1e56f0] text-[#1e56f0] font-sans font-black rounded-full flex items-center justify-center text-md mb-6 shadow-sm">
+              <div className="w-12 h-12 bg-white border-2 border-emerald-500 text-emerald-600 font-sans font-black rounded-full flex items-center justify-center text-md mb-6 shadow-xs">
                 2
               </div>
-              <h3 className="font-sans font-black text-xs tracking-wider uppercase mb-2 text-slate-800">Automação de Planilhas</h3>
-              <p className="text-slate-500 text-xs leading-relaxed max-w-xs">Todo o preenchimento de planilhas é automatizado pelo sistema. Sem digitação manual ou planilhas locais lentas.</p>
+              <h3 className="font-sans font-black text-xs tracking-wider uppercase mb-2 text-blue-900">2. Consolidação Automática</h3>
+              <p className="text-blue-600/80 text-xs leading-relaxed max-w-xs">Sem retrabalho ou digitação em planilhas locais. O banco de dados em nuvem processa os dados e compila metas instantaneamente.</p>
             </div>
 
             <div className="flex flex-col items-center relative">
-              <div className="w-12 h-12 bg-white border-2 border-[#1e56f0] text-[#1e56f0] font-sans font-black rounded-full flex items-center justify-center text-md mb-6 shadow-sm">
+              <div className="w-12 h-12 bg-white border-2 border-blue-400 text-blue-700 font-sans font-black rounded-full flex items-center justify-center text-md mb-6 shadow-xs">
                 3
               </div>
-              <h3 className="font-sans font-black text-xs tracking-wider uppercase mb-2 text-slate-800">Monitoramento Real-Time</h3>
-              <p className="text-slate-500 text-xs leading-relaxed max-w-xs">A mesa de controle visualiza as informações na hora com linhas de tendência automáticas, alertas instantâneos de anomalias e rápida tomada de decisão.</p>
+              <h3 className="font-sans font-black text-xs tracking-wider uppercase mb-2 text-blue-900">3. Decisão Ágil e Direta</h3>
+              <p className="text-blue-600/80 text-xs leading-relaxed max-w-xs">A Mesa de Controle acompanha os gráficos de tendência unificados, agindo imediatamente para reverter gargalos de produtividade.</p>
             </div>
           </div>
         </div>
@@ -420,74 +418,74 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
       {/* ── ADVANTAGES SECTION ── */}
       <section id="vantagens" className="py-24 px-6 max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <span className="font-sans font-bold text-xs uppercase tracking-[3px] text-[#1e56f0] mb-3 block">RETORNO REAL DA OPERAÇÃO</span>
-          <h2 className="font-sans font-black text-3xl md:text-5xl tracking-tight text-slate-900">
-            Benefícios para a eficiência do seu CD
+          <span className="font-sans font-bold text-xs uppercase tracking-[3px] text-blue-600 mb-3 block">BENEFÍCIOS DA MESA DE CONTROLE</span>
+          <h2 className="font-sans font-black text-3xl md:text-5xl tracking-tight text-blue-950">
+            Principais Benefícios da Plataforma
           </h2>
-          <p className="text-slate-600 text-sm max-w-3xl mx-auto mt-4 leading-relaxed">
-            Muito mais do que coletar dados: geramos cultura de produtividade, organização impecável de estoque e tomada rápida de decisões operacionais.
+          <p className="text-blue-700/80 text-sm max-w-3xl mx-auto mt-4 leading-relaxed font-medium">
+            Entenda por que a agilidade e o sincronismo imediato de dados criam resultados incomparáveis para a gestão de estoques e retorno de rota.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl flex gap-4 items-start hover:border-[#1e56f0]/30 transition-all duration-300 shadow-sm">
-            <div className="bg-[#1e56f0]/10 border border-[#1e56f0]/20 p-2.5 rounded-xl text-[#1e56f0] shrink-0">
+          <div className="bg-white border border-blue-100 p-6 rounded-2xl flex gap-4 items-start hover:border-blue-300 transition-all duration-300 shadow-xs">
+            <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-blue-700 shrink-0">
               <TrendingUp className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-slate-800 mb-2">Aumento de Produtividade</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Acompanhe individualmente o rendimento da equipe de reembalagem e retorno de rota. Identifique gargalos logísticos e otimize os processos diários.</p>
+              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-blue-950 mb-2 font-black">Tomada de Decisão Imediata</h3>
+              <p className="text-xs text-blue-600 leading-relaxed">Não espere reuniões semanais para saber quais rotas avariam mais. Veja as tendências calculadas na hora e mude as diretrizes no mesmo dia.</p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl flex gap-4 items-start hover:border-[#1e56f0]/30 transition-all duration-300 shadow-sm">
-            <div className="bg-[#1e56f0]/10 border border-[#1e56f0]/20 p-2.5 rounded-xl text-[#1e56f0] shrink-0">
+          <div className="bg-white border border-blue-100 p-6 rounded-2xl flex gap-4 items-start hover:border-blue-300 transition-all duration-300 shadow-xs">
+            <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-blue-700 shrink-0">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-slate-800 mb-2">Operação 100% em Tempo Real</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Os gráficos e tabelas atualizam em milissegundos. Tudo o que é registrado pelos operadores no pátio é refletido instantaneamente na tela da mesa de controle.</p>
+              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-blue-950 mb-2 font-black">Acompanhamentos Automáticos</h3>
+              <p className="text-xs text-blue-600 leading-relaxed">Esqueça os atrasos e planilhas offline. As informações de repack, quebras, validades e auditorias são consolidadas na mesma hora.</p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl flex gap-4 items-start hover:border-[#1e56f0]/30 transition-all duration-300 shadow-sm">
-            <div className="bg-[#1e56f0]/10 border border-[#1e56f0]/20 p-2.5 rounded-xl text-[#1e56f0] shrink-0">
+          <div className="bg-white border border-blue-100 p-6 rounded-2xl flex gap-4 items-start hover:border-blue-300 transition-all duration-300 shadow-xs">
+            <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-blue-700 shrink-0">
               <Database className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-slate-800 mb-2">Automação de Planilhas</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Todo o preenchimento de planilhas de avarias, perdas e retornos é feito automaticamente em nuvem, garantindo agilidade e eliminando o erro humano.</p>
+              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-blue-950 mb-2 font-black">Banco de Dados em Nuvem</h3>
+              <p className="text-xs text-blue-600 leading-relaxed">Toda a base operacional é compilada em gráficos de tendências dinâmicos, rankings individuais de produtividade e logs confiáveis de dados.</p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl flex gap-4 items-start hover:border-[#1e56f0]/30 transition-all duration-300 shadow-sm">
-            <div className="bg-[#1e56f0]/10 border border-[#1e56f0]/20 p-2.5 rounded-xl text-[#1e56f0] shrink-0">
+          <div className="bg-white border border-blue-100 p-6 rounded-2xl flex gap-4 items-start hover:border-blue-300 transition-all duration-300 shadow-xs">
+            <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-blue-700 shrink-0">
               <ClipboardList className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-slate-800 mb-2">Verificação & Auditoria</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Toda quebra, avaria e validades do pátio são verificados ativamente pela supervisão e mesa de controle, com histórico auditável permanente.</p>
+              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-slate-950 mb-2 font-black">Monitoramento de Tendências</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">A mesa de controle consolida as médias históricas para que a coordenação identifique padrões crônicos de quebras e planeje soluções rápidas.</p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl flex gap-4 items-start hover:border-[#1e56f0]/30 transition-all duration-300 shadow-sm">
-            <div className="bg-[#1e56f0]/10 border border-[#1e56f0]/20 p-2.5 rounded-xl text-[#1e56f0] shrink-0">
+          <div className="bg-white border border-blue-100 p-6 rounded-2xl flex gap-4 items-start hover:border-blue-300 transition-all duration-300 shadow-xs">
+            <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-blue-700 shrink-0">
               <Shield className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-slate-800 mb-2">Linhas de Tendência e Anomalias</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">O sistema alerta com inteligência quando desvios ou anomalias no pátio ocorrem, auxiliando na rápida tomada de decisões preventivas nas rotas.</p>
+              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-slate-950 mb-2 font-black">Auditoria Operacional Rápida</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Todos os descartes e reembalagens passam por validações seguras, reduzindo riscos de fraudes ou furos físicos de estoque com total rastreabilidade.</p>
             </div>
           </div>
 
-          <div className="bg-white border border-slate-200 p-6 rounded-2xl flex gap-4 items-start hover:border-[#1e56f0]/30 transition-all duration-300 shadow-sm">
-            <div className="bg-[#1e56f0]/10 border border-[#1e56f0]/20 p-2.5 rounded-xl text-[#1e56f0] shrink-0">
+          <div className="bg-white border border-blue-100 p-6 rounded-2xl flex gap-4 items-start hover:border-blue-300 transition-all duration-300 shadow-xs">
+            <div className="bg-blue-50 border border-blue-100 p-2.5 rounded-xl text-blue-700 shrink-0">
               <Smartphone className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-slate-800 mb-2">Desenvolvido para Mobile e Coletores</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">Funciona diretamente via web em qualquer smartphone (Android ou iOS), tablet ou coletores de dados de pátio.</p>
+              <h3 className="font-sans font-bold text-xs uppercase tracking-wider text-slate-950 mb-2 font-black">Compatibilidade com Coletores</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">Desenvolvido sob medida para smartphones, tablets e coletores de dados de pátio para que a equipe lance dados diretamente do local da operação.</p>
             </div>
           </div>
 
@@ -496,15 +494,15 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
         <div className="mt-16 text-center">
           <button 
             onClick={onEnterApp}
-            className="inline-flex items-center gap-2 bg-[#1e56f0] text-white font-black text-xs uppercase tracking-wider px-10 py-5 rounded-xl shadow-[0_4px_25px_rgba(30,86,240,0.25)] hover:bg-[#1848c8] hover:shadow-[0_8px_35px_rgba(30,86,240,0.45)] hover:-translate-y-0.5 transition-all text-center cursor-pointer border-none"
+            className="inline-flex items-center gap-2 bg-blue-600 text-white font-black text-xs uppercase tracking-wider px-10 py-5 rounded-xl shadow-md hover:bg-blue-700 hover:-translate-y-0.5 transition-all text-center cursor-pointer border-none"
           >
-            Acessar o Painel Operacional <ArrowRight className="w-4 h-4 stroke-[3px]" />
+            Acessar o Painel Operacional Real-Time <ArrowRight className="w-4 h-4 stroke-[3px]" />
           </button>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-slate-200 py-8 text-center text-[10px] text-slate-400 tracking-wider uppercase font-semibold bg-white shadow-inner">
+      <footer className="border-t border-blue-100 py-8 text-center text-[10px] text-blue-600 tracking-wider uppercase font-semibold bg-white shadow-inner">
         Pau Brasil Distribuidora © Todos os Direitos Reservados · Gestão de Retorno de Rota em Tempo Real — Ambev Guarabira
       </footer>
     </div>
