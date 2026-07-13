@@ -200,11 +200,11 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
 
         <h1 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl leading-[1.15] tracking-tight mb-6 text-blue-900">
           ARMAZÉM FÁCIL PAU BRASIL AMBEV<br />
-          <span className="text-blue-600 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">Mais Agilidade na Pista, Zero Papel e União no Turno!</span>
+          <span className="text-blue-600 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">Sua Produtividade em Tempo Real, Zero Papel e União no Turno!</span>
         </h1>
 
         <p className="text-sm sm:text-base text-blue-800/80 max-w-3xl leading-relaxed mb-10 font-medium">
-          O <strong>Armazém Fácil</strong> foi criado especialmente para apoiar quem faz a engrenagem do nosso CD girar todos os dias: <strong>o nosso time operacional</strong>. Nossa intenção é transformar as antigas planilhas de papel, pranchetas e controles manuais em uma plataforma rápida, conectada e que valoriza a produtividade de cada operador em tempo real.
+          O <strong>Armazém Fácil</strong> foi criado especialmente para apoiar quem faz a engrenagem da nossa Revenda girar todos os dias: <strong>o nosso time operacional</strong>. Nossa intenção é transformar as antigas planilhas de papel, pranchetas e controles manuais em uma plataforma rápida, conectada e que valoriza a produtividade de cada operador em tempo real.
         </p>
 
         {/* Botões de Ação Rápida */}
@@ -363,7 +363,7 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
                   </div>
                   <div>
                     <h4 className="font-sans font-black text-xs uppercase tracking-wide text-blue-900">Registrou, Atualizou na Hora</h4>
-                    <p className="text-xs text-blue-600/80 mt-1">A informação vai direto para o banco de dados e atualiza o painel do CD. A mesa de controle de DPO, a coordenação e a supervisão acompanham em tempo real.</p>
+                    <p className="text-xs text-blue-600/80 mt-1">A informação vai direto para o banco de dados e atualiza o painel da Revenda. A mesa de controle de DPO, a coordenação e a supervisão acompanham em tempo real.</p>
                   </div>
                 </div>
               </div>
@@ -406,7 +406,7 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
       <section id="modulos" className="py-20 px-6 max-w-5xl mx-auto bg-white rounded-2xl my-12 border border-blue-100 shadow-xs">
         <div className="text-center mb-14 max-w-2xl mx-auto">
           <span className="font-sans font-black text-[10px] uppercase tracking-[3px] text-blue-600 block mb-2">QUAIS MÓDULOS VOCÊ VAI OPERAR?</span>
-          <h2 className="font-sans font-black text-2xl md:text-3xl tracking-tight text-blue-950">Apoio a Todas as Funções do CD</h2>
+          <h2 className="font-sans font-black text-2xl md:text-3xl tracking-tight text-blue-950">Apoio a Todas as Funções da Revenda</h2>
           <p className="text-blue-700/80 text-xs mt-3 leading-relaxed">
             Cada área do armazém tem seu canal específico no sistema, garantindo clareza e separação de responsabilidades.
           </p>
