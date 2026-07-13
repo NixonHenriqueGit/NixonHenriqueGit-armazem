@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { auth, db } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail } from 'firebase/auth';
-import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { motion } from 'motion/react';
 import { BrandLogo } from './BrandLogo';
 
@@ -23,6 +23,13 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
   // Controle States
   const [contEmail, setContEmail] = useState('');
   const [contSenha, setContSenha] = useState('');
+
+  // Primeiro Acesso (First-time login) States
+  const [isFirstAccess, setIsFirstAccess] = useState(false);
+  const [firstAccessInput, setFirstAccessInput] = useState('');
+  const [firstAccessUser, setFirstAccessUser] = useState<any | null>(null);
+  const [faNovaSenha, setFaNovaSenha] = useState('');
+  const [faConfirmSenha, setFaConfirmSenha] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
@@ -51,7 +58,155 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
     setTempUser(null);
     setContEmail('');
     setContSenha('');
+    setFirstAccessInput('');
+    setFirstAccessUser(null);
+    setFaNovaSenha('');
+    setFaConfirmSenha('');
+    setIsFirstAccess(false);
     setMsg(null);
+  };
+
+  const handleVerifyFirstAccess = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstAccessInput.trim()) {
+      setMsg({ type: 'err', text: 'Informe seu e-mail ou sua matrícula cadastrada.' });
+      return;
+    }
+
+    setLoading(true);
+    setMsg(null);
+
+    const inputClean = firstAccessInput.trim();
+    const emailClean = inputClean.toLowerCase();
+
+    try {
+      let colabData: any = null;
+      let colabDocId: string = '';
+
+      if (db) {
+        const colabRef = collection(db, 'colaboradores');
+        let q;
+        if (inputClean.includes('@')) {
+          q = query(colabRef, where('email', '==', emailClean));
+        } else {
+          q = query(colabRef, where('matricula', '==', inputClean));
+        }
+
+        const colabSnap = await getDocs(q);
+        if (!colabSnap.empty) {
+          colabDocId = colabSnap.docs[0].id;
+          colabData = colabSnap.docs[0].data();
+        }
+      }
+
+      // Offline localStorage lookup fallback
+      if (!colabData) {
+        const savedKeys = Object.keys(localStorage).filter(k => k.startsWith('colaboradores_'));
+        for (const key of savedKeys) {
+          const saved = localStorage.getItem(key);
+          if (saved) {
+            const colabs = JSON.parse(saved);
+            const found = colabs.find((c: any) => 
+              String(c.matricula).trim() === inputClean || 
+              (c.email && String(c.email).toLowerCase().trim() === emailClean)
+            );
+            if (found) {
+              colabData = found;
+              colabDocId = found._docId || 'local_' + found.matricula;
+              break;
+            }
+          }
+        }
+      }
+
+      if (colabData) {
+        if (colabData.primeiroAcesso === true || !colabData.senha) {
+          setFirstAccessUser({ id: colabDocId, ...colabData });
+          setMsg({ type: 'ok', text: 'Colaborador pré-autorizado encontrado! Crie sua senha abaixo.' });
+        } else {
+          setMsg({ type: 'err', text: 'Sua senha já está cadastrada! Por favor, faça login normalmente.' });
+        }
+      } else {
+        setMsg({ type: 'err', text: 'Colaborador não encontrado. Solicite ao seu supervisor para pré-autorizar o seu acesso.' });
+      }
+    } catch (err: any) {
+      console.error('Erro ao verificar primeiro acesso:', err);
+      setMsg({ type: 'err', text: 'Erro ao verificar cadastro: ' + err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!faNovaSenha.trim() || !faConfirmSenha.trim()) {
+      setMsg({ type: 'err', text: 'Preencha todos os campos de senha.' });
+      return;
+    }
+
+    if (faNovaSenha.trim().length < 4) {
+      setMsg({ type: 'err', text: 'A senha deve conter ao menos 4 caracteres.' });
+      return;
+    }
+
+    if (faNovaSenha.trim() !== faConfirmSenha.trim()) {
+      setMsg({ type: 'err', text: 'As senhas digitadas não coincidem.' });
+      return;
+    }
+
+    setLoading(true);
+    setMsg(null);
+
+    const targetSenha = faNovaSenha.trim();
+
+    try {
+      const colabId = firstAccessUser.id;
+      
+      if (db && !colabId.startsWith('local_')) {
+        const colabRef = doc(db, 'colaboradores', colabId);
+        await updateDoc(colabRef, {
+          senha: targetSenha,
+          primeiroAcesso: false,
+          updatedAt: new Date().toISOString()
+        });
+      } else {
+        // Local state updates
+        const savedKeys = Object.keys(localStorage).filter(k => k.startsWith('colaboradores_'));
+        for (const key of savedKeys) {
+          const saved = localStorage.getItem(key);
+          if (saved) {
+            let colabs = JSON.parse(saved);
+            const foundIdx = colabs.findIndex((c: any) => 
+              (c._docId && c._docId === colabId) || String(c.matricula).trim() === String(firstAccessUser.matricula).trim()
+            );
+            if (foundIdx !== -1) {
+              colabs[foundIdx].senha = targetSenha;
+              colabs[foundIdx].primeiroAcesso = false;
+              colabs[foundIdx].updatedAt = new Date().toISOString();
+              localStorage.setItem(key, JSON.stringify(colabs));
+              break;
+            }
+          }
+        }
+      }
+
+      // Login directly and successfully
+      onAuthSuccess({
+        id: colabId,
+        uid: colabId,
+        nome: firstAccessUser.nome,
+        email: firstAccessUser.email || `${firstAccessUser.matricula}@paubrasil.com`,
+        papel: firstAccessUser.funcao,
+        empresaId: firstAccessUser.empresaId || 'demo',
+        status: 'ativo',
+        isControle: firstAccessUser.funcao === 'controle'
+      });
+    } catch (err: any) {
+      console.error('Erro ao salvar senha de primeiro acesso:', err);
+      setMsg({ type: 'err', text: 'Erro ao salvar senha de acesso: ' + err.message });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -511,7 +666,7 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
                 </div>
                 {msg && (
                   <div className={`p-3 rounded-lg text-xs font-semibold ${msg.type === 'ok' ? 'bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e]' : 'bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444]'}`}>
-                    {msg.text}
+                     {msg.text}
                   </div>
                 )}
                 <div className="flex gap-3">
@@ -529,6 +684,113 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
                   </button>
                 </div>
               </div>
+            ) : isFirstAccess ? (
+              /* FIRST-TIME LOGIN / PASSWORD CREATION FLOW */
+              !firstAccessUser ? (
+                /* STEP 1: VALIDATE FIRST-TIME ACCESS */
+                <form onSubmit={handleVerifyFirstAccess} className="flex flex-col gap-4 animate-fadeIn">
+                  <div className="text-center mb-2">
+                    <span className="font-sans font-black text-xs text-[#1e56f0] tracking-wider uppercase block">
+                      🔑 PRIMEIRO ACESSO À PLATAFORMA
+                    </span>
+                    <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
+                      Se você foi pré-cadastrado por um supervisor, digite seu e-mail ou matrícula abaixo para validar seu primeiro login e criar sua senha.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-extrabold tracking-widest text-slate-500 uppercase">E-mail ou Matrícula</label>
+                    <input 
+                      type="text"
+                      required
+                      placeholder="Ex: 50811 ou email@empresa.com"
+                      value={firstAccessInput}
+                      onChange={e => setFirstAccessInput(e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e56f0] focus:ring-2 focus:ring-[#1e56f0]/10 transition-all text-sm"
+                    />
+                  </div>
+
+                  {msg && (
+                    <div className={`p-3 rounded-lg text-xs font-semibold ${msg.type === 'ok' ? 'bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e]' : 'bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444]'}`}>
+                      {msg.text}
+                    </div>
+                  )}
+
+                  <button 
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-4 bg-[#1e56f0] hover:bg-[#1848c8] text-white text-xs font-sans font-bold uppercase tracking-[2px] rounded-xl cursor-pointer disabled:opacity-50 border-none transition-all shadow-[0_4px_16px_rgba(30,86,240,0.15)] flex items-center justify-center"
+                  >
+                    {loading ? 'Validando...' : 'Validar Primeiro Acesso'}
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => { setIsFirstAccess(false); setMsg(null); }}
+                    className="w-full py-3 border border-slate-200 text-slate-500 hover:text-slate-800 rounded-xl text-xs uppercase font-extrabold tracking-wider bg-transparent cursor-pointer transition-colors"
+                  >
+                    Voltar ao Login
+                  </button>
+                </form>
+              ) : (
+                /* STEP 2: DEFINE SYSTEM PASSWORD */
+                <form onSubmit={handleCreatePassword} className="flex flex-col gap-4 animate-fadeIn">
+                  <div className="text-center mb-2">
+                    <span className="font-sans font-black text-xs text-[#22c55e] tracking-wider uppercase block">
+                      ✅ CADASTRO DE SENHA AUTORIZADO
+                    </span>
+                    <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
+                      Olá, <strong>{firstAccessUser.nome}</strong>! Crie a sua senha pessoal abaixo para acessar a plataforma Pau Brasil.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-extrabold tracking-widest text-slate-500 uppercase">Defina sua Nova Senha</label>
+                    <input 
+                      type="password"
+                      required
+                      placeholder="Mínimo 4 caracteres"
+                      value={faNovaSenha}
+                      onChange={e => setFaNovaSenha(e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e56f0] focus:ring-2 focus:ring-[#1e56f0]/10 transition-all text-sm"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[10px] font-extrabold tracking-widest text-slate-500 uppercase">Confirme a Nova Senha</label>
+                    <input 
+                      type="password"
+                      required
+                      placeholder="Repita a senha digitada"
+                      value={faConfirmSenha}
+                      onChange={e => setFaConfirmSenha(e.target.value)}
+                      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#1e56f0] focus:ring-2 focus:ring-[#1e56f0]/10 transition-all text-sm"
+                    />
+                  </div>
+
+                  {msg && (
+                    <div className={`p-3 rounded-lg text-xs font-semibold ${msg.type === 'ok' ? 'bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e]' : 'bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444]'}`}>
+                      {msg.text}
+                    </div>
+                  )}
+
+                  <button 
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-4 bg-[#22c55e] hover:bg-[#1ebd52] text-white text-xs font-sans font-bold uppercase tracking-[2px] rounded-xl cursor-pointer disabled:opacity-50 border-none transition-all shadow-[0_4px_16px_rgba(34,197,94,0.15)] flex items-center justify-center"
+                  >
+                    {loading ? 'Salvando...' : 'Salvar e Entrar no Sistema'}
+                  </button>
+
+                  <button 
+                    type="button"
+                    onClick={() => { setFirstAccessUser(null); setMsg(null); }}
+                    className="w-full py-3 border border-slate-200 text-slate-500 hover:text-slate-800 rounded-xl text-xs uppercase font-extrabold tracking-wider bg-transparent cursor-pointer transition-colors"
+                  >
+                    Voltar
+                  </button>
+                </form>
+              )
             ) : (
               
               /* SIGN IN FORM PANEL */
@@ -569,6 +831,14 @@ export default function LoginAuth({ onAuthSuccess, onBackToLanding }: LoginAuthP
                   className="w-full py-4 bg-[#1e56f0] hover:bg-[#1848c8] text-white text-xs font-sans font-bold uppercase tracking-[2px] rounded-xl cursor-pointer disabled:opacity-50 border-none transition-all shadow-[0_4px_16px_rgba(30,86,240,0.15)] hover:shadow-[0_4px_16px_rgba(30,86,240,0.25)] flex items-center justify-center"
                 >
                   {loading ? 'Aguarde...' : 'Entrar na Operação'}
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => { setIsFirstAccess(true); setMsg(null); }}
+                  className="w-full py-3.5 bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-800 rounded-xl text-xs font-bold tracking-wide transition-colors"
+                >
+                  💡 Primeiro acesso? Crie sua senha
                 </button>
 
                 <button 

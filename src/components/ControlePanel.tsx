@@ -82,7 +82,7 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
   // Navigation: 'hub' shows the main interactive landing dashboard
   // Navigation: 'hub' shows the main interactive landing dashboard
   // 'dash', 'timer', 'audit', 'ranking', 'normas' represent the active functional views of Repack
-  const [currentSection, setCurrentSection] = useState<'hub' | 'dash' | 'timer' | 'audit' | 'ranking' | 'normas' | 'colaboradores'>('colaboradores');
+  const [currentSection, setCurrentSection] = useState<'hub' | 'dash' | 'timer' | 'audit' | 'ranking' | 'normas' | 'colaboradores' | 'primeiro_acesso'>('colaboradores');
   
   // Collaborator Management State
   const [colaboradores, setColaboradores] = useState<any[]>([]);
@@ -94,6 +94,17 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
   const [editingColabId, setEditingColabId] = useState<string | null>(null);
   const [registeringColab, setRegisteringColab] = useState(false);
   const [colabMsg, setColabMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const [confirmColabId, setConfirmColabId] = useState<string | null>(null);
+  const [confirmRepackId, setConfirmRepackId] = useState<string | null>(null);
+  const [confirmAuditId, setConfirmAuditId] = useState<string | null>(null);
+
+  // Primeiro Acesso (First-time login) State
+  const [paMatricula, setPaMatricula] = useState('');
+  const [paNome, setPaNome] = useState('');
+  const [paEmail, setPaEmail] = useState('');
+  const [paFuncao, setPaFuncao] = useState('repack');
+  const [paMsg, setPaMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null);
+  const [registeringPa, setRegisteringPa] = useState(false);
   
   // Timer State
   const [embalagem, setEmbalagem] = useState(REPACK_EMBALAGENS[0].nome);
@@ -400,6 +411,73 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
     }
   };
 
+  const handleRegisterPrimeiroAcesso = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!paMatricula.trim() && !paEmail.trim()) {
+      setPaMsg({ type: 'err', text: 'Preencha a Matrícula ou o E-mail para identificar o usuário.' });
+      return;
+    }
+    if (!paNome.trim() || !paFuncao) {
+      setPaMsg({ type: 'err', text: 'Preencha todos os campos obrigatórios (Nome Completo e Função).' });
+      return;
+    }
+
+    setRegisteringPa(true);
+    setPaMsg(null);
+
+    // Check duplicated matrícula
+    if (paMatricula.trim()) {
+      const checkExisting = colaboradores.some(c => String(c.matricula).trim() === paMatricula.trim());
+      if (checkExisting) {
+        setPaMsg({ type: 'err', text: 'Esta matrícula já está cadastrada.' });
+        setRegisteringPa(false);
+        return;
+      }
+    }
+
+    // Check duplicated email
+    if (paEmail.trim()) {
+      const checkExistingEmail = colaboradores.some(c => c.email && String(c.email).toLowerCase().trim() === paEmail.toLowerCase().trim());
+      if (checkExistingEmail) {
+        setPaMsg({ type: 'err', text: 'Este e-mail já está cadastrado.' });
+        setRegisteringPa(false);
+        return;
+      }
+    }
+
+    const colabData = {
+      empresaId,
+      matricula: paMatricula.trim() || null,
+      nome: paNome.trim(),
+      email: paEmail.trim().toLowerCase() || null,
+      senha: '', // No password yet, created on first login
+      funcao: paFuncao,
+      primeiroAcesso: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    try {
+      if (db) {
+        await addDoc(collection(db, 'colaboradores'), colabData);
+      } else {
+        const current = [{ _docId: String(Date.now()), ...colabData }, ...colaboradores];
+        setColaboradores(current);
+        localStorage.setItem(`colaboradores_${empresaId}`, JSON.stringify(current));
+      }
+      setPaMsg({ type: 'ok', text: '✅ Primeiro acesso pré-autorizado com sucesso!' });
+      
+      setPaMatricula('');
+      setPaNome('');
+      setPaEmail('');
+      setPaFuncao('repack');
+    } catch (err: any) {
+      setPaMsg({ type: 'err', text: 'Erro ao pré-autorizar: ' + err.message });
+    } finally {
+      setRegisteringPa(false);
+    }
+  };
+
   const handleEditColaborador = (colab: any) => {
     setEditingColabId(colab._docId || null);
     setNewMatricula(colab.matricula || '');
@@ -411,47 +489,53 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
   };
 
   const handleDeleteColaborador = async (docId?: string) => {
-    if (!docId || !confirm('Deseja realmente remover este colaborador?')) return;
+    if (!docId) return;
     try {
       if (db) {
         await deleteDoc(doc(db, 'colaboradores', docId));
+        // Optimistically update the UI list immediately
+        setColaboradores(prev => prev.filter(c => c._docId !== docId && c.id !== docId));
       } else {
-        const remaining = colaboradores.filter(c => c._docId !== docId);
+        const remaining = colaboradores.filter(c => c._docId !== docId && c.id !== docId);
         setColaboradores(remaining);
         localStorage.setItem(`colaboradores_${empresaId}`, JSON.stringify(remaining));
       }
     } catch (err: any) {
-      alert('Erro ao excluir colaborador: ' + err.message);
+      console.error('Erro ao excluir colaborador:', err);
     }
   };
 
   const handleDeleteRepack = async (docId?: string) => {
-    if (!docId || !confirm('Deseja excluir este lançamento de repack?')) return;
+    if (!docId) return;
     try {
       if (db) {
         await deleteDoc(doc(db, 'repack', docId));
+        // Optimistically update the UI list immediately
+        setRepackRows(prev => prev.filter(r => r._docId !== docId && r.id !== docId));
       } else {
-        const remaining = repackRows.filter(r => r._docId !== docId);
+        const remaining = repackRows.filter(r => r._docId !== docId && r.id !== docId);
         setRepackRows(remaining);
         localStorage.setItem(`repack_rows_${empresaId}`, JSON.stringify(remaining));
       }
-    } catch (e) {
-      alert('Erro ao excluir repack: ' + e);
+    } catch (e: any) {
+      console.error('Erro ao excluir repack:', e);
     }
   };
 
   const handleDeleteAudit = async (docId?: string) => {
-    if (!docId || !confirm('Deseja excluir este registro de auditoria?')) return;
+    if (!docId) return;
     try {
       if (db) {
         await deleteDoc(doc(db, 'dpo_audits', docId));
+        // Optimistically update the UI list immediately
+        setAuditRows(prev => prev.filter(a => a._docId !== docId && a.id !== docId));
       } else {
-        const remaining = auditRows.filter(a => a._docId !== docId);
+        const remaining = auditRows.filter(a => a._docId !== docId && a.id !== docId);
         setAuditRows(remaining);
         localStorage.setItem(`dpo_audits_${empresaId}`, JSON.stringify(remaining));
       }
-    } catch (e) {
-      alert('Erro ao excluir auditoria: ' + e);
+    } catch (e: any) {
+      console.error('Erro ao excluir auditoria:', e);
     }
   };
 
@@ -558,7 +642,14 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
               className={`py-2.5 px-4 font-sans font-bold text-xs uppercase cursor-pointer whitespace-nowrap transition-all rounded-lg flex items-center gap-1.5 ${currentSection === 'colaboradores' ? 'text-[#f5a623] bg-[#f5a623]/10 border border-[#f5a623]/20' : 'text-[#6a7d92] hover:text-[#e8eef5]'}`}
             >
               <Users className="w-3.5 h-3.5" />
-              Colaboradores
+              Colaboradores Ativos
+            </button>
+            <button 
+              onClick={() => setCurrentSection('primeiro_acesso')}
+              className={`py-2.5 px-4 font-sans font-bold text-xs uppercase cursor-pointer whitespace-nowrap transition-all rounded-lg flex items-center gap-1.5 ${currentSection === 'primeiro_acesso' ? 'text-[#f5a623] bg-[#f5a623]/10 border border-[#f5a623]/20' : 'text-[#6a7d92] hover:text-[#e8eef5]'}`}
+            >
+              <Plus className="w-3.5 h-3.5 text-[#f5a623]" />
+              Login pela Primeira Vez
             </button>
           </div>
 
@@ -611,7 +702,7 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
               </div>
 
               {/* Modern Bento Grid Menu for Navigation */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-5">
                 
                 {/* 1. Gestão de Colaboradores card */}
                 <div 
@@ -626,7 +717,7 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
                   </div>
                   <div>
                     <h3 className="font-sans font-bold text-sm text-snow uppercase tracking-wide group-hover:text-[#f5a623] transition-colors mt-4">
-                      Cadastrar Colaboradores
+                      Colaboradores Ativos
                     </h3>
                     <p className="text-[11px] text-[#6a7d92] mt-1 leading-relaxed">
                       Gerencie matrículas, senhas e permissões para novos colaboradores acessarem as dependências digitais do armazém.
@@ -634,7 +725,28 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
                   </div>
                 </div>
 
-                {/* 2. Current User Stats Quick Glance */}
+                {/* 2. Pré-Autorizar Primeiro Acesso card */}
+                <div 
+                  onClick={() => setCurrentSection('primeiro_acesso')}
+                  className="g-card p-5 border border-[#222d3a] hover:border-[#f5a623]/40 bg-[#11151c]/60 hover:bg-[#161c27] transition-all duration-300 rounded-2xl cursor-pointer group flex flex-col justify-between min-h-[170px]"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Plus className="w-5 h-5 text-[#f5a623]" />
+                    </div>
+                    <span className="font-mono text-[9px] text-[#6a7d92] font-black tracking-wider uppercase">PRIMEIRO LOGIN</span>
+                  </div>
+                  <div>
+                    <h3 className="font-sans font-bold text-sm text-snow uppercase tracking-wide group-hover:text-[#f5a623] transition-colors mt-4">
+                      Autorizar Primeiro Acesso
+                    </h3>
+                    <p className="text-[11px] text-[#6a7d92] mt-1 leading-relaxed">
+                      Pré-autorize novos colaboradores por matrícula, nome ou e-mail para que criem suas senhas no primeiro login.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3. Current User Stats Quick Glance */}
                 <div className="g-card p-5 bg-[#1a212d]/30 border border-[#222d3a] rounded-2xl flex flex-col justify-between min-h-[170px]">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-snow/5 flex items-center justify-center border border-snow/10">
@@ -1445,7 +1557,7 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#222d3a]">
-                        {colaboradores.map((colab, idx) => (
+                        {colaboradores.filter(c => c.primeiroAcesso !== true).map((colab, idx) => (
                           <tr key={idx} className="hover:bg-[#151b23]/30">
                             <td className="p-3 font-mono font-bold text-snow text-sm">{colab.matricula}</td>
                             <td className="p-3">
@@ -1484,19 +1596,229 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
                               >
                                 <Pencil className="w-4 h-4" />
                               </button>
-                              <button
-                                onClick={() => handleDeleteColaborador(colab._docId)}
-                                className="p-2 rounded-lg border border-[#222d3a] hover:border-red-500/40 bg-[#151b23] hover:bg-red-500/10 text-[#6a7d92] hover:text-red-400 transition-all cursor-pointer inline-flex items-center justify-center"
-                                title="Remover Colaborador"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                              {confirmColabId === colab._docId ? (
+                                <button
+                                  onClick={() => {
+                                    handleDeleteColaborador(colab._docId);
+                                    setConfirmColabId(null);
+                                  }}
+                                  className="px-2.5 py-1 text-[10px] uppercase font-black tracking-widest bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-all cursor-pointer"
+                                  title="Confirmar Exclusão"
+                                >
+                                  Certeza?
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setConfirmColabId(colab._docId || null);
+                                    setTimeout(() => setConfirmColabId(prev => prev === colab._docId ? null : prev), 4000);
+                                  }}
+                                  className="p-2 rounded-lg border border-[#222d3a] hover:border-red-500/40 bg-[#151b23] hover:bg-red-500/10 text-[#6a7d92] hover:text-red-400 transition-all cursor-pointer inline-flex items-center justify-center"
+                                  title="Remover Colaborador"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))}
-                        {colaboradores.length === 0 && (
+                        {colaboradores.filter(c => c.primeiroAcesso !== true).length === 0 && (
                           <tr>
-                            <td colSpan={5} className="p-8 text-center text-[#6a7d92]">Nenhum colaborador cadastrado ainda. Use o formulário ao lado para cadastrar.</td>
+                            <td colSpan={5} className="p-8 text-center text-[#6a7d92]">Nenhum colaborador ativo cadastrado ainda. Use o formulário ao lado para cadastrar.</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ── SECTION 7: PRÉ-AUTORIZAÇÃO DE PRIMEIRO ACESSO ── */}
+          {currentSection === 'primeiro_acesso' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 animate-fadeIn">
+              
+              {/* Form Column */}
+              <div className="lg:col-span-4 flex flex-col gap-4">
+                <div className="g-card p-6 border border-[#222d3a] flex flex-col gap-4">
+                  <div className="flex items-center gap-2 pb-2 border-b border-[#222d3a]">
+                    <div className="w-8 h-8 bg-[#f5a623]/10 rounded-lg flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-[#f5a623]" />
+                    </div>
+                    <h3 className="font-sans font-black text-sm tracking-wider uppercase text-[#f5a623]">
+                      Pré-Autorizar Acesso
+                    </h3>
+                  </div>
+
+                  <p className="text-[11px] text-[#6a7d92] leading-relaxed">
+                    Insira a matrícula ou e-mail de um novo funcionário para pré-autorizá-lo na plataforma. No primeiro acesso, ele definirá a sua própria senha do sistema.
+                  </p>
+
+                  <form onSubmit={handleRegisterPrimeiroAcesso} className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Matrícula (Para identificação)</label>
+                      <input 
+                        type="text"
+                        placeholder="Ex: 50811 (Deixe em branco se usar e-mail)"
+                        value={paMatricula}
+                        onChange={e => setPaMatricula(e.target.value)}
+                        className="g-input"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Nome Completo *</label>
+                      <input 
+                        type="text"
+                        required
+                        placeholder="Nome completo do funcionário"
+                        value={paNome}
+                        onChange={e => setPaNome(e.target.value)}
+                        className="g-input"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">E-mail (Opcional - Para identificação)</label>
+                      <input 
+                        type="email"
+                        placeholder="Ex: colab@paubrasil.com"
+                        value={paEmail}
+                        onChange={e => setPaEmail(e.target.value)}
+                        className="g-input"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold tracking-widest text-[#6a7d92] uppercase">Função Operacional *</label>
+                      <select 
+                        value={paFuncao}
+                        onChange={e => setPaFuncao(e.target.value)}
+                        className="g-select cursor-pointer"
+                      >
+                        <option value="repack">Operador de Repack</option>
+                        <option value="despejo">Operador de Despejo</option>
+                        <option value="armazem">Operador de Armazém Fácil</option>
+                        <option value="quebras">Fiscal de Quebras</option>
+                        <option value="validades">Gestor de Validades (FEFO)</option>
+                        <option value="refugo">Operador Blitz Refugo</option>
+                        <option value="empilhador">Picking / Empilhadeira</option>
+                        <option value="conferente">Conferente Geral</option>
+                        <option value="controle">Controle / Supervisor</option>
+                      </select>
+                    </div>
+
+                    {paMsg && (
+                      <div className={`p-3 rounded-lg text-xs font-semibold ${paMsg.type === 'ok' ? 'bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e]' : 'bg-[#ef4444]/10 border border-[#ef4444]/30 text-[#ef4444]'}`}>
+                        {paMsg.text}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={registeringPa}
+                      className="w-full mt-2 py-3 rounded-xl bg-gradient-to-br from-[#f5a623] to-[#d4780a] hover:shadow-[0_4px_16px_rgba(245,166,35,0.25)] text-[#07090d] font-sans font-black uppercase text-xs tracking-widest flex items-center justify-center gap-2 cursor-pointer transition-all active:scale-[0.98] disabled:opacity-50"
+                    >
+                      {registeringPa ? 'Salvando...' : '⚡ Pré-Autorizar Primeiro Acesso'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* List Column */}
+              <div className="lg:col-span-8 flex flex-col gap-4">
+                <div className="g-card p-6 border border-[#222d3a] flex flex-col gap-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-[#222d3a]">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-indigo-500/10 rounded-lg flex items-center justify-center">
+                        <Users className="w-4 h-4 text-indigo-400" />
+                      </div>
+                      <div>
+                        <h3 className="font-sans font-black text-sm tracking-wider uppercase text-snow">Pré-Autorizações Ativas</h3>
+                        <p className="text-[10px] text-[#6a7d92]">Lista de funcionários autorizados a definir senha no primeiro login</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs min-w-[500px]">
+                      <thead>
+                        <tr className="bg-[#151b23] border-b border-[#222d3a] text-[#6a7d92] font-black uppercase text-[9px] tracking-widest">
+                          <th className="p-3">Matrícula</th>
+                          <th className="p-3">Nome</th>
+                          <th className="p-3 text-center">Função</th>
+                          <th className="p-3 text-center">Status</th>
+                          <th className="p-3 text-center">Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#222d3a]">
+                        {colaboradores.filter(c => c.primeiroAcesso === true).map((colab, idx) => (
+                          <tr key={idx} className="hover:bg-[#151b23]/30">
+                            <td className="p-3 font-mono font-bold text-snow text-sm">{colab.matricula || '—'}</td>
+                            <td className="p-3">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-snow text-sm">{colab.nome}</span>
+                                {colab.email && (
+                                  <span className="text-[10px] text-[#6a7d92] font-mono">{colab.email}</span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="p-3 text-center">
+                              <span className={`text-[9px] font-black tracking-wider uppercase px-2.5 py-1 rounded border ${
+                                colab.funcao === 'controle' 
+                                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' 
+                                  : colab.funcao === 'conferente' 
+                                    ? 'bg-amber-500/10 text-[#f5a623] border-[#f5a623]/20' 
+                                    : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                              }`}>
+                                {colab.funcao === 'repack' ? 'Operador Repack' :
+                                 colab.funcao === 'despejo' ? 'Operador Despejo' :
+                                 colab.funcao === 'armazem' ? 'Armazém Fácil' :
+                                 colab.funcao === 'quebras' ? 'Fiscal de Quebras' :
+                                 colab.funcao === 'validades' ? 'Gestor de Validades' :
+                                 colab.funcao === 'refugo' ? 'Operador Blitz Refugo' :
+                                 colab.funcao === 'empilhador' ? 'Picking/Empilhadeira' :
+                                 colab.funcao === 'conferente' ? 'Conferente Geral' :
+                                 colab.funcao === 'controle' ? 'Supervisor Controle' : colab.funcao}
+                              </span>
+                            </td>
+                            <td className="p-3 text-center">
+                              <span className="px-2.5 py-0.5 rounded text-[9px] bg-amber-500/10 text-[#f5a623] border border-[#f5a623]/20 font-black tracking-widest uppercase animate-pulse">
+                                AGUARDANDO SENHA
+                              </span>
+                            </td>
+                            <td className="p-3 text-center flex items-center justify-center gap-2">
+                              {confirmColabId === colab._docId ? (
+                                <button
+                                  onClick={() => {
+                                    handleDeleteColaborador(colab._docId);
+                                    setConfirmColabId(null);
+                                  }}
+                                  className="px-2.5 py-1 text-[10px] uppercase font-black tracking-widest bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500 hover:text-white rounded-lg transition-all cursor-pointer"
+                                  title="Confirmar Revogação"
+                                >
+                                  Certeza?
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => {
+                                    setConfirmColabId(colab._docId || null);
+                                    setTimeout(() => setConfirmColabId(prev => prev === colab._docId ? null : prev), 4000);
+                                  }}
+                                  className="p-2 rounded-lg border border-[#222d3a] hover:border-red-500/40 bg-[#151b23] hover:bg-red-500/10 text-[#6a7d92] hover:text-red-400 transition-all cursor-pointer inline-flex items-center justify-center"
+                                  title="Revogar Pré-Autorização"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                        {colaboradores.filter(c => c.primeiroAcesso === true).length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="p-8 text-center text-[#6a7d92]">Nenhuma pré-autorização ativa no momento. Cadastre novas ao lado.</td>
                           </tr>
                         )}
                       </tbody>
