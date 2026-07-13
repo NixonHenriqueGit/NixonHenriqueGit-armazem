@@ -200,7 +200,7 @@ export default function LandingPage({ onEnterApp }: LandingPageProps) {
 
         <h1 className="font-sans font-black text-3xl sm:text-4xl md:text-5xl leading-[1.15] tracking-tight mb-6 text-blue-900">
           ARMAZÉM FÁCIL PAU BRASIL AMBEV<br />
-          <span className="text-blue-600 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">Sua Produtividade em Tempo Real, Zero Papel e União no Turno!</span>
+          <span className="text-blue-600 bg-gradient-to-r from-blue-700 to-blue-500 bg-clip-text text-transparent">Sua Produtividade em Tempo Real</span>
         </h1>
 
         <p className="text-sm sm:text-base text-blue-800/80 max-w-3xl leading-relaxed mb-10 font-medium">
