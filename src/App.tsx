@@ -14,7 +14,6 @@ import EmpilhadorPanel from './components/EmpilhadorPanel';
 import ConferentePanel from './components/ConferentePanel';
 import ControlePanel from './components/ControlePanel';
 import ExportarPanel from './components/ExportarPanel';
-import AdminPanel from './components/AdminPanel';
 import FirebasePanel from './components/FirebasePanel';
 import RepackDashboard from './components/RepackDashboard';
 import DespejoDashboard from './components/DespejoDashboard';
@@ -384,9 +383,6 @@ export default function App() {
         return <FirebasePanel />;
       case 'exportar':
         return <ExportarPanel user={user} empresa={empresa} />;
-      case 'configuracao':
-      case 'admin':
-        return <AdminPanel user={user} empresa={empresa} onNavigate={setActivePanel} />;
       default:
         return (
           <DashboardOverview 
@@ -559,13 +555,6 @@ export default function App() {
           title: 'Conexão Firestore',
           subtitle: 'Configuração e teste de latência do banco de dados na nuvem corporativa.',
           color: 'from-sky-500/10 to-transparent'
-        };
-      case 'admin':
-        return {
-          breadcrumbs: ['Sistemas', 'Painel Admin'],
-          title: 'Painel do Administrador',
-          subtitle: 'Gerenciamento global de unidades, parâmetros e chaves de API.',
-          color: 'from-[#1e56f0]/10 to-transparent'
         };
       default:
         return defaultInfo;

@@ -239,13 +239,6 @@ export default function Sidebar({
       visible: isSupervisorOrAdmin
     },
     {
-      id: 'admin',
-      label: 'Painel Admin',
-      icon: <Building2 className="w-4 h-4 text-purple-400" />,
-      category: 'ADMINISTRAÇÃO & GESTÃO',
-      visible: isSupervisorOrAdmin
-    },
-    {
       id: 'exportar',
       label: 'Exportar Base',
       icon: <Download className="w-4 h-4 text-gray-400" />,
