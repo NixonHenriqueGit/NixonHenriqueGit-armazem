@@ -630,17 +630,16 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
         </div>
       )}
 
-      {/* ── SEÇÃO DE REFERÊNCIA OPERACIONAL INDEPENDENTE (RACI, POP, LUP) ── */}
       {activeTab === 'raci' && (
-        <div className="g-card p-6 flex flex-col gap-6">
+        <div className="g-card p-6 flex flex-col gap-6 bg-[var(--surf)] border border-[var(--edge)]">
           <div className="flex items-center justify-between border-b border-[var(--edge)] pb-4 flex-wrap gap-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
                 <Users className="w-5 h-5 text-blue-500" />
               </div>
               <div>
-                <h3 className="font-sans font-black text-sm tracking-widest text-blue-650 dark:text-blue-400 uppercase">MATRIZ RACI — FLUXO DE REPACK</h3>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Quem executa, quem aprova, quem é consultado e informado no processo de Repack.</p>
+                <h3 className="font-sans font-black text-sm tracking-widest text-[var(--snow)] uppercase">MATRIZ RACI — FLUXO DE REPACK</h3>
+                <p className="text-[10px] text-[var(--dim)] font-semibold mt-0.5">Quem executa, quem aprova, quem é consultado e informado no processo de Repack.</p>
               </div>
             </div>
             <button 
@@ -652,11 +651,11 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
             </button>
           </div>
 
-          <div className="p-5 bg-slate-50/55 dark:bg-[#111827]/30 border border-[var(--edge)] rounded-xl flex flex-col gap-5 shadow-xs">
+          <div className="p-5 bg-[var(--surf2)] border border-[var(--edge)] rounded-xl flex flex-col gap-5 shadow-sm">
             <div className="flex items-center justify-between border-b border-[var(--edge)] pb-3 flex-wrap gap-3">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Legenda de Atribuição</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--snow)]">Legenda de Atribuição</span>
               <div className="flex gap-2 text-[9px] font-black flex-wrap">
-                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-md border border-blue-500/20">R: RESPONSIBLE (Executor)</span>
+                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-650 dark:text-blue-400 rounded-md border border-blue-500/20">R: RESPONSIBLE (Executor)</span>
                 <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md border border-emerald-500/20">A: ACCOUNTABLE (Aprovador)</span>
                 <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-md border border-amber-500/20">C: CONSULTED (Consultado)</span>
                 <span className="px-2 py-0.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-md border border-purple-500/20">I: INFORMED (Informado)</span>
@@ -666,7 +665,7 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse min-w-[550px]">
                 <thead>
-                  <tr className="border-b border-[var(--edge)] text-slate-400 dark:text-slate-500 text-[10px] uppercase font-black tracking-wider">
+                  <tr className="border-b border-[var(--edge)] text-[var(--dim)] text-[10px] uppercase font-black tracking-wider">
                     <th className="py-3 px-2">Atividade Operacional</th>
                     <th className="py-3 px-2 text-center w-28">Op. Repack</th>
                     <th className="py-3 px-2 text-center w-28">Supervisor</th>
@@ -674,11 +673,11 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
                     <th className="py-3 px-2 text-center w-28">Controle (Mesa)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[var(--edge)] text-slate-700 dark:text-slate-300">
+                <tbody className="divide-y divide-[var(--edge)] text-[var(--snow)]">
                   <tr className="hover:bg-slate-500/5 transition-colors">
-                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">1. Segregação de produtos e avarias físicas</td>
+                    <td className="py-4 px-2 font-bold text-[var(--snow)]">1. Segregação de produtos e avarias físicas</td>
                     <td className="py-4 px-2 text-center">
-                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-650 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
                     </td>
                     <td className="py-4 px-2 text-center">
                       <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">A</span>
@@ -691,9 +690,9 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
                     </td>
                   </tr>
                   <tr className="hover:bg-slate-500/5 transition-colors">
-                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">2. Execução da reembalagem física (Repack)</td>
+                    <td className="py-4 px-2 font-bold text-[var(--snow)]">2. Execução da reembalagem física (Repack)</td>
                     <td className="py-4 px-2 text-center">
-                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-650 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
                     </td>
                     <td className="py-4 px-2 text-center">
                       <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">A</span>
@@ -706,9 +705,9 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
                     </td>
                   </tr>
                   <tr className="hover:bg-slate-500/5 transition-colors">
-                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">3. Registro de tempos e volumes no aplicativo</td>
+                    <td className="py-4 px-2 font-bold text-[var(--snow)]">3. Registro de tempos e volumes no aplicativo</td>
                     <td className="py-4 px-2 text-center">
-                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-650 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
                     </td>
                     <td className="py-4 px-2 text-center">
                       <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shadow-xs">I</span>
@@ -721,7 +720,7 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
                     </td>
                   </tr>
                   <tr className="hover:bg-slate-500/5 transition-colors">
-                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">4. Aprovação de descarte definitivo (DPO)</td>
+                    <td className="py-4 px-2 font-bold text-[var(--snow)]">4. Aprovação de descarte definitivo (DPO)</td>
                     <td className="py-4 px-2 text-center">
                       <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-700/60">—</span>
                     </td>
@@ -732,19 +731,19 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
                       <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">C</span>
                     </td>
                     <td className="py-4 px-2 text-center">
-                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-650 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
                     </td>
                   </tr>
                   <tr className="hover:bg-slate-500/5 transition-colors">
-                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">5. Devolução de caixas íntegras ao estoque de picking</td>
+                    <td className="py-4 px-2 font-bold text-[var(--snow)]">5. Devolução de caixas íntegras ao estoque de picking</td>
                     <td className="py-4 px-2 text-center">
-                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-650 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
                     </td>
                     <td className="py-4 px-2 text-center">
                       <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">A</span>
                     </td>
                     <td className="py-4 px-2 text-center">
-                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-650 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
                     </td>
                     <td className="py-4 px-2 text-center">
                       <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-700/60">—</span>
@@ -758,13 +757,13 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
       )}
 
       {activeTab === 'pop' && (
-        <div className="g-card p-6 bg-gradient-to-br from-[#11151c] to-[#151b23] border border-[#222d3a] flex flex-col gap-6">
-          <div className="flex items-center justify-between border-b border-[#222d3a] pb-4 flex-wrap gap-4">
+        <div className="g-card p-6 bg-[var(--surf)] border border-[var(--edge)] flex flex-col gap-6">
+          <div className="flex items-center justify-between border-b border-[var(--edge)] pb-4 flex-wrap gap-4">
             <div className="flex items-center gap-2.5">
-              <FileText className="w-5 h-5 text-[#f5a623]" />
+              <FileText className="w-5 h-5 text-blue-550" />
               <div>
-                <h3 className="font-sans font-black text-sm tracking-widest text-[#f5a623] uppercase">PROCEDIMENTO OPERACIONAL PADRÃO (POP)</h3>
-                <p className="text-[10px] text-[#6a7d92] font-semibold mt-0.5">Instrução de trabalho padrão para triagem, higienização, montagem e registro.</p>
+                <h3 className="font-sans font-black text-sm tracking-widest text-[var(--snow)] uppercase">PROCEDIMENTO OPERACIONAL PADRÃO (POP)</h3>
+                <p className="text-[10px] text-[var(--dim)] font-semibold mt-0.5">Instrução de trabalho padrão para triagem, higienização, montagem e registro.</p>
               </div>
             </div>
             <button 
@@ -776,41 +775,41 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
             </button>
           </div>
 
-          <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-4 text-snow">
-            <div className="flex flex-col gap-3 font-sans text-xs">
-              <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">1</span>
+          <div className="p-5 bg-[var(--surf2)] border border-[var(--edge)] rounded-xl flex flex-col gap-5 text-[var(--snow)] shadow-sm">
+            <div className="flex flex-col gap-4 font-sans text-xs">
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-bold text-blue-650 dark:text-blue-400 text-xs flex-shrink-0 mt-0.5 shadow-xs">1</span>
                 <div>
-                  <h5 className="font-bold text-snow uppercase text-[11px]">Segregação e Inspeção das Avarias</h5>
-                  <p className="text-[#6a7d92] mt-0.5">Retirar do fluxo de pátio todas as caixas molhadas, amassadas ou com suspeita de quebra física. Mover para a baia demarcada de repack.</p>
+                  <h5 className="font-black text-[var(--snow)] uppercase text-[11.5px] tracking-wide">Segregação e Inspeção das Avarias</h5>
+                  <p className="text-[var(--dim)] mt-1 font-medium leading-relaxed">Retirar do fluxo de pátio todas as caixas molhadas, amassadas ou com suspeita de quebra física. Mover para a baia demarcada de repack.</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">2</span>
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-bold text-blue-650 dark:text-blue-400 text-xs flex-shrink-0 mt-0.5 shadow-xs">2</span>
                 <div>
-                  <h5 className="font-bold text-snow uppercase text-[11px]">Abertura do Timer no Aplicativo</h5>
-                  <p className="text-[#6a7d92] mt-0.5">Antes de iniciar a montagem física, acesse o painel, selecione o tipo de embalagem do lote (ex: LATA 350) e registre o horário de início (botão ⏱ Agora).</p>
+                  <h5 className="font-black text-[var(--snow)] uppercase text-[11.5px] tracking-wide">Abertura do Timer no Aplicativo</h5>
+                  <p className="text-[var(--dim)] mt-1 font-medium leading-relaxed">Antes de iniciar a montagem física, acesse o painel, selecione o tipo de embalagem do lote (ex: LATA 350) e registre o horário de início (botão ⏱ Agora).</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">3</span>
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-bold text-blue-650 dark:text-blue-400 text-xs flex-shrink-0 mt-0.5 shadow-xs">3</span>
                 <div>
-                  <h5 className="font-bold text-snow uppercase text-[11px]">Montagem Física de Caixas Recuperadas</h5>
-                  <p className="text-[#6a7d92] mt-0.5">Higienizar garrafas/latas íntegras com panos limpos. Montar caixas novas respeitando as divisórias Ambev. Descarte cacos e líquidos no dreno ecológico de refugo.</p>
+                  <h5 className="font-black text-[var(--snow)] uppercase text-[11.5px] tracking-wide">Montagem Física de Caixas Recuperadas</h5>
+                  <p className="text-[var(--dim)] mt-1 font-medium leading-relaxed">Higienizar garrafas/latas íntegras com panos limpos. Montar caixas novas respeitando as divisórias Ambev. Descarte cacos e líquidos no dreno ecológico de refugo.</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">4</span>
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-bold text-blue-650 dark:text-blue-400 text-xs flex-shrink-0 mt-0.5 shadow-xs">4</span>
                 <div>
-                  <h5 className="font-bold text-snow uppercase text-[11px]">Fechamento e Registro de Resultados</h5>
-                  <p className="text-[#6a7d92] mt-0.5">Feche as caixas com fita adesiva padrão. Finalize o timer (botão ⏱ Agora), insira a quantidade exata montada e envie. O sistema calcula a eficácia na hora! (Meta Ambev).</p>
+                  <h5 className="font-black text-[var(--snow)] uppercase text-[11.5px] tracking-wide">Fechamento e Registro de Resultados</h5>
+                  <p className="text-[var(--dim)] mt-1 font-medium leading-relaxed">Feche as caixas com fita adesiva padrão. Finalize o timer (botão ⏱ Agora), insira a quantidade exata montada e envie. O sistema calcula a eficácia na hora! (Meta Ambev).</p>
                 </div>
               </div>
-              <div className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-[#f5a623]/20 border border-[#f5a623]/40 flex items-center justify-center font-bold text-[#f5a623] text-[10px] flex-shrink-0 mt-0.5">5</span>
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center font-bold text-blue-650 dark:text-blue-400 text-xs flex-shrink-0 mt-0.5 shadow-xs">5</span>
                 <div>
-                  <h5 className="font-bold text-snow uppercase text-[11px]">Destinação do Estoque e Limpeza</h5>
-                  <p className="text-[#6a7d92] mt-0.5">Leve o pallet de repack finalizado de volta ao endereço de estocagem de origem. Varra os detritos da baia de trabalho para evitar acidentes com resíduos.</p>
+                  <h5 className="font-black text-[var(--snow)] uppercase text-[11.5px] tracking-wide">Destinação do Estoque e Limpeza</h5>
+                  <p className="text-[var(--dim)] mt-1 font-medium leading-relaxed">Leve o pallet de repack finalizado de volta ao endereço de estocagem de origem. Varra os detritos da baia de trabalho para evitar acidentes com resíduos.</p>
                 </div>
               </div>
             </div>
@@ -819,13 +818,13 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
       )}
 
       {activeTab === 'lup' && (
-        <div className="g-card p-6 bg-gradient-to-br from-[#11151c] to-[#151b23] border border-[#222d3a] flex flex-col gap-6">
-          <div className="flex items-center justify-between border-b border-[#222d3a] pb-4 flex-wrap gap-4">
+        <div className="g-card p-6 bg-[var(--surf)] border border-[var(--edge)] flex flex-col gap-6">
+          <div className="flex items-center justify-between border-b border-[var(--edge)] pb-4 flex-wrap gap-4">
             <div className="flex items-center gap-2.5">
-              <AlertCircle className="w-5 h-5 text-[#f5a623]" />
+              <AlertCircle className="w-5 h-5 text-blue-550" />
               <div>
-                <h3 className="font-sans font-black text-sm tracking-widest text-[#f5a623] uppercase">LUP — LIÇÃO DE UM PONTO</h3>
-                <p className="text-[10px] text-[#6a7d92] font-semibold mt-0.5">Garantia visual Ambev de qualidade para paletização, montagem e amarração.</p>
+                <h3 className="font-sans font-black text-sm tracking-widest text-[var(--snow)] uppercase">LUP — LIÇÃO DE UM PONTO</h3>
+                <p className="text-[10px] text-[var(--dim)] font-semibold mt-0.5">Garantia visual Ambev de qualidade para paletização, montagem e amarração.</p>
               </div>
             </div>
             <button 
@@ -837,36 +836,36 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
             </button>
           </div>
 
-          <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-4 text-snow">
-            <div className="text-xs bg-[#11151c] p-3 rounded-lg border border-[#222d3a] mb-2">
-              <span className="font-bold text-[#f5a623] block text-[10px] uppercase">TEMA DA LIÇÃO:</span>
-              <span className="font-black text-white text-[13px] uppercase">Padrão de Paletização, Amarração de Repack e Filme Stretch</span>
+          <div className="p-5 bg-[var(--surf2)] border border-[var(--edge)] rounded-xl flex flex-col gap-4 text-[var(--snow)] shadow-sm">
+            <div className="p-4 rounded-xl bg-[var(--surf)] border border-[var(--edge)] mb-2 shadow-xs flex flex-col gap-1">
+              <span className="font-bold text-blue-650 dark:text-blue-400 block text-[10px] uppercase tracking-wider">TEMA DA LIÇÃO:</span>
+              <span className="font-black text-[var(--snow)] text-[13px] tracking-wide uppercase">Padrão de Paletização, Amarração de Repack e Filme Stretch</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* DO */}
-              <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-4 flex flex-col gap-2">
-                <span className="text-[10px] font-black text-emerald-400 tracking-wider flex items-center gap-1">
+              <div className="bg-emerald-500/5 border border-emerald-500/20 dark:border-emerald-500/30 rounded-xl p-5 flex flex-col gap-3 shadow-xs">
+                <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 tracking-wider flex items-center gap-1">
                   🟢 CERTO (Padrão de Qualidade)
                 </span>
-                <ul className="text-xs space-y-2 text-[#a0aec0] list-disc list-inside">
-                  <li><strong className="text-white">Amarração cruzada (tijolinho):</strong> caixas travadas por camadas intercaladas.</li>
-                  <li><strong className="text-white">Filme stretch tensionado:</strong> mínimo de 3 voltas na base de madeira e no topo do pallet.</li>
-                  <li><strong className="text-white">Monolote por pallet:</strong> apenas produtos do mesmo lote de validade e SKU no mesmo pallet.</li>
-                  <li><strong className="text-white">Altura de segurança:</strong> empilhamento máximo de até 5 camadas por pallet.</li>
+                <ul className="text-xs space-y-2 text-[var(--snow)] list-disc list-inside">
+                  <li><strong className="text-[var(--snow)]">Amarração cruzada (tijolinho):</strong> caixas travadas por camadas intercaladas.</li>
+                  <li><strong className="text-[var(--snow)]">Filme stretch tensionado:</strong> mínimo de 3 voltas na base de madeira e no topo do pallet.</li>
+                  <li><strong className="text-[var(--snow)]">Monolote por pallet:</strong> apenas produtos do mesmo lote de validade e SKU no mesmo pallet.</li>
+                  <li><strong className="text-[var(--snow)]">Altura de segurança:</strong> empilhamento máximo de até 5 camadas por pallet.</li>
                 </ul>
               </div>
 
               {/* DON'T */}
-              <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4 flex flex-col gap-2">
-                <span className="text-[10px] font-black text-red-400 tracking-wider flex items-center gap-1">
+              <div className="bg-red-500/5 border border-red-500/20 dark:border-red-500/30 rounded-xl p-5 flex flex-col gap-3 shadow-xs">
+                <span className="text-[10px] font-black text-red-600 dark:text-red-400 tracking-wider flex items-center gap-1">
                   🔴 ERRADO (Risco de Tombamento / Quebra)
                 </span>
-                <ul className="text-xs space-y-2 text-[#a0aec0] list-disc list-inside">
-                  <li><strong className="text-white">Empilhamento em coluna direta:</strong> sem cruzamento de camadas (pallet tomba fácil).</li>
-                  <li><strong className="text-white">Falta de amarração na base:</strong> stretch aplicado sem prender na madeira do pallet.</li>
-                  <li><strong className="text-white">SKUs ou validades misturadas:</strong> gera quebra de FEFO e descontrole de inventário.</li>
-                  <li><strong className="text-white">Caixas rasgadas/úmidas:</strong> utilizar caixas danificadas na base causa desmoronamento.</li>
+                <ul className="text-xs space-y-2 text-[var(--snow)] list-disc list-inside">
+                  <li><strong className="text-[var(--snow)]">Empilhamento em coluna direta:</strong> sem cruzamento de camadas (pallet tomba fácil).</li>
+                  <li><strong className="text-[var(--snow)]">Falta de amarração na base:</strong> stretch aplicado sem prender na madeira do pallet.</li>
+                  <li><strong className="text-[var(--snow)]">SKUs ou validades misturadas:</strong> gera quebra de FEFO e descontrole de inventário.</li>
+                  <li><strong className="text-[var(--snow)]">Caixas rasgadas/úmidas:</strong> utilizar caixas danificadas na base causa desmoronamento.</li>
                 </ul>
               </div>
             </div>
