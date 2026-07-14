@@ -632,81 +632,123 @@ export default function RepackPanel({ user, empresa }: RepackPanelProps) {
 
       {/* ── SEÇÃO DE REFERÊNCIA OPERACIONAL INDEPENDENTE (RACI, POP, LUP) ── */}
       {activeTab === 'raci' && (
-        <div className="g-card p-6 bg-gradient-to-br from-[#11151c] to-[#151b23] border border-[#222d3a] flex flex-col gap-6">
-          <div className="flex items-center justify-between border-b border-[#222d3a] pb-4 flex-wrap gap-4">
-            <div className="flex items-center gap-2.5">
-              <Users className="w-5 h-5 text-[#f5a623]" />
+        <div className="g-card p-6 flex flex-col gap-6">
+          <div className="flex items-center justify-between border-b border-[var(--edge)] pb-4 flex-wrap gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
+                <Users className="w-5 h-5 text-blue-500" />
+              </div>
               <div>
-                <h3 className="font-sans font-black text-sm tracking-widest text-[#f5a623] uppercase">MATRIZ RACI — FLUXO DE REPACK</h3>
-                <p className="text-[10px] text-[#6a7d92] font-semibold mt-0.5">Quem executa, quem aprova, quem é consultado e informado no processo de Repack.</p>
+                <h3 className="font-sans font-black text-sm tracking-widest text-blue-650 dark:text-blue-400 uppercase">MATRIZ RACI — FLUXO DE REPACK</h3>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-semibold mt-0.5">Quem executa, quem aprova, quem é consultado e informado no processo de Repack.</p>
               </div>
             </div>
             <button 
               type="button"
               onClick={() => setActiveTab('form')}
-              className="px-3 py-1.5 bg-[#1e56f0]/10 hover:bg-[#1e56f0]/20 border border-[#1e56f0]/20 text-[#1e56f0] rounded-lg font-bold text-[10px] transition-colors flex items-center gap-1 cursor-pointer uppercase tracking-wider"
+              className="px-4 py-2 bg-blue-500/10 hover:bg-blue-500/25 border border-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg font-black text-[10px] transition-all flex items-center gap-1 cursor-pointer uppercase tracking-wider"
             >
               ← Voltar ao Formulário
             </button>
           </div>
 
-          <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-[#222d3a] pb-2 flex-wrap gap-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-[#6a7d92]">Legenda de Atribuição</span>
-              <div className="flex gap-1.5 text-[8px] font-black flex-wrap">
-                <span className="px-1.5 py-0.5 bg-[#1e56f0]/15 text-blue-400 rounded border border-[#1e56f0]/30">R: RESPONSIBLE</span>
-                <span className="px-1.5 py-0.5 bg-[#22c55e]/15 text-emerald-400 rounded border border-[#22c55e]/30">A: ACCOUNTABLE</span>
-                <span className="px-1.5 py-0.5 bg-amber-500/15 text-amber-400 rounded border border-amber-500/30">C: CONSULTED</span>
-                <span className="px-1.5 py-0.5 bg-purple-500/15 text-purple-400 rounded border border-purple-500/30">I: INFORMED</span>
+          <div className="p-5 bg-slate-50/55 dark:bg-[#111827]/30 border border-[var(--edge)] rounded-xl flex flex-col gap-5 shadow-xs">
+            <div className="flex items-center justify-between border-b border-[var(--edge)] pb-3 flex-wrap gap-3">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Legenda de Atribuição</span>
+              <div className="flex gap-2 text-[9px] font-black flex-wrap">
+                <span className="px-2 py-0.5 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-md border border-blue-500/20">R: RESPONSIBLE (Executor)</span>
+                <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md border border-emerald-500/20">A: ACCOUNTABLE (Aprovador)</span>
+                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-md border border-amber-500/20">C: CONSULTED (Consultado)</span>
+                <span className="px-2 py-0.5 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-md border border-purple-500/20">I: INFORMED (Informado)</span>
               </div>
             </div>
 
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse min-w-[500px]">
+              <table className="w-full text-left text-xs border-collapse min-w-[550px]">
                 <thead>
-                  <tr className="border-b border-[#222d3a] text-[#6a7d92] text-[9px] uppercase font-bold tracking-wider">
-                    <th className="py-2 px-1">Atividade Operacional</th>
-                    <th className="py-2 px-1 text-center w-25">Op. Repack</th>
-                    <th className="py-2 px-1 text-center w-25">Supervisor</th>
-                    <th className="py-2 px-1 text-center w-25">Conferente</th>
-                    <th className="py-2 px-1 text-center w-25">Controle (Mesa)</th>
+                  <tr className="border-b border-[var(--edge)] text-slate-400 dark:text-slate-500 text-[10px] uppercase font-black tracking-wider">
+                    <th className="py-3 px-2">Atividade Operacional</th>
+                    <th className="py-3 px-2 text-center w-28">Op. Repack</th>
+                    <th className="py-3 px-2 text-center w-28">Supervisor</th>
+                    <th className="py-3 px-2 text-center w-28">Conferente</th>
+                    <th className="py-3 px-2 text-center w-28">Controle (Mesa)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#222d3a] text-snow/90">
-                  <tr className="hover:bg-[#11151c]/40">
-                    <td className="py-3 px-1 font-semibold">1. Segregação de produtos e avarias físicas</td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-amber-500/15 text-amber-400 border border-amber-500/30">C</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
+                <tbody className="divide-y divide-[var(--edge)] text-slate-700 dark:text-slate-300">
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">1. Segregação de produtos e avarias físicas</td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">A</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">C</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-700/60">—</span>
+                    </td>
                   </tr>
-                  <tr className="hover:bg-[#11151c]/40">
-                    <td className="py-3 px-1 font-semibold">2. Execução da reembalagem física (Repack)</td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-purple-500/15 text-purple-400 border border-purple-500/30">I</span></td>
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">2. Execução da reembalagem física (Repack)</td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">A</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-700/60">—</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shadow-xs">I</span>
+                    </td>
                   </tr>
-                  <tr className="hover:bg-[#11151c]/40">
-                    <td className="py-3 px-1 font-semibold">3. Registro de tempos e volumes no aplicativo</td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-purple-500/15 text-purple-400 border border-purple-500/30">I</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">3. Registro de tempos e volumes no aplicativo</td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 shadow-xs">I</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-700/60">—</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">A</span>
+                    </td>
                   </tr>
-                  <tr className="hover:bg-[#11151c]/40">
-                    <td className="py-3 px-1 font-semibold">4. Aprovação de descarte definitivo (DPO)</td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-amber-500/15 text-amber-400 border border-amber-500/30">C</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">4. Aprovação de descarte definitivo (DPO)</td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-700/60">—</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">A</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shadow-xs">C</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                    </td>
                   </tr>
-                  <tr className="hover:bg-[#11151c]/40">
-                    <td className="py-3 px-1 font-semibold">5. Devolução de caixas íntegras ao estoque de picking</td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#22c55e]/15 text-emerald-400 border border-[#22c55e]/30">A</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#1e56f0]/15 text-blue-400 border border-[#1e56f0]/30">R</span></td>
-                    <td className="py-3 px-1 text-center"><span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#222d3a] text-[#6a7d92] border border-[#222d3a]">—</span></td>
+                  <tr className="hover:bg-slate-500/5 transition-colors">
+                    <td className="py-4 px-2 font-bold text-slate-800 dark:text-snow">5. Devolução de caixas íntegras ao estoque de picking</td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-xs">A</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shadow-xs">R</span>
+                    </td>
+                    <td className="py-4 px-2 text-center">
+                      <span className="inline-flex w-7 h-7 items-center justify-center rounded-lg font-black text-xs bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-700/60">—</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>

@@ -386,7 +386,7 @@ export default function App() {
         return <ExportarPanel user={user} empresa={empresa} />;
       case 'configuracao':
       case 'admin':
-        return <AdminPanel user={user} empresa={empresa} />;
+        return <AdminPanel user={user} empresa={empresa} onNavigate={setActivePanel} />;
       default:
         return (
           <DashboardOverview 
@@ -436,8 +436,8 @@ export default function App() {
         };
       case 'logistica-dashboard':
         return {
-          breadcrumbs: ['Dashboard', 'Dashboard Logística'],
-          title: 'Dashboard Logística',
+          breadcrumbs: ['Dashboard', 'Dashboard EFC EFD'],
+          title: 'Dashboard EFC EFD',
           subtitle: 'Análise de tempos de carregamento, janelas logísticas e fluxo de caminhões.',
           color: 'from-sky-500/10 to-transparent'
         };

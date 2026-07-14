@@ -117,8 +117,11 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
   };
 
   const timeToMinutes = (t: string) => {
-    if (!t) return 0;
-    const [h, m] = t.split(':').map(Number);
+    if (!t || typeof t !== 'string' || !t.includes(':')) return 0;
+    const parts = t.split(':');
+    const h = Number(parts[0]);
+    const m = Number(parts[1]);
+    if (isNaN(h) || isNaN(m)) return 0;
     return h * 60 + m;
   };
 
@@ -323,7 +326,11 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
     efcColor,
     efcBg,
     efdColor,
-    efdBg
+    efdBg,
+    tempoMinimoCarregamento,
+    tempoMaximoCarregamento,
+    tempoMinimoDescarga,
+    tempoMaximoDescarga
   } = useMemo(() => {
     const carregamentos = filteredRows.filter(r => r.operacao === 'Carregamento');
     const descarregamentos = filteredRows.filter(r => r.operacao === 'Descarregamento');
@@ -334,36 +341,52 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
     const avgPaletes = filteredRows.length > 0 ? parseFloat((totalPaletes / filteredRows.length).toFixed(1)) : 0;
 
     // EFC calculation: percentage of carregamentos that are inside window (DENTRO DA JANELA or isOk)
-    const insideWindowC = carregamentos.filter(r => r.status?.includes('DENTRO')).length;
+    const insideWindowC = carregamentos.filter(r => r.status?.toUpperCase().includes('DENTRO')).length;
     const efcVal = totalC > 0 ? parseFloat(((insideWindowC / totalC) * 100).toFixed(1)) : 100.0;
 
     // EFD calculation
-    const insideWindowD = descarregamentos.filter(r => r.status?.includes('DENTRO')).length;
+    const insideWindowD = descarregamentos.filter(r => r.status?.toUpperCase().includes('DENTRO')).length;
     const efdVal = totalD > 0 ? parseFloat(((insideWindowD / totalD) * 100).toFixed(1)) : 100.0;
 
     // Average times
     let minutesC = 0, countC = 0;
+    let minC = Infinity, maxC = -Infinity;
     carregamentos.forEach(r => {
       if (r.inicio && r.fim) {
         const diff = timeToMinutes(r.fim) - timeToMinutes(r.inicio);
-        if (diff > 0) { minutesC += diff; countC++; }
+        if (diff > 0) { 
+          minutesC += diff; 
+          countC++; 
+          if (diff < minC) minC = diff;
+          if (diff > maxC) maxC = diff;
+        }
       }
     });
     const avgTimeC = countC > 0 ? Math.round(minutesC / countC) : 0;
+    const minTimeC = countC > 0 ? minC : 0;
+    const maxTimeC = countC > 0 ? maxC : 0;
 
     let minutesD = 0, countD = 0;
+    let minD = Infinity, maxD = -Infinity;
     descarregamentos.forEach(r => {
       if (r.inicio && r.fim) {
         const diff = timeToMinutes(r.fim) - timeToMinutes(r.inicio);
-        if (diff > 0) { minutesD += diff; countD++; }
+        if (diff > 0) { 
+          minutesD += diff; 
+          countD++; 
+          if (diff < minD) minD = diff;
+          if (diff > maxD) maxD = diff;
+        }
       }
     });
     const avgTimeD = countD > 0 ? Math.round(minutesD / countD) : 0;
+    const minTimeD = countD > 0 ? minD : 0;
+    const maxTimeD = countD > 0 ? maxD : 0;
 
     // Atrasos are defined as operations with "FORA DA JANELA" or duration > 60 min for carregamento / > 45 min for descarregamento
     let atrasosCount = 0;
     filteredRows.forEach(r => {
-      if (r.status?.includes('FORA')) {
+      if (r.status?.toUpperCase().includes('FORA')) {
         atrasosCount++;
       } else if (r.inicio && r.fim) {
         const diff = timeToMinutes(r.fim) - timeToMinutes(r.inicio);
@@ -396,7 +419,11 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
       efcColor: cColor,
       efcBg: cBg,
       efdColor: dColor,
-      efdBg: dBg
+      efdBg: dBg,
+      tempoMinimoCarregamento: minTimeC,
+      tempoMaximoCarregamento: maxTimeC,
+      tempoMinimoDescarga: minTimeD,
+      tempoMaximoDescarga: maxTimeD
     };
   }, [filteredRows]);
 
@@ -429,8 +456,8 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
       const carregamentos = rows.filter(r => r.operacao === 'Carregamento');
       const descarregamentos = rows.filter(r => r.operacao === 'Descarregamento');
       
-      const inWindowC = carregamentos.filter(r => r.status?.includes('DENTRO')).length;
-      const inWindowD = descarregamentos.filter(r => r.status?.includes('DENTRO')).length;
+      const inWindowC = carregamentos.filter(r => r.status?.toUpperCase().includes('DENTRO')).length;
+      const inWindowD = descarregamentos.filter(r => r.status?.toUpperCase().includes('DENTRO')).length;
       
       const efc = carregamentos.length > 0 ? parseFloat(((inWindowC / carregamentos.length) * 100).toFixed(1)) : 100;
       const efd = descarregamentos.length > 0 ? parseFloat(((inWindowD / descarregamentos.length) * 100).toFixed(1)) : 100;
@@ -462,6 +489,15 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
       };
     });
   }, [armazemRows]);
+
+  // Calculate dynamic minimum for the EFC/EFD Y-Axis to prevent rendering clipping
+  const dynamicYMin = useMemo(() => {
+    if (!trend4MonthsData || trend4MonthsData.length === 0) return 80;
+    const allVals = trend4MonthsData.map(d => Math.min(d.EFC, d.EFD));
+    const minVal = Math.min(...allVals, 80);
+    const rounded = Math.floor(minVal / 10) * 10;
+    return rounded < 0 ? 0 : rounded;
+  }, [trend4MonthsData]);
 
   // Histograma Carregamento distribution
   const histogramaCarregamentoData = useMemo(() => {
@@ -504,7 +540,7 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
       }
       empGroups[nome].totalPaletes += Number(r.palhete) || 0;
       empGroups[nome].totalViagens += 1;
-      if (r.status?.includes('DENTRO')) {
+      if (r.status?.toUpperCase().includes('DENTRO')) {
         empGroups[nome].dentroJanela += 1;
       }
       if (r.inicio && r.fim) {
@@ -534,7 +570,7 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
     let totalAtrasos = 0;
     
     filteredRows.forEach(r => {
-      const isAtrasado = r.status?.includes('FORA') || (() => {
+      const isAtrasado = r.status?.toUpperCase().includes('FORA') || (() => {
         if (r.inicio && r.fim) {
           const diff = timeToMinutes(r.fim) - timeToMinutes(r.inicio);
           return (r.operacao === 'Carregamento' && diff > 60) || (r.operacao === 'Descarregamento' && diff > 45);
@@ -685,10 +721,10 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
           <div>
             <div className="flex items-center gap-2">
               <h1 className="font-sans font-black text-2xl tracking-tight text-[#032b5e] uppercase">
-                PERFORMANCE LOGÍSTICA
+                DASHBOARD EFC EFD
               </h1>
               <span className="bg-[#f5a623]/15 text-[#d4780a] border border-[#f5a623]/25 px-2.5 py-0.5 rounded-full text-[9px] font-black tracking-widest uppercase">
-                LOGÍSTICA
+                EFC EFD
               </span>
             </div>
             <p className="text-[10px] text-gray-500 tracking-wider font-bold uppercase mt-0.5">
@@ -704,7 +740,7 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
               onClick={() => setActiveSubTab('indicadores')}
               className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'indicadores' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
             >
-              Logística & BI
+              EFC EFD & BI
             </button>
             <button 
               onClick={() => setActiveSubTab('boarda3')}
@@ -745,7 +781,7 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
       <div className="bg-white p-4.5 rounded-xl border border-gray-200/80 shadow-xs flex flex-col gap-3">
         <div className="flex items-center gap-2 text-xs font-black text-[#032b5e] uppercase tracking-wider border-b border-gray-100 pb-2">
           <Filter className="w-4 h-4 text-gray-400" />
-          <span>Filtros do Painel Logístico (Integrado ao Armazém Fácil)</span>
+          <span>Filtros do Painel EFC EFD (Integrado ao Armazém Fácil)</span>
         </div>
         
         {/* Responsive Grid with 6 dynamic filters */}
@@ -1021,7 +1057,7 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
               <LineChart data={trend4MonthsData} margin={{ top: 10, right: 10, left: -25, bottom: 5 }}>
                 <CartesianGrid stroke="#f1f5f9" vertical={false} />
                 <XAxis dataKey="month" stroke="#94a3b8" fontSize={10} tickLine={false} />
-                <YAxis domain={[80, 100]} stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
+                <YAxis domain={[dynamicYMin, 100]} stroke="#94a3b8" fontSize={10} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px' }} />
                 <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: 10, fontWeight: 'bold' }} />
                 <Line type="monotone" dataKey="EFC" name="EFC % (Carregamento)" stroke="#032b5e" strokeWidth={3} dot={{ r: 5 }} />
@@ -1098,15 +1134,19 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
               </div>
               <div>
                 <span className="text-[8px] font-bold text-gray-400 block uppercase">Mínimo</span>
-                <span className="text-sm font-black text-slate-800">18 min</span>
+                <span className="text-sm font-black text-slate-800">
+                  {tempoMinimoCarregamento === Infinity ? 0 : tempoMinimoCarregamento} min
+                </span>
               </div>
               <div>
                 <span className="text-[8px] font-bold text-gray-400 block uppercase">Máximo</span>
-                <span className="text-sm font-black text-slate-800">190 min</span>
+                <span className="text-sm font-black text-slate-800">
+                  {tempoMaximoCarregamento === -Infinity ? 0 : tempoMaximoCarregamento} min
+                </span>
               </div>
               <div>
                 <span className="text-[8px] font-bold text-gray-400 block uppercase">Na Meta</span>
-                <span className="text-sm font-black text-emerald-600">88.5%</span>
+                <span className="text-sm font-black text-emerald-600">{efcValue.toFixed(1)}%</span>
               </div>
             </div>
 

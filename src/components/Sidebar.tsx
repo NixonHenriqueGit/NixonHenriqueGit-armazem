@@ -124,7 +124,7 @@ export default function Sidebar({
     },
     {
       id: 'logistica-dashboard',
-      label: 'Dashboard Logística',
+      label: 'Dashboard EFC EFD',
       icon: <BarChart2 className="w-4 h-4 text-sky-400" />,
       category: 'DASHBOARD',
       visible: isSupervisorOrAdmin
@@ -235,6 +235,13 @@ export default function Sidebar({
       id: 'controle',
       label: 'Painel Controle',
       icon: <Sliders className="w-4 h-4 text-amber-500" />,
+      category: 'ADMINISTRAÇÃO & GESTÃO',
+      visible: isSupervisorOrAdmin
+    },
+    {
+      id: 'admin',
+      label: 'Painel Admin',
+      icon: <Building2 className="w-4 h-4 text-purple-400" />,
       category: 'ADMINISTRAÇÃO & GESTÃO',
       visible: isSupervisorOrAdmin
     },

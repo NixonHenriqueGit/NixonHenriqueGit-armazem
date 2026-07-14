@@ -17,6 +17,8 @@ import {
   TrendingUp, 
   FileText, 
   Trash2, 
+  Percent,
+  Activity, 
   Pencil,
   Truck,
   User, 
@@ -83,6 +85,7 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
   // Navigation: 'hub' shows the main interactive landing dashboard
   // 'dash', 'timer', 'audit', 'ranking', 'normas' represent the active functional views of Repack
   const [currentSection, setCurrentSection] = useState<'hub' | 'dash' | 'timer' | 'audit' | 'ranking' | 'normas' | 'colaboradores' | 'primeiro_acesso'>('colaboradores');
+  const [selectedMetricTab, setSelectedMetricTab] = useState<'logistica' | 'quebras' | 'repack' | 'outros'>('logistica');
   
   // Collaborator Management State
   const [colaboradores, setColaboradores] = useState<any[]>([]);
@@ -651,6 +654,13 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
               <Plus className="w-3.5 h-3.5 text-[#f5a623]" />
               Login pela Primeira Vez
             </button>
+            <button 
+              onClick={() => setCurrentSection('normas')}
+              className={`py-2.5 px-4 font-sans font-bold text-xs uppercase cursor-pointer whitespace-nowrap transition-all rounded-lg flex items-center gap-1.5 ${currentSection === 'normas' ? 'text-[#f5a623] bg-[#f5a623]/10 border border-[#f5a623]/20' : 'text-[#6a7d92] hover:text-[#e8eef5]'}`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              Métricas & Fórmulas
+            </button>
           </div>
 
           <button 
@@ -702,7 +712,7 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
               </div>
 
               {/* Modern Bento Grid Menu for Navigation */}
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 
                 {/* 1. Gestão de Colaboradores card */}
                 <div 
@@ -746,7 +756,28 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
                   </div>
                 </div>
 
-                {/* 3. Current User Stats Quick Glance */}
+                {/* 3. Dicionário de Fórmulas e Métricas card */}
+                <div 
+                  onClick={() => setCurrentSection('normas')}
+                  className="g-card p-5 border border-[#222d3a] hover:border-[#f5a623]/40 bg-[#11151c]/60 hover:bg-[#161c27] transition-all duration-300 rounded-2xl cursor-pointer group flex flex-col justify-between min-h-[170px]"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="w-10 h-10 rounded-xl bg-[#f5a623]/10 border border-[#f5a623]/20 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <BookOpen className="w-5 h-5 text-[#f5a623]" />
+                    </div>
+                    <span className="font-mono text-[9px] text-[#6a7d92] font-black tracking-wider uppercase">FÓRMULAS & NORMAS</span>
+                  </div>
+                  <div>
+                    <h3 className="font-sans font-bold text-sm text-snow uppercase tracking-wide group-hover:text-[#f5a623] transition-colors mt-4">
+                      Métricas & Fórmulas
+                    </h3>
+                    <p className="text-[11px] text-[#6a7d92] mt-1 leading-relaxed">
+                      Visualize o manual de regras e as fórmulas exatas de EFC, EFD, Quebras e Refugo.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 4. Current User Stats Quick Glance */}
                 <div className="g-card p-5 bg-[#1a212d]/30 border border-[#222d3a] rounded-2xl flex flex-col justify-between min-h-[170px]">
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-full bg-snow/5 flex items-center justify-center border border-snow/10">
@@ -1354,49 +1385,296 @@ export default function ControlePanel({ user, empresa }: ControlePanelProps) {
 
           {/* ── SECTION 5: TECHNICAL MANUAL ── */}
           {currentSection === 'normas' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-6">
               
-              <div className="g-card p-6 flex flex-col gap-4 border border-[#222d3a]">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
-                    <FileText className="w-4 h-4 text-[#f5a623]" />
+              {/* ── DICIONÁRIO DE MÉTRICAS E FÓRMULAS OPERACIONAIS ── */}
+              <div className="g-card p-6 flex flex-col gap-5 border-l-2 border-l-[#f5a623]">
+                <div className="flex items-center gap-3 border-b border-[#222d3a] pb-3 flex-wrap justify-between gap-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-[#f5a623]/10 flex items-center justify-center text-[#f5a623]">
+                      <BookOpen className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-sans font-black text-sm tracking-wider uppercase text-[#f5a623]">Dicionário de Métricas e Fórmulas Operacionais</h3>
+                      <p className="text-[10px] text-[#6a7d92] font-semibold mt-0.5">Entenda como cada indicador de gestão e logística é medido e calculado de forma automatizada no sistema.</p>
+                    </div>
                   </div>
-                  <h3 className="font-sans font-black text-sm tracking-wider uppercase text-[#f5a623]">Políticas de Repack</h3>
+                  
+                  {/* Tabs selectors */}
+                  <div className="flex bg-[#0f141c] border border-[#222d3a] p-1 rounded-xl gap-1 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMetricTab('logistica')}
+                      className={`px-3 py-1.5 rounded-lg font-sans font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer ${selectedMetricTab === 'logistica' ? 'bg-[#f5a623] text-[#07090d] shadow-xs' : 'text-[#6a7d92] hover:text-white bg-transparent border-none'}`}
+                    >
+                      📊 Logística (EFC/EFD)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMetricTab('quebras')}
+                      className={`px-3 py-1.5 rounded-lg font-sans font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer ${selectedMetricTab === 'quebras' ? 'bg-[#f5a623] text-[#07090d] shadow-xs' : 'text-[#6a7d92] hover:text-white bg-transparent border-none'}`}
+                    >
+                      💥 Quebras (Perdas)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMetricTab('repack')}
+                      className={`px-3 py-1.5 rounded-lg font-sans font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer ${selectedMetricTab === 'repack' ? 'bg-[#f5a623] text-[#07090d] shadow-xs' : 'text-[#6a7d92] hover:text-white bg-transparent border-none'}`}
+                    >
+                      🔄 Repack & Refugo
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMetricTab('outros')}
+                      className={`px-3 py-1.5 rounded-lg font-sans font-black text-[9px] uppercase tracking-wider transition-all cursor-pointer ${selectedMetricTab === 'outros' ? 'bg-[#f5a623] text-[#07090d] shadow-xs' : 'text-[#6a7d92] hover:text-white bg-transparent border-none'}`}
+                    >
+                      💼 Outros Indicadores
+                    </button>
+                  </div>
                 </div>
-                <div className="text-xs text-[#6a7d92] flex flex-col gap-3.5 leading-relaxed">
-                  <p>
-                    As políticas de <strong>Estabilidade de Depósito</strong> e <strong>Segurança</strong> exigem controle milimétrico e absoluto sobre as operações de repack de garrafas de vidro e latinhas de alumínio.
-                  </p>
-                  <div>
-                    <strong className="text-snow block mb-1">🎯 OBJETIVO DO REPACK:</strong>
-                    Recuperar produtos avariados por vazamento ou quebras durante o manuseio. Reduzindo a quebra financeira e gerando caixas mistas ou fechadas 100% íntegras, seguras para faturamento e distribuição ao mercado.
+
+                {/* Content of the selected Tab */}
+                {selectedMetricTab === 'logistica' && (
+                  <div className="flex flex-col gap-6 animate-fadeIn">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                      {/* EFC Box */}
+                      <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+                          <Percent className="w-4 h-4 text-emerald-400" />
+                          <span>EFC — Eficiência de Faturamento e Carregamento</span>
+                        </div>
+                        <p className="text-[11px] text-[#6a7d92] leading-relaxed">
+                          Mede o nível de cumprimento da janela horária para os caminhões expedidos com mercadorias. Garante que os processos de faturamento e carregamento ocorram no tempo planejado de operação.
+                        </p>
+                        <div className="bg-[#0f141c] p-3 rounded-lg border border-[#222d3a] flex flex-col items-center justify-center my-1">
+                          <span className="text-[9px] font-black uppercase text-[#6a7d92] tracking-widest mb-2">Fórmula Matemática</span>
+                          <div className="flex flex-col items-center font-mono text-[10px] text-snow">
+                            <span className="pb-1 border-b border-gray-600 text-center px-4">Qtd. Carregamentos Dentro da Janela</span>
+                            <span className="pt-1 text-center px-4">Total de Carregamentos Realizados</span>
+                          </div>
+                          <span className="text-xs font-black text-emerald-400 mt-2">× 100</span>
+                        </div>
+                        <div className="text-[10px] text-gray-400 leading-normal flex flex-col gap-1.5 border-t border-[#222d3a] pt-2">
+                          <div>• <strong>Dentro da Janela:</strong> Operações de carregamento identificadas no sistema com status regular de janela ativa.</div>
+                          <div>• <strong>Meta Operacional:</strong> Manter-se acima de <strong className="text-emerald-400">85.0%</strong> para evitar penalidades comerciais e retenção de frotas.</div>
+                        </div>
+                      </div>
+
+                      {/* EFD Box */}
+                      <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+                          <Percent className="w-4 h-4 text-sky-400" />
+                          <span>EFD — Eficiência de Faturamento de Descarga</span>
+                        </div>
+                        <p className="text-[11px] text-[#6a7d92] leading-relaxed">
+                          Mede o cumprimento das janelas horárias destinadas ao recebimento de materiais e insumos de fornecedores externos, otimizando a rotatividade de docas de descarregamento.
+                        </p>
+                        <div className="bg-[#0f141c] p-3 rounded-lg border border-[#222d3a] flex flex-col items-center justify-center my-1">
+                          <span className="text-[9px] font-black uppercase text-[#6a7d92] tracking-widest mb-2">Fórmula Matemática</span>
+                          <div className="flex flex-col items-center font-mono text-[10px] text-snow">
+                            <span className="pb-1 border-b border-gray-600 text-center px-4">Qtd. Descarregamentos Dentro da Janela</span>
+                            <span className="pt-1 text-center px-4">Total de Descarregamentos Realizados</span>
+                          </div>
+                          <span className="text-xs font-black text-sky-400 mt-2">× 100</span>
+                        </div>
+                        <div className="text-[10px] text-gray-400 leading-normal flex flex-col gap-1.5 border-t border-[#222d3a] pt-2">
+                          <div>• <strong>Critério do Dashboard:</strong> Calcula o percentual agrupando todos os registros filtrados pelo tipo operacional de "Descarregamento".</div>
+                          <div>• <strong>Tempo de Permanência:</strong> Alvo ideal menor que 45 minutos em doca de entrada para recepção física de carga.</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <strong className="text-snow block mb-1">⏱ REQUISITOS DE TEMPO (METAS):</strong>
-                    A meta é medida por caixa montada. Cada embalagem possui sua meta específica calculada a partir do tempo de montagem e selagem padrão. Qualquer desvio acima da meta aciona sinalização crítica no dashboard operacional.
+                )}
+
+                {selectedMetricTab === 'quebras' && (
+                  <div className="flex flex-col gap-6 animate-fadeIn">
+                    <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-4">
+                      <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider border-b border-[#222d3a] pb-2">
+                        <TrendingUp className="w-4 h-4 text-amber-500" />
+                        <span>Distribuição de Quebras por Área Operacional</span>
+                      </div>
+                      <p className="text-xs text-[#6a7d92] leading-relaxed">
+                        As perdas físicas no recinto do armazém (garrafas quebradas, fardos rompidos ou avarias no estoque) são registradas pelo time através de formulários digitais. O sistema então compila a representatividade percentual das perdas por área do armazém.
+                      </p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
+                        <div className="bg-[#0f141c] p-4 rounded-xl border border-[#222d3a] flex flex-col justify-center items-center">
+                          <span className="text-[9px] font-black uppercase text-[#6a7d92] tracking-widest mb-3">Fórmula de Distribuição por Área (%)</span>
+                          <div className="flex flex-col items-center font-mono text-[10px] text-snow">
+                            <span className="pb-1 border-b border-gray-600 text-center px-4">Soma das Quebras (Caixas / Itens) na Área X</span>
+                            <span className="pt-1 text-center px-4">Soma Total Geral de Quebras Registradas na Empresa</span>
+                          </div>
+                          <span className="text-xs font-black text-amber-500 mt-2">× 100</span>
+                        </div>
+
+                        <div className="flex flex-col gap-2.5">
+                          <span className="text-[10px] font-black uppercase text-white tracking-wider">Mapeamento de Ofensores Operacionais:</span>
+                          <div className="grid grid-cols-2 gap-2 text-[10px]">
+                            <div className="p-2 bg-[#0f141c] rounded-lg border border-[#222d3a]">
+                              <span className="text-amber-500 font-extrabold block">📦 BLOCADO / PICKING</span>
+                              <span className="text-[#6a7d92]">Avarias comuns por manuseio rápido ou desalinhamento de paletes nas gôndolas de separação.</span>
+                            </div>
+                            <div className="p-2 bg-[#0f141c] rounded-lg border border-[#222d3a]">
+                              <span className="text-sky-400 font-extrabold block">🚚 DOCAS / CARGA</span>
+                              <span className="text-[#6a7d92]">Ocorre durante a colocação dos paletes no interior do baú de caminhões de entrega.</span>
+                            </div>
+                            <div className="p-2 bg-[#0f141c] rounded-lg border border-[#222d3a]">
+                              <span className="text-emerald-400 font-extrabold block">🏬 RECON / REPACK</span>
+                              <span className="text-[#6a7d92]">Perdas registradas no processo de reembalagem física e segregação de avarias físicas.</span>
+                            </div>
+                            <div className="p-2 bg-[#0f141c] rounded-lg border border-[#222d3a]">
+                              <span className="text-purple-400 font-extrabold block">🚨 BLITZ / PORTARIA</span>
+                              <span className="text-[#6a7d92]">Identificação de quebras no recebimento físico de caminhões retornando da rua.</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {selectedMetricTab === 'repack' && (
+                  <div className="flex flex-col gap-6 animate-fadeIn">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                      {/* Repack Box */}
+                      <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+                          <Activity className="w-4 h-4 text-violet-400" />
+                          <span>Eficiência de Repack (Tempo Médio por Palete)</span>
+                        </div>
+                        <p className="text-[11px] text-[#6a7d92] leading-relaxed">
+                          Calcula o rendimento médio do time focado na reembalagem e recuperação física de produtos avariados, medindo a velocidade de reinserção desses itens recuperados ao estoque.
+                        </p>
+                        <div className="bg-[#0f141c] p-3 rounded-lg border border-[#222d3a] flex flex-col items-center justify-center my-1">
+                          <span className="text-[9px] font-black uppercase text-[#6a7d92] tracking-widest mb-2">Fórmula Matemática</span>
+                          <div className="flex flex-col items-center font-mono text-[10px] text-snow">
+                            <span className="pb-1 border-b border-gray-600 text-center px-4">Tempo de Atividade de Repack (Minutos)</span>
+                            <span className="pt-1 text-center px-4">Total de Paletes ou Caixas Reembaladas</span>
+                          </div>
+                          <span className="text-[10px] font-black text-violet-400 mt-2">Expresso em Minutos por Unidade (min/Palete)</span>
+                        </div>
+                        <div className="text-[10px] text-gray-400 leading-normal flex flex-col gap-1 border-t border-[#222d3a] pt-2">
+                          <div>• <strong>Nível de Serviço Alvo:</strong> Menor que 15 minutos por palete de garrafa recuperado.</div>
+                          <div>• <strong>Governança de Processo:</strong> Aprovado pelo Supervisor e registrado em tempo real pelo operador no painel móvel.</div>
+                        </div>
+                      </div>
+
+                      {/* Blitz de Refugo Box */}
+                      <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+                          <Activity className="w-4 h-4 text-rose-400" />
+                          <span>Cálculo de Percentual de Refugo (Blitz)</span>
+                        </div>
+                        <p className="text-[11px] text-[#6a7d92] leading-relaxed">
+                          Avalia de forma automatizada o índice de descarte de garrafas retornáveis avariadas ou fora de padrão de mercado (sujeira extrema, desgaste físico excessivo ou quebras) inspecionadas em blitz amostrais.
+                        </p>
+                        <div className="bg-[#0f141c] p-3 rounded-lg border border-[#222d3a] flex flex-col items-center justify-center my-1">
+                          <span className="text-[9px] font-black uppercase text-[#6a7d92] tracking-widest mb-2">Fórmula Matemática</span>
+                          <div className="flex flex-col items-center font-mono text-[10px] text-snow">
+                            <span className="pb-1 border-b border-gray-600 text-center px-4">Quantidade de Vasilhames Rejeitados / Refugados</span>
+                            <span className="pt-1 text-center px-4">Total Geral de Garrafas Inspecionadas no Lote Amostral</span>
+                          </div>
+                          <span className="text-xs font-black text-rose-400 mt-2">× 100</span>
+                        </div>
+                        <div className="text-[10px] text-gray-400 leading-normal flex flex-col gap-1 border-t border-[#222d3a] pt-2">
+                          <div>• <strong>Tolerância de Qualidade:</strong> O limite tolerado de refugo técnico no lote é de <strong className="text-rose-400">3.5%</strong>. Exceder esse patamar gera alertas imediatos para devoluções.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedMetricTab === 'outros' && (
+                  <div className="flex flex-col gap-6 animate-fadeIn">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                      {/* Densidade de Movimentação */}
+                      <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+                          <Award className="w-4 h-4 text-purple-400" />
+                          <span>Média de Paletes por Viagem / Movimentação</span>
+                        </div>
+                        <p className="text-[11px] text-[#6a7d92] leading-relaxed">
+                          Monitora a eficiência de ocupação de garfos de empilhadeira, garantindo que o transporte interno ocorra em sua capacidade ideal, sem desperdício de rotas.
+                        </p>
+                        <div className="bg-[#0f141c] p-3 rounded-lg border border-[#222d3a] flex flex-col items-center justify-center my-1">
+                          <span className="text-[9px] font-black uppercase text-[#6a7d92] tracking-widest mb-2">Fórmula Matemática</span>
+                          <div className="flex flex-col items-center font-mono text-[10px] text-snow">
+                            <span className="pb-1 border-b border-gray-600 text-center px-4">Soma Geral de Paletes Movimentados</span>
+                            <span className="pt-1 text-center px-4">Quantidade Total de Operações (Viagens) Registradas</span>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-gray-400 border-t border-[#222d3a] pt-2 leading-relaxed">
+                          • <strong>Aplicação de Otimização:</strong> Permite o correto dimensionamento das equipes de pátio e das frotas de equipamentos pesados contratados.
+                        </p>
+                      </div>
+
+                      {/* FEFO */}
+                      <div className="p-4 bg-[#151b23] border border-[#222d3a] rounded-xl flex flex-col gap-3">
+                        <div className="flex items-center gap-2 text-xs font-black text-white uppercase tracking-wider">
+                          <Award className="w-4 h-4 text-teal-400" />
+                          <span>Método de Giro FEFO (First Expired, First Out)</span>
+                        </div>
+                        <p className="text-[11px] text-[#6a7d92] leading-relaxed">
+                          Mapeia a criticidade do inventário para que los lotes que expiram primeiro saiam primeiro, mitigando a ocorrência de produtos vencidos no estoque de vendas.
+                        </p>
+                        <div className="bg-[#0f141c] p-3 rounded-lg border border-[#222d3a] flex flex-col items-center justify-center my-1">
+                          <span className="text-[9px] font-black uppercase text-[#6a7d92] tracking-widest mb-2">Cálculo de Criticidade de Validade</span>
+                          <span className="font-mono text-[10px] text-teal-300 text-center">Tempo de Vida Útil Restante = Data de Vencimento - Data Atual</span>
+                          <span className="text-[10px] text-gray-500 mt-2 text-center block">Classificação de Risco: Crítico (&lt;30 dias), Atenção (30-90 dias), Seguro (&gt;90 dias)</span>
+                        </div>
+                        <p className="text-[10px] text-gray-400 border-t border-[#222d3a] pt-2 leading-relaxed">
+                          • <strong>Prevenção Pró-Ativa:</strong> O sistema bloqueia de forma automática carregamentos de lotes vencidos ou aponta alertas no painel de picking.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="g-card p-6 flex flex-col gap-4 border border-[#222d3a]">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center">
-                    <ShieldAlert className="w-4 h-4 text-red-400" />
+              {/* Políticas e Segurança cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="g-card p-6 flex flex-col gap-4 border border-[#222d3a]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                      <FileText className="w-4 h-4 text-[#f5a623]" />
+                    </div>
+                    <h3 className="font-sans font-black text-sm tracking-wider uppercase text-[#f5a623]">Políticas de Repack</h3>
                   </div>
-                  <h3 className="font-sans font-black text-sm tracking-wider uppercase text-red-400">Instruções Críticas de Segurança</h3>
+                  <div className="text-xs text-[#6a7d92] flex flex-col gap-3.5 leading-relaxed">
+                    <p>
+                      As políticas de <strong>Estabilidade de Depósito</strong> e <strong>Segurança</strong> exigem controle milimétrico e absoluto sobre as operações de repack de garrafas de vidro e latinhas de alumínio.
+                    </p>
+                    <div>
+                      <strong className="text-snow block mb-1">🎯 OBJETIVO DO REPACK:</strong>
+                      Recuperar produtos avariados por vazamento ou quebras durante o manuseio. Reduzindo a quebra financeira e gerando caixas mistas ou fechadas 100% íntegras, seguras para faturamento e distribuição ao mercado.
+                    </div>
+                    <div>
+                      <strong className="text-snow block mb-1">⏱ REQUISITOS DE TEMPO (METAS):</strong>
+                      A meta é medida por caixa montada. Cada embalagem possui sua meta específica calculada a partir do tempo de montagem e selagem padrão. Qualquer desvio acima da meta aciona sinalização crítica no dashboard operacional.
+                    </div>
+                  </div>
                 </div>
-                <div className="text-xs text-[#6a7d92] flex flex-col gap-3.5 leading-relaxed">
-                  <div>
-                    <strong className="text-snow block mb-1">🛡 LUVA ANTICORTE DE COMPOSITE:</strong>
-                    Uso 100% obrigatório no manuseio de garrafas de vidro vazando ou trincadas. Nunca, sob qualquer hipótese, separe cacos de vidro com as mãos desprotegidas ou luva de pano/borracha simples.
+
+                <div className="g-card p-6 flex flex-col gap-4 border border-[#222d3a]">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-red-500/10 rounded-lg flex items-center justify-center">
+                      <ShieldAlert className="w-4 h-4 text-red-400" />
+                    </div>
+                    <h3 className="font-sans font-black text-sm tracking-wider uppercase text-red-400">Instruções Críticas de Segurança</h3>
                   </div>
-                  <div>
-                    <strong className="text-snow block mb-1">🗑 FLUXO DE DESCARTE DE CACOS:</strong>
-                    Todo resíduo de vidro deve ser colocado no tambor vermelho selado e específico para cacos. A área do posto de repack precisa ser limpa com vassoura e pá a cada término de lote de repacking.
-                  </div>
-                  <div>
-                    <strong className="text-snow block mb-1">🔍 RASTREABILIDADE DE LOTE:</strong>
-                    Para garantir que o produto esteja em conformidade no mercado, o operador deve garantir a colagem da nova etiqueta de código de barras e lote legíveis na caixa correspondente.
+                  <div className="text-xs text-[#6a7d92] flex flex-col gap-3.5 leading-relaxed">
+                    <div>
+                      <strong className="text-snow block mb-1">🛡 LUVA ANTICORTE DE COMPOSITE:</strong>
+                      Uso 100% obrigatório no manuseio de garrafas de vidro vazando ou trincadas. Nunca, sob qualquer hipótese, separe cacos de vidro com as mãos desprotegidas ou luva de pano/borracha simples.
+                    </div>
+                    <div>
+                      <strong className="text-snow block mb-1">🗑 FLUXO DE DESCARTE DE CACOS:</strong>
+                      Todo resíduo de vidro deve ser colocado no tambor vermelho selado e específico para cacos. A área do posto de repack precisa ser limpa com vassoura e pá a cada término de lote de repacking.
+                    </div>
+                    <div>
+                      <strong className="text-snow block mb-1">🔍 RASTREABILIDADE DE LOTE:</strong>
+                      Para garantir que o produto esteja em conformidade no mercado, o operador deve garantir a colagem da nova etiqueta de código de barras e lote legíveis na caixa correspondente.
+                    </div>
                   </div>
                 </div>
               </div>
