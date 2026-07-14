@@ -41,6 +41,7 @@ import { Usuario, Empresa, ArmazemRow } from '../types';
 import { db, isCustomFirebaseConnected } from '../firebase';
 import { collection, query, onSnapshot } from 'firebase/firestore';
 import A3BoardComponent from './A3BoardComponent';
+import LogisticaDrilldown from './LogisticaDrilldown';
 
 interface ActionPlanItem {
   id: string;
@@ -63,7 +64,17 @@ interface LogisticaDashboardProps {
 
 export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaDashboardProps) {
   const [armazemRows, setArmazemRows] = useState<ArmazemRow[]>([]);
-  const [activeSubTab, setActiveSubTab] = useState<'indicadores' | 'boarda3'>('indicadores');
+  const [activeSubTab, setActiveSubTab] = useState<'indicadores' | 'boarda3' | 'detalhes'>('indicadores');
+  const [selectedDrilldownMetric, setSelectedDrilldownMetric] = useState<string | null>(null);
+
+  const handleDrilldown = (metric: string) => {
+    setSelectedDrilldownMetric(metric);
+    setActiveSubTab('detalhes');
+    const el = document.getElementById('logistica-dashboard-wrapper');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const companyId = empresa?.id || 'demo';
@@ -735,7 +746,7 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
 
         {/* Subtab Selector */}
         <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200/60">
+          <div className="flex flex-wrap items-center bg-gray-100 p-1 rounded-xl border border-gray-200/60 gap-1">
             <button 
               onClick={() => setActiveSubTab('indicadores')}
               className={`px-4 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'indicadores' ? 'bg-[#032b5e] text-white shadow-sm' : 'text-gray-500 hover:text-[#032b5e] bg-transparent'}`}
@@ -748,6 +759,24 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
             >
               Quadro de Ações
             </button>
+            {selectedDrilldownMetric && (
+              <button 
+                onClick={() => setActiveSubTab('detalhes')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-sans font-bold text-[10px] uppercase tracking-wider transition-all border-none cursor-pointer ${activeSubTab === 'detalhes' ? 'bg-[#4f46e5] text-white shadow-sm' : 'text-[#4f46e5] hover:text-[#3730a3] bg-indigo-50/70 hover:bg-indigo-100/70'}`}
+              >
+                <span>🔍 Detalhes: {selectedDrilldownMetric}</span>
+                <span 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedDrilldownMetric(null);
+                    if (activeSubTab === 'detalhes') setActiveSubTab('indicadores');
+                  }} 
+                  className="hover:bg-black/20 rounded px-1.5 ml-1 text-xs"
+                >
+                  ✕
+                </span>
+              </button>
+            )}
           </div>
 
           {/* TOP INTERACTIVE ACTIONS */}
@@ -867,15 +896,22 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
         </div>
       )}
 
-      {/* CARDS PRINCIPAIS (8 KPI CARDS) */}
+      {/* CARDS PRINCIPAIS (8 KPI CARDS - CLICKABLE DRILLDOWN) */}
       <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-4">
         
         {/* KPI 1: % EFC */}
-        <div className={`p-4 rounded-xl border shadow-xs flex flex-col justify-between ${efcBg}`}>
+        <div 
+          onClick={() => handleDrilldown('EFC (Carregamento)')}
+          className={`p-4 rounded-xl border shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-indigo-400 cursor-pointer transition-all ${efcBg}`}
+          title="Clique para abrir análise detalhada do EFC"
+        >
           <div>
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
-              EFC (CARREGAMENTO)
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
+                EFC (CARREGAMENTO)
+              </span>
+              <span className="text-xs" title="Ver detalhes">🔍</span>
+            </div>
             <div className="flex items-baseline mt-1.5 gap-1">
               <span className="text-2xl font-black tracking-tight">{efcValue.toFixed(1)}%</span>
             </div>
@@ -895,11 +931,18 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
         </div>
 
         {/* KPI 2: % EFD */}
-        <div className={`p-4 rounded-xl border shadow-xs flex flex-col justify-between ${efdBg}`}>
+        <div 
+          onClick={() => handleDrilldown('EFD (Descarga)')}
+          className={`p-4 rounded-xl border shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-indigo-400 cursor-pointer transition-all ${efdBg}`}
+          title="Clique para abrir análise detalhada do EFD"
+        >
           <div>
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
-              EFD (DESCARGA)
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
+                EFD (DESCARGA)
+              </span>
+              <span className="text-xs" title="Ver detalhes">🔍</span>
+            </div>
             <div className="flex items-baseline mt-1.5 gap-1">
               <span className="text-2xl font-black tracking-tight">{efdValue.toFixed(1)}%</span>
             </div>
@@ -919,11 +962,18 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
         </div>
 
         {/* KPI 3: CAMINHÕES CARREGADOS */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between">
+        <div 
+          onClick={() => handleDrilldown('Carregamentos')}
+          className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-indigo-400 cursor-pointer transition-all"
+          title="Clique para ver lista de carregamentos realizados"
+        >
           <div>
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
-              CARREGAMENTOS
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
+                CARREGAMENTOS
+              </span>
+              <span className="text-xs" title="Ver detalhes">🔍</span>
+            </div>
             <span className="text-2xl font-black tracking-tight block mt-1.5 text-[#032b5e]">
               {totalCarregados}
             </span>
@@ -937,11 +987,18 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
         </div>
 
         {/* KPI 4: CAMINHÕES DESCARREGADOS */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between">
+        <div 
+          onClick={() => handleDrilldown('Descarregamentos')}
+          className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-indigo-400 cursor-pointer transition-all"
+          title="Clique para ver lista de descarregamentos realizados"
+        >
           <div>
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
-              DESCARREGAMENTOS
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
+                DESCARREGAMENTOS
+              </span>
+              <span className="text-xs" title="Ver detalhes">🔍</span>
+            </div>
             <span className="text-2xl font-black tracking-tight block mt-1.5 text-sky-700">
               {totalDescarregados}
             </span>
@@ -955,11 +1012,18 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
         </div>
 
         {/* KPI 5: TEMPO MÉDIO CARREGAMENTO */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between">
+        <div 
+          onClick={() => handleDrilldown('T.M. Carregamento')}
+          className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-indigo-400 cursor-pointer transition-all"
+          title="Clique para ver detalhe do tempo médio de carregamento"
+        >
           <div>
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
-              T.M. CARREGAMENTO
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
+                T.M. CARREGAMENTO
+              </span>
+              <span className="text-xs" title="Ver detalhes">🔍</span>
+            </div>
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-2xl font-black tracking-tight text-slate-800">
                 {tempoMedioCarregamento}
@@ -976,11 +1040,18 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
         </div>
 
         {/* KPI 6: TEMPO MÉDIO DESCARGA */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between">
+        <div 
+          onClick={() => handleDrilldown('T.M. Descarga')}
+          className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-indigo-400 cursor-pointer transition-all"
+          title="Clique para ver detalhe do tempo médio de descarga"
+        >
           <div>
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
-              T.M. DESCARGA
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
+                T.M. DESCARGA
+              </span>
+              <span className="text-xs" title="Ver detalhes">🔍</span>
+            </div>
             <div className="flex items-baseline gap-1 mt-1.5">
               <span className="text-2xl font-black tracking-tight text-slate-800">
                 {tempoMedioDescarga}
@@ -997,11 +1068,18 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
         </div>
 
         {/* KPI 7: QUANTIDADE ATRASOS */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between">
+        <div 
+          onClick={() => handleDrilldown('Veículos Atrasados')}
+          className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-indigo-400 cursor-pointer transition-all"
+          title="Clique para ver a listagem de veículos atrasados"
+        >
           <div>
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
-              VEÍCULOS ATRASADOS
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
+                VEÍCULOS ATRASADOS
+              </span>
+              <span className="text-xs" title="Ver detalhes">🔍</span>
+            </div>
             <span className="text-2xl font-black tracking-tight text-rose-500 block mt-1.5">
               {quantidadeAtrasos}
             </span>
@@ -1015,11 +1093,18 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
         </div>
 
         {/* KPI 8: PALETES MOVIMENTADOS */}
-        <div className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between">
+        <div 
+          onClick={() => handleDrilldown('Paletes Movimentados')}
+          className="bg-white p-4 rounded-xl border border-gray-200/80 shadow-xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md hover:border-indigo-400 cursor-pointer transition-all"
+          title="Clique para ver o detalhamento de paletes movimentados"
+        >
           <div>
-            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
-              PALETES MOVIMENTADOS
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">
+                PALETES MOVIMENTADOS
+              </span>
+              <span className="text-xs" title="Ver detalhes">🔍</span>
+            </div>
             <span className="text-2xl font-black tracking-tight text-[#f5a623] block mt-1.5">
               {totalPaletesMovimentados}
             </span>
@@ -1302,6 +1387,17 @@ export default function LogisticaDashboard({ user, empresa, onBack }: LogisticaD
 
       {activeSubTab === 'boarda3' && (
         <A3BoardComponent user={user} empresa={empresa} dashboard="logistica" />
+      )}
+
+      {activeSubTab === 'detalhes' && selectedDrilldownMetric && (
+        <LogisticaDrilldown 
+          metric={selectedDrilldownMetric} 
+          rawRows={filteredRows} 
+          onBack={() => {
+            setSelectedDrilldownMetric(null);
+            setActiveSubTab('indicadores');
+          }} 
+        />
       )}
 
       {false && activeSubTab === 'planos' && (
